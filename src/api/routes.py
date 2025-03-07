@@ -252,10 +252,5 @@ def remove_user_from_group():
     return jsonify({"msg": "User removed from group successfully"}), 200
 
 
-@api.route("/payments", methods=["GET"])
-def get_payments():
-    payments = Payments.query.all()
-    payments_info = [payment.serialize() for payment in payments]
-    return jsonify(payments_info), 200
 
 
