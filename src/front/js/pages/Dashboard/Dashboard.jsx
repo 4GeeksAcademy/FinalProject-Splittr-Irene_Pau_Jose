@@ -44,64 +44,31 @@ function Copyright() {
 
 const darkTheme = createMuiTheme({
   palette: {
-    type: "dark",
-    primary: {
-      main: "#ffffff",
-    },
-    background: {
-      default: "#23272A",
-      paper: "#2C2F33",
-    },
-    text: {
-      primary: "#ffffff",
-      secondary: "#b9bbbe",
-    },
+    type: 'dark',
+    primary: { main: '#ffffff' },
+    background: { default: '#23272A', paper: '#2C2F33' },
+    text: { primary: '#ffffff', secondary: '#b9bbbe' },
   },
   overrides: {
-    MuiAppBar: {
-      colorPrimary: {
-        backgroundColor: "#000000", 
-        color: "#ffffff", 
-      },
-    },
-    MuiToolbar: {
-      root: {
-        color: "#ffffff", 
-      },
-    },
-    MuiTypography: {
-      root: {
-        color: "#ffffff", 
-      },
-    },
-    MuiIconButton: {
-      root: {
-        color: "#ffffff !important", 
-      },
-    },
-    MuiBadge: {
-      colorSecondary: {
-        backgroundColor: "#ff0000", 
-      },
-    },
+    MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
+    MuiToolbar: { root: { color: '#ffffff' } },
+    MuiTypography: { root: { color: '#ffffff' } },
+    MuiIconButton: { root: { color: '#ffffff !important' } },
+    MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
   },
 });
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-  },
-  toolbar: {
-    paddingRight: 24,
-  },
+  root: { display: 'flex' },
+  toolbar: { paddingRight: 20 },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-    ...theme.mixins.toolbar,
+
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -109,8 +76,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    backgroundColor: '#000000', 
-    color: theme.palette.text.primary, 
+    backgroundColor: '#000000',
+    color: theme.palette.text.primary,
   },
   appBarShift: {
     marginLeft: drawerWidth,
@@ -119,23 +86,12 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    backgroundColor: '#000000', 
+    backgroundColor: '#000000',
     color: theme.palette.text.primary,
   },
-  toolbar: {
-    backgroundColor: '#000000', 
-    color: theme.palette.text.primary,
-  },
-  menuButton: {
-    marginRight: 36,
-  },
-  menuButtonHidden: {
-    display: 'none',
-  },
-  title: {
-    flexGrow: 1,
-    
-  },
+  menuButton: { marginRight: 36 },
+  menuButtonHidden: { display: 'none' },
+  title: { flexGrow: 1 },
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
@@ -144,6 +100,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    top: 30,
+    
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -152,28 +110,20 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     width: theme.spacing(7),
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(9),
-    },
+    [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
+    top: 30, 
   },
-  appBarSpacer: theme.mixins.toolbar,
-  content: {
-    flexGrow: 1,
-    height: "auto", 
-    overflow: "auto",
-},
+  appBarSpacer: {
+    minHeight: theme.spacing(4),
+  },
   container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(4)
+
   },
-  paper: {
-    padding: theme.spacing(2),
+  contactGrid: {
     display: 'flex',
-    overflow: 'auto',
-    flexDirection: 'column',
-  },
-  fixedHeight: {
-    height: 240,
+    flexWrap: 'wrap',
   },
 }));
 
@@ -192,32 +142,45 @@ export default function Dashboard() {
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar  className={clsx(classes.appBar, open && classes.appBarShift)}>
-          <Toolbar className={classes.toolbar}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              noWrap
-              className={classes.title}
-            >
-              Welcome, Pepito!
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+                 <Toolbar className={classes.toolbar}>
+                   {/* Show MenuIcon when the drawer is closed */}
+                   {!open && (
+                     <IconButton
+                       edge="start"
+                       color="inherit"
+                       aria-label="open drawer"
+                       onClick={handleDrawerOpen}
+                       className={classes.menuButton}
+                     >
+                       <MenuIcon />
+                     </IconButton>
+                   )}
+       
+                   {/* Show ChevronLeftIcon when the drawer is open */}
+                   {open && (
+                     <IconButton
+                       edge="start"
+                       color="inherit"
+                       aria-label="close drawer"
+                       onClick={handleDrawerClose}
+                       className={classes.menuButton}
+                     >
+                       <ChevronLeftIcon />
+                     </IconButton>
+                   )}
+       
+                   <Typography component="h1" variant="h6" noWrap className={classes.title}>
+                     Welcome, Pepito!
+                   </Typography>
+       
+                   <IconButton color="inherit">
+                     <Badge badgeContent={4} color="secondary">
+                       <NotificationsIcon />
+                     </Badge>
+                   </IconButton>
+                 </Toolbar>
+               </AppBar>
         <Drawer
           variant="permanent"
           classes={{
@@ -225,11 +188,7 @@ export default function Dashboard() {
           }}
           open={open}
         >
-          <div className={classes.toolbarIcon}>
-            <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </div>
+          
           <Divider />
           <List>{mainListItems}</List>
           <Divider />
