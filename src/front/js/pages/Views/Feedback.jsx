@@ -28,6 +28,14 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import Icon from '@material-ui/core/Icon';
+import SaveIcon from '@material-ui/icons/Save';
+
 
 function Copyright() {
   return (
@@ -101,7 +109,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-    
+
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -111,7 +119,7 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30, 
+    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
@@ -143,44 +151,44 @@ export default function Feedback() {
       <div className={classes.root}>
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-                 <Toolbar className={classes.toolbar}>
-                   {/* Show MenuIcon when the drawer is closed */}
-                   {!open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="open drawer"
-                       onClick={handleDrawerOpen}
-                       className={classes.menuButton}
-                     >
-                       <MenuIcon />
-                     </IconButton>
-                   )}
-       
-                   {/* Show ChevronLeftIcon when the drawer is open */}
-                   {open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="close drawer"
-                       onClick={handleDrawerClose}
-                       className={classes.menuButton}
-                     >
-                       <ChevronLeftIcon />
-                     </IconButton>
-                   )}
-       
-                   <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                     Welcome, Pepito!
-                   </Typography>
-       
-                   <IconButton color="inherit">
-                     <Badge badgeContent={4} color="secondary">
-                       <NotificationsIcon />
-                     </Badge>
-                   </IconButton>
-                 </Toolbar>
-               </AppBar>
+          <Toolbar className={classes.toolbar}>
+            {/* Show MenuIcon when the drawer is closed */}
+            {!open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+
+            {/* Show ChevronLeftIcon when the drawer is open */}
+            {open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
+
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, Pepito!
+            </Typography>
+
+            <IconButton color="inherit">
+              <Badge badgeContent={4} color="secondary">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
         <Drawer
           variant="permanent"
           classes={{
@@ -188,12 +196,53 @@ export default function Feedback() {
           }}
           open={open}
         >
-          
+
           <Divider />
           <List>{mainListItems}</List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
+        <Box
+  sx={{
+    width: "100%",
+    maxWidth: "600px", // Reducido para que los campos sean más estrechos
+    padding: "0 16px",
+    marginTop: "80px", // Espacio para evitar el solapamiento con el navbar
+    margin: "0 auto", // Centrado en la pantalla
+  }}
+>
+  <Box sx={{ marginBottom: "20px" }}>
+    <h3>We'd love to hear from you!</h3>
+    <TextField
+      id="outlined-textarea"
+      label="Name"
+      variant="outlined"
+      fullWidth
+    />
+  </Box>
+
+  <Box sx={{ marginBottom: "20px" }}>
+    <TextField
+      id="outlined-multiline"
+      label="Feedback"
+      variant="outlined"
+      multiline
+      rows={8}
+      fullWidth
+    />
+  </Box>
+
+  <Button
+    variant="contained"
+    color="primary"
+    sendIcon={<Icon>send</Icon>}
+    sx={{
+      width: "100%", // Botón ocupa todo el ancho del formulario
+    }}
+  >
+    Send
+  </Button>
+</Box>
 
       </div>
     </ThemeProvider>
