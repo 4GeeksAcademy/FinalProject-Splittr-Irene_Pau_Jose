@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   card: {
     display: "flex",
     width: "100%",
-    minHeight: 70, // Use minHeight instead of fixed height
+    minHeight: 70, 
     minWidth: 250,
     alignItems: "center",
     justifyContent: "space-between",
@@ -22,15 +22,15 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(0),
     borderRadius: 4,
     [theme.breakpoints.down('sm')]: {
-      padding: theme.spacing(1), // Smaller padding on mobile
+      padding: theme.spacing(1), 
       
     },
   },
   iconButton: {
     color: "#ffffff",
-    padding: theme.spacing(0.5), // Smaller padding around icons
+    padding: theme.spacing(0.5), 
     [theme.breakpoints.down('sm')]: {
-      fontSize: '0.8rem', // Smaller icon size on mobile
+      fontSize: '0.8rem', 
     },
   },
   name: {
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
     color: "#ffffff",
     flexGrow: 1,
     [theme.breakpoints.down('sm')]: {
-      fontSize: '0.875rem', // Smaller text on mobile
+      fontSize: '0.875rem', 
     },
   },
   initial: {
