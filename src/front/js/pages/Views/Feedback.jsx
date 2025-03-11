@@ -208,10 +208,10 @@ export default function Feedback() {
         <Box
   sx={{
     width: "100%",
-    maxWidth: "600px", // Reducido para que los campos sean más estrechos
+    maxWidth: "600px", 
     padding: "0 16px",
-    marginTop: "80px", // Espacio para evitar el solapamiento con el navbar
-    margin: "0 auto", // Centrado en la pantalla
+    marginTop: "80px", 
+    margin: "0 auto",
   }}
 >
   <Box sx={{ marginBottom: "20px" }}>
@@ -240,7 +240,7 @@ export default function Feedback() {
     color="primary"
     sendIcon={<Icon>send</Icon>}
     sx={{
-      width: "100%", // Botón ocupa todo el ancho del formulario
+      width: "100%",
     }}
   >
     Send
