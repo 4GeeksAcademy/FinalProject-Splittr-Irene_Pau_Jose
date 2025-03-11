@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -27,6 +27,18 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import Icon from '@material-ui/core/Icon';
+import SendIcon from '@material-ui/icons/Save';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import NativeSelect from '@material-ui/core/NativeSelect';
 
 
 function Copyright() {
@@ -101,7 +113,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-    
+
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -111,7 +123,7 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30, 
+    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
@@ -137,50 +149,57 @@ export default function Settings() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const [state, setState] = useState({
+    Language: 'English',  
+  });
+
+  const handleChange = (event) => {
+    setState({ ...state, Language: event.target.value });
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-                 <Toolbar className={classes.toolbar}>
-                   {/* Show MenuIcon when the drawer is closed */}
-                   {!open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="open drawer"
-                       onClick={handleDrawerOpen}
-                       className={classes.menuButton}
-                     >
-                       <MenuIcon />
-                     </IconButton>
-                   )}
-       
-                   {/* Show ChevronLeftIcon when the drawer is open */}
-                   {open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="close drawer"
-                       onClick={handleDrawerClose}
-                       className={classes.menuButton}
-                     >
-                       <ChevronLeftIcon />
-                     </IconButton>
-                   )}
-       
-                   <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                     Welcome, Pepito!
-                   </Typography>
-       
-                   <IconButton color="inherit">
-                     <Badge badgeContent={4} color="secondary">
-                       <NotificationsIcon />
-                     </Badge>
-                   </IconButton>
-                 </Toolbar>
-               </AppBar>
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+          <Toolbar className={classes.toolbar}>
+            {/* Show MenuIcon when the drawer is closed */}
+            {!open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+
+            {/* Show ChevronLeftIcon when the drawer is open */}
+            {open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
+
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, Pepito!
+            </Typography>
+
+            <IconButton color="inherit">
+              <Badge badgeContent={4} color="secondary">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
         <Drawer
           variant="permanent"
           classes={{
@@ -188,14 +207,127 @@ export default function Settings() {
           }}
           open={open}
         >
-          
+
           <Divider />
           <List>{mainListItems}</List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
-      
-    </div>
+        <Box
+  sx={{
+    width: "50%",
+    padding: "0 16px",
+    marginTop: "80px",
+    margin: "0 auto",
+    display: "flex",
+    flexDirection: "column", 
+
+  }}
+>
+  <Box sx={{ marginBottom: "20px"}}>
+    <h3>Settings</h3>
+    <h5>User</h5>
+
+
+  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+    <TextField
+      id="outlined-textarea"
+      label="Change name"
+      variant="outlined"
+      fullWidth
+      placeholder="Current user"
+
+    />
+<Box sx={{marginLeft:"40px"}}>
+  <Button>Change</Button>
+  </Box>
+  </Box>
+  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+    <TextField
+      id="outlined-textarea"
+      label="Change email"
+      variant="outlined"
+      fullWidth
+      placeholder="Current email"
+    />
+<Box sx={{marginLeft:"40px"}}>
+  <Button>Change</Button>
+  </Box>
+  </Box>
+  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+    <TextField
+      id="outlined-textarea"
+      label="Change password"
+      variant="outlined"
+      type="password"
+      fullWidth
+    />
+<Box sx={{marginLeft:"40px"}}>
+  <Button>Change</Button>
+  </Box>
+    
+  </Box>
+  
+  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+  <TextField
+    id="date"
+    label="Birthday"
+    type="date"
+    defaultValue="2017-05-24"
+    variant="outlined"
+    fullWidth
+    InputLabelProps={{
+      shrink: true,
+    }}
+  />
+<Box sx={{marginLeft:"40px"}}>
+  <Button>Change</Button>
+  </Box>
+</Box>
+
+
+  <h5>Preferences</h5>
+
+
+  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+  <FormControl variant="outlined" fullWidth>
+    <InputLabel htmlFor="outlined-age-native-simple">Language</InputLabel>
+    <Select
+      native
+      value={state.Language}
+      onChange={handleChange}
+      label="Language"
+      inputProps={{
+        name: 'Language',
+        id: 'outlined-age-native-simple',
+      }}
+    >
+      <option aria-label="None" value="" />
+      <option value={10}>English</option>
+      <option value={20}>Spanish</option>
+      <option value={30}>French</option>
+      <option value={40}>Italian</option>
+      <option value={50}>German</option>
+      <option value={60}>Portuguese</option>
+    </Select>
+  </FormControl>
+<Box sx={{marginLeft:"40px"}}>
+  <Button>Change</Button>
+  </Box>
+</Box>
+<Box sx={{ marginBottom: "20px", marginTop:"60px", display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+  <Button>Log out</Button>
+  <Button variant="outlined" color="secondary">Delete account</Button>
+</Box>
+
+
+  
+  </Box>
+</Box>
+
+
+
+      </div>
     </ThemeProvider>
   );
 }
