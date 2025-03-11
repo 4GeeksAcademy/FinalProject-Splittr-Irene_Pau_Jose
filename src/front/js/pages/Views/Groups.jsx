@@ -27,6 +27,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
+import GroupCard from './GroupCard.jsx';
 
 
 function Copyright() {
@@ -126,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
   },
   contactGrid: {
     display: 'flex',
-    flexWrap: 'wrap',
+    
   },
 }));
 
@@ -197,6 +198,19 @@ export default function Groups() {
   <Divider />
   <List>{secondaryListItems}</List>
 </Drawer>
+<main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <Container maxWidth="lg" className={classes.container}>
+
+          <Grid container spacing={3} justifyContent="center" >
+  {Array.from({ length: 6 }, (_, i) => (
+    <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
+      <GroupCard />
+    </Grid>
+  ))}
+</Grid>
+          </Container>
+        </main>
       
     </div>
     </ThemeProvider>
