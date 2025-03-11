@@ -62,7 +62,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { paddingRight: 20 },
+  toolbar: { 
+    paddingRight: 20,
+    minHeight: 70,
+   },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',

@@ -38,12 +38,16 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { paddingRight: 20 },
+  toolbar: { 
+    paddingRight: 20,
+    minHeight: 70,
+   },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
+    
 
   },
   appBar: {
@@ -111,74 +115,74 @@ export default function FavouriteContacts() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-          <Toolbar className={classes.toolbar}>
-            {/* Show MenuIcon when the drawer is closed */}
-            {!open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                className={classes.menuButton}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
-
-            {/* Show ChevronLeftIcon when the drawer is open */}
-            {open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="close drawer"
-                onClick={handleDrawerClose}
-                className={classes.menuButton}
-              >
-                <ChevronLeftIcon />
-              </IconButton>
-            )}
-
-            <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
-            </Typography>
-
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
-          <Divider />
-          <List>{mainListItems}</List>
-          <Divider />
-          <List>{secondaryListItems}</List>
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-
-            <Grid container spacing={2} className={classes.contactGrid}>
-              {Array.from({ length: 6 }, (_, i) => (
-                <Grid item xs={12} key={i}>
-                  <ContactCard />
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        </main>
-      </div>
-    </ThemeProvider>
+         <div className={classes.root}>
+           <CssBaseline />
+           <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+             <Toolbar className={classes.toolbar}>
+               
+               {!open && (
+                 <IconButton
+                   edge="start"
+                   color="inherit"
+                   aria-label="open drawer"
+                   onClick={handleDrawerOpen}
+                   className={classes.menuButton}
+                 >
+                   <MenuIcon />
+                 </IconButton>
+               )}
+   
+   
+               {open && (
+                 <IconButton
+                   edge="start"
+                   color="inherit"
+                   aria-label="close drawer"
+                   onClick={handleDrawerClose}
+                   className={classes.menuButton}
+                 >
+                   <ChevronLeftIcon />
+                 </IconButton>
+               )}
+   
+               <Typography component="h1" variant="h6" noWrap className={classes.title}>
+                 Welcome, Pepito!
+               </Typography>
+   
+               <IconButton color="inherit">
+                 <Badge badgeContent={4} color="secondary">
+                   <NotificationsIcon />
+                 </Badge>
+               </IconButton>
+             </Toolbar>
+           </AppBar>
+           <Drawer
+             variant="permanent"
+             classes={{
+               paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+             }}
+             open={open}
+           >
+   
+             <Divider />
+             <List>{mainListItems}</List>
+             <Divider />
+             <List>{secondaryListItems}</List>
+           </Drawer>
+           <main className={classes.content}>
+             <div className={classes.appBarSpacer} />
+             <Container maxWidth="lg" className={classes.container}>
+   
+               <Grid container spacing={2} className={classes.contactGrid}>
+                 {Array.from({ length: 6 }, (_, i) => (
+                   <Grid item xs={12} key={i}>
+                     <ContactCard />
+                   </Grid>
+                 ))}
+               </Grid>
+             </Container>
+           </main>
+         </div>
+       </ThemeProvider>
   );
 }
