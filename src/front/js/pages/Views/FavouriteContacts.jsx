@@ -16,7 +16,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from '../Dashboard/listitems.jsx';
-import ContactCard from './ContactCard.jsx';
+import ContactCard from './IndividualViews/ContactCard.jsx';
 
 const darkTheme = createMuiTheme({
   palette: {

@@ -27,7 +27,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
-import GroupCard from './GroupCard.jsx';
+import GroupCard from './IndividualViews/GroupCard.jsx';
 
 
 function Copyright() {

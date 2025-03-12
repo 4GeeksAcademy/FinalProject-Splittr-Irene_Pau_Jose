@@ -24,7 +24,7 @@ import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import ContactCard from './ContactCard.jsx';
+import ContactCard from './IndividualViews/ContactCard.jsx';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 
