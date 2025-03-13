@@ -127,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
     width: 200,
     height: 200,
     fontSize: '4rem',
-    transition: 'width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out', // 👈 Transición para todos los tamaños
+    transition: 'width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out', 
     '@media (max-width:900px)': {
       width: 160,
       height: 160,
@@ -156,22 +156,22 @@ const useStyles = makeStyles((theme) => ({
 export default function ListOfContacts() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false); // Estado para el modal
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false); 
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
   const handleDeleteClick = () => {
-    setOpenDeleteDialog(true); // Abre el modal de confirmación
+    setOpenDeleteDialog(true); 
   };
 
   const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false); // Cierra el modal de confirmación
+    setOpenDeleteDialog(false); 
   };
 
   const handleConfirmDelete = () => {
     setOpenDeleteDialog(false);
-    // Aquí puedes agregar el código para eliminar el contacto si es necesario
+    // aquí el código para eliminar el contacto
   };
 
   return (
