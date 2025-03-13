@@ -25,6 +25,12 @@ import { deepOrange, deepPurple } from '@material-ui/core/colors';
 import MailIcon from '@material-ui/icons/Mail';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import { Box } from '@material-ui/core';
+import { useMediaQuery } from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -100,44 +106,73 @@ const useStyles = makeStyles((theme) => ({
   container: {
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
-    display: 'flex',  
-    justifyContent: 'center',  
-    width: '100%',  
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
     height: '100vh',
-    marginTop:"10%",
+    marginTop: "10%",
   },
   card: {
     width: "40%",
-    maxWidth:"700px",
-    height: "60%",
-    maxHeight:"700px",
+    maxWidth: "700px",
+    height: "50%",
+    maxHeight: "800px",
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center', 
-    alignItems: 'center',  
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   avatar: {
     backgroundColor: deepPurple[500],
-    width: "40%", 
-    height: "40%",  
-    fontSize: '4rem', 
-    marginBottom: "40px", 
+    width: 200,
+    height: 200,
+    fontSize: '4rem',
+    transition: 'width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out', 
+    '@media (max-width:900px)': {
+      width: 160,
+      height: 160,
+      fontSize: '3.5rem',
+    },
+    '@media (max-width:600px)': {
+      width: 120,
+      height: 120,
+      fontSize: '3rem',
+    },
+    '@media (max-width:400px)': {
+      width: 80,
+      height: 80,
+      fontSize: '2rem',
+    }
   },
 
   cardContent: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center', 
-    textAlign: 'center',  
+    alignItems: 'center',
+    textAlign: 'center',
   },
 }));
 
 export default function ListOfContacts() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false); 
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
+
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true); 
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false); 
+  };
+
+  const handleConfirmDelete = () => {
+    setOpenDeleteDialog(false);
+    // aquí el código para eliminar el contacto
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -187,26 +222,50 @@ export default function ListOfContacts() {
         <div className={classes.container}>
           <Card className={classes.card} variant="outlined">
             <CardContent className={classes.cardContent}>
-            <Avatar style={{ width:200, height: 200, fontSize: '4rem' }} className={classes.purple}>
-  OP
-</Avatar>
-              <Typography variant="h5" component="h2">
-                Pepito Pepe
-              </Typography>
-              <Typography color="textSecondary">pepitopepe@gmail.com</Typography>
-              <Typography variant="body2" component="p">
-                well meaning and kindly.
-                <br />
-              </Typography>
+              <Avatar className={classes.avatar}>PP</Avatar>
+              <Box sx={{ marginTop: "10px" }}>
+                <Typography variant="h5" component="h2">
+                  Pepito Pepe
+                </Typography>
+                <Typography color="textSecondary">pepitopepe@gmail.com</Typography>
+              </Box>
+              <Box sx={{ marginTop: "10px" }}>
+                <Typography variant="body2" component="p">
+                  Mutual groups:
+                </Typography>
+                <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={1}>
+                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
+                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
+                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
+
+                  <Typography>+4 more</Typography>
+                </Box>
+              </Box>
             </CardContent>
             <CardActions>
-            <Button><MailIcon fontSize="large" /></Button>
-            <Button><EditIcon fontSize="large" /></Button>
-            <Button color="secondary"><CloseIcon fontSize="large" /></Button>
+              <Button><MailIcon fontSize="large" /></Button>
+              <Button color="secondary" onClick={handleDeleteClick}>
+                <CloseIcon fontSize="large" />
+              </Button>
             </CardActions>
           </Card>
         </div>
       </div>
+
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete contact</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this contact?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="secondary">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }
