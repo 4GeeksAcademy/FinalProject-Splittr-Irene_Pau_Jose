@@ -21,6 +21,7 @@ import Feedback from "./pages/Views/Feedback.jsx";
 import SingleObjective from "./pages/Views/IndividualViews/SingleObjective.jsx";
 import SingleContact from "./pages/Views/IndividualViews/SingleContact.jsx";
 import SingleGroup from "./pages/Views/IndividualViews/SingleGroup.jsx";
+import SingleMessage from "./pages/Views/IndividualViews/SingleMessage.jsx";
 
 
 
@@ -60,6 +61,7 @@ const Layout = () => {
                         <Route element={<Feedback/>} path="/feedback" />
                         <Route element={<SingleContact/>} path="/singlecontact" />
                         <Route element={<SingleGroup/>} path="/singlegroup" />
+                        <Route element={<SingleMessage/>} path="/singlemessage" />
                         <Route element={<SingleObjective/>} path="/singleobjective" />
                     </Routes>
                     <Footer />
