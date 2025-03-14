@@ -2,11 +2,14 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments
+from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user
+
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from api.models import db, User, Group, Group_to_user, Payments
+
 from datetime import datetime
+from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions
+
 #from api import api
 
 api = Blueprint('api', __name__)
@@ -557,4 +560,93 @@ def remove_user_from_group():
 
 
 
+
+@api.route("/userpopulate", methods=["GET"])
+def user_populate():
+    for user in users:
+        new_user = User(userID=user["userID"], name=user["name"], email=user["email"], password=user["password"])
+        db.session.add(new_user)
+    db.session.commit()
+    return jsonify("Users have been created")
+
+@api.route("/grouppopulate", methods=["GET"])
+def group_populate():
+    for group in groups:
+        new_group = Group(groupID=group["groupID"], group_name=group["group_name"], created_at=group["created_at"], total_Amount=group["total_Amount"])
+        db.session.add(new_group)
+    db.session.commit()
+    return jsonify("Groups have been created")
+
+
+@api.route("/grouptouserpopulate", methods=["GET"])
+def group_to_user_populate():
+    for group in group_to_user:
+        new_group_to_user = Group_to_user(id=group["id"],userID=group["userID"], groupId=group["groupId"], created_at=group["created_at"])
+        db.session.add(new_group_to_user)
+    db.session.commit()
+    return jsonify("Groups_to_user have been created")
+
+@api.route("/grouppaymentspopulate", methods=["GET"])
+def group_payments_populate():
+    for group in group_payments:
+        new_group_payments = Group_payments(id=group["id"],receiverID=group["receiverID"], payerID=group["payerID"], groupID=group["groupID"], amount=group["amount"], payed_at=group["payed_at"])
+        db.session.add(new_group_payments)
+    db.session.commit()
+    return jsonify("Group_payments have been created")
+
+
+@api.route("/paymentspopulate", methods=["GET"])
+def payments_populate():
+    for payment in payments:
+        new_payments = Payments(id=payment["id"], payerID=payment["payerID"], receiverID=payment["receiverID"], amount=payment["amount"], payed_at=payment["payed_at"])
+        #No deja meter el debtID=payment["debtID"], sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "payments_pkey" DETAIL:  Key (id)=(2) already exists.
+
+        db.session.add(new_payments)
+    db.session.commit()
+    return jsonify("Payments have been created")
+
+@api.route("/expensespopulate", methods=["GET"])
+def expenses_populate():
+    for expense in expenses:
+        new_expense = Expenses(expenseID=expense["expenseID"], payerId=expense["payerId"], shared_between=expense["shared_between"], amount=expense["amount"], description=expense["description"], created_at=expense["created_at"])
+        #En este da problema  groupID=expense["groupID"], dice que no es un int like
+        db.session.add(new_expense)
+    db.session.commit()
+    return jsonify("Expenses have been created")
+
+@api.route("/debtspopulate", methods=["GET"])
+def debts_populate():
+    for debt in debts:
+        new_debt = Debts(debtID=debt["debtID"], expensesID=debt["expensesID"], debtorID=debt["debtorID"], amount_to_pay=debt["amount_to_pay"], is_paid=debt["is_paid"], payed_at=debt["payed_at"])
+        #
+        db.session.add(new_debt)
+    db.session.commit()
+    return jsonify("Debts have been created")
+
+@api.route("/messagespopulate", methods=["GET"])
+def messages_populate():
+    for message in messages:
+        new_message = Messages(id=message["id"], from_userid=message["from_userid"], message=message["message"], sent_at=message["sent_at"])
+        #
+        db.session.add(new_message)
+    db.session.commit()
+    return jsonify("Messages have been created")
+
+@api.route("/objectivespopulate", methods=["GET"])
+def objectives_populate():
+    for objective in objectives:
+        new_objective = Objectives(id=objective["id"], groupID=objective["groupID"], name=objective["name"], target_amount=objective["target_amount"], created_at=objective["created_at"], is_completed=objective["is_completed"])
+        #
+        db.session.add(new_objective)
+    db.session.commit()
+    return jsonify("Objectives have been created")
+
+@api.route("/objectivescontributionspopulate", methods=["GET"])
+def objectives_contributions_populate():
+    for objective in objectives_contributions:
+        new_objectives_contribution = ObjectivesContributions(id=objective["id"], objectiveID=objective["objectiveID"], userID=objective["userID"], amount_contributed=objective["amount_contributed"], contributed_at=objective["contributed_at"])
+        #
+        db.session.add(new_objectives_contribution)
+    db.session.commit()
+    return jsonify("Objectives Contributions have been created")
 
