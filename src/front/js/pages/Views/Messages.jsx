@@ -27,7 +27,12 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
+import ContactCard from './IndividualViews/ContactCard.jsx';
 
+import StarIcon from '@material-ui/icons/Star';
+import MailIcon from '@material-ui/icons/Mail';
+import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
 
 function Copyright() {
   return (
@@ -60,75 +65,156 @@ const darkTheme = createMuiTheme({
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme) => ({
-  root: { display: 'flex' },
-  toolbar: { 
-    paddingRight: 20,
-    minHeight: 70,
-   },
-  toolbarIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
+const useStyles = makeStyles((theme) => {
+  const appBarCommon = {
+    backgroundColor: '#000000',
+    color: theme.palette.text.primary,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    backgroundColor: '#000000',
-    color: theme.palette.text.primary,
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    backgroundColor: '#000000',
-    color: theme.palette.text.primary,
-  },
-  menuButton: { marginRight: 36 },
-  menuButtonHidden: { display: 'none' },
-  title: { flexGrow: 1 },
-  drawerPaper: {
+  };
+
+  const drawerCommon = {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: drawerWidth,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-    
-  },
-  drawerPaperClose: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30, 
-  },
-  appBarSpacer: {
-    minHeight: theme.spacing(4),
-  },
-  container: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4)
+  };
 
-  },
-  contactGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-}));
+  const responsiveText = {
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '0.875rem',
+    },
+  };
+
+  const responsiveIcon = {
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '0.8rem',
+    },
+  };
+
+  const responsiveInitial = {
+    [theme.breakpoints.down('sm')]: {
+      width: 30,
+      height: 30,
+      fontSize: '0.8rem',
+    },
+  };
+
+  return {
+    root: { display: 'flex' },
+    toolbar: {
+      paddingRight: 20,
+      minHeight: 70,
+    },
+    toolbarIcon: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      padding: '0 8px',
+    },
+    appBar: {
+      ...appBarCommon,
+      zIndex: theme.zIndex.drawer + 1,
+    },
+    appBarShift: {
+      ...appBarCommon,
+      marginLeft: drawerWidth,
+      width: `calc(100% - ${drawerWidth}px)`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
+    menuButton: { marginRight: 36 },
+    menuButtonHidden: { display: 'none' },
+    title: { flexGrow: 1 },
+    drawerPaper: {
+      ...drawerCommon,
+      width: drawerWidth,
+    },
+    drawerPaperClose: {
+      ...drawerCommon,
+      overflowX: 'hidden',
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      width: theme.spacing(7),
+      [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
+    },
+    appBarSpacer: {
+      minHeight: theme.spacing(4),
+    },
+    container: {
+      paddingTop: theme.spacing(1),
+      paddingBottom: theme.spacing(4),
+    },
+    contactGrid: {
+      display: 'flex',
+      
+    },
+    card: {
+      display: 'flex',
+      width: 500,
+      minHeight: 70,
+      minWidth: 250,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: theme.spacing(1),
+      backgroundColor: '#2C2F33',
+      margin: theme.spacing(0),
+      borderRadius: 4,
+      [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(1),
+      },
+    },
+    iconButton: {
+      color: '#ffffff',
+      padding: theme.spacing(0.5),
+      ...responsiveIcon,
+    },
+    name: {
+      display: 'flex',
+      alignItems: 'center',
+      color: '#ffffff',
+      flexGrow: 1,
+      ...responsiveText,
+    },
+    initial: {
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      backgroundColor: '#6c63ff',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 'bold',
+      marginRight: theme.spacing(1),
+      ...responsiveInitial,
+    },
+    container: {
+      paddingTop: theme.spacing(1),
+      paddingBottom: theme.spacing(4),
+      display: 'flex',
+      justifyContent: 'center',
+      
+      
+  
+    },
+    contactGrid: {
+      display: 'flex',
+      justifyContent: 'center',
+      
+      
+    },
+  };
+});
 
 
 export default function Messages() {
@@ -147,60 +233,87 @@ export default function Messages() {
     <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-                 <Toolbar className={classes.toolbar}>
-                   {/* Show MenuIcon when the drawer is closed */}
-                   {!open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="open drawer"
-                       onClick={handleDrawerOpen}
-                       className={classes.menuButton}
-                     >
-                       <MenuIcon />
-                     </IconButton>
-                   )}
-       
-                   {/* Show ChevronLeftIcon when the drawer is open */}
-                   {open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="close drawer"
-                       onClick={handleDrawerClose}
-                       className={classes.menuButton}
-                     >
-                       <ChevronLeftIcon />
-                     </IconButton>
-                   )}
-       
-                   <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                     Welcome, Pepito!
-                   </Typography>
-       
-                   <IconButton color="inherit">
-                     <Badge badgeContent={4} color="secondary">
-                       <NotificationsIcon />
-                     </Badge>
-                   </IconButton>
-                 </Toolbar>
-               </AppBar>
+        <Toolbar className={classes.toolbar}>
+          
+          {!open && (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              className={classes.menuButton}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
+
+          {open && (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="close drawer"
+              onClick={handleDrawerClose}
+              className={classes.menuButton}
+            >
+              <ChevronLeftIcon />
+            </IconButton>
+          )}
+
+          <Typography component="h1" variant="h6" noWrap className={classes.title}>
+            Welcome, Pepito!
+          </Typography>
+
+          <IconButton color="inherit">
+            <Badge badgeContent={4} color="secondary">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+        </Toolbar>
+      </AppBar>
       <Drawer
-  variant="permanent"
-  classes={{
-    paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-  }}
-  open={open}
->
- 
-  <Divider />
-  <List>{mainListItems}</List>
-  <Divider />
-  <List>{secondaryListItems}</List>
-</Drawer>
-      
+        variant="permanent"
+        classes={{
+          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+        }}
+        open={open}
+      >
+
+        <Divider />
+        <List>{mainListItems}</List>
+        <Divider />
+        <List>{secondaryListItems}</List>
+      </Drawer>
+      <main className={classes.content} style={{ padding: 16, textAlign: "center", borderRadius: 10, width: "100%", minWidth: "250px" }}>
+        <div className={classes.appBarSpacer} />
+        <Container maxWidth="lg" className={classes.container}>
+
+          <Grid container spacing={2} className={classes.contactGrid}>
+            {Array.from({ length: 2 }, (_, i) => (
+              <Grid item xs={12} key={i}>
+                <div>
+                  <Paper className={classes.card}>
+                        <div className={classes.name}>
+                          <div className={classes.initial}>P</div>
+                          <Typography variant="h6" style={{ fontSize: '1rem' }}>Pepito Grillo</Typography>
+                        </div>
+                        <div>
+                          <IconButton className={classes.iconButton}>
+                            <MailIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton className={classes.iconButton}>
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        </div>
+                      </Paper>
+                      </div>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </main>
     </div>
-    </ThemeProvider>
+  </ThemeProvider>
   );
-}
+};
 

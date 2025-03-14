@@ -6,6 +6,7 @@ import MailIcon from '@material-ui/icons/Mail';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import { flexbox } from '@material-ui/system';
+import { Link } from "react-router-dom";
 
 
 
@@ -65,6 +66,8 @@ export default function ContactCard() {
   const classes = useStyles();
 
   return (
+    <>
+    <Link to="/singlecontact">
     <Paper className={classes.card}>
       <div className={classes.name}>
         <div className={classes.initial}>P</div>
@@ -85,5 +88,8 @@ export default function ContactCard() {
         </IconButton>
       </div>
     </Paper>
+    </Link>
+    </>
+
   );
 }

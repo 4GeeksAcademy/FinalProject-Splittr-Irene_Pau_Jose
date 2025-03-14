@@ -17,11 +17,8 @@ export const Home = () => {
       <div className="mt-3">
         <Link to="/login"> <button className="btn btn-dark me-3 px-4 py-2">Log in</button> </Link>
         <Link to="/signup"><button className="btn btn-light px-4 py-2">Sign up</button></Link>
-        <Link to="/dashboard"><button className="btn btn-light px-4 py-2">Dashboard</button></Link>
-        <Link to="/singlecontact"><button className="btn btn-light px-4 py-2">Single Contact</button></Link>
-        <Link to="/singlegroup"><button className="btn btn-light px-4 py-2">Single Group</button></Link>
-        <Link to="/singleobjective"><button className="btn btn-light px-4 py-2">Single Objective</button></Link>
-      </div>
+        </div>
+        
     </div>
 	);
 };
