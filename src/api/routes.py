@@ -21,321 +21,8 @@ CORS(api)
 #def test():
 #    return jsonify({"message": "API funcionando"})
 
-@api.route("/expenses", methods=["GET"])
-def get_expenses():
-    expenses = Expenses.query.all()
-    expenses_info = [expense.serialize() for expense in expenses]
-    return jsonify(expenses_info), 200
 
-
-@api.route("/expense/<int:expenseID>", methods=["GET"])
-def get_expense_by_id(expenseID):
-    expense = Expenses.query.filter_by(expenseID=expenseID).first()
-    
-    if not expense:
-        return jsonify({"msg": "Expense does not exist"})
-
-    return jsonify(expense.serialize()), 200
-
-
-
-@api.route("/expense/create", methods=["POST"])
-def create_expense():
-    data = request.get_json()
-
-    if "amount" not in data or "description" not in data or "shared_between" not in data:
-        return jsonify({"error": "Missing required fields"}), 400
-
-
-    new_expense = Expenses( amount=data["amount"], description=data["description"], shared_between=data["shared_between"])
-
-    db.session.add(new_expense)
-    db.session.commit()
-
-    return jsonify({"msg": "Expense was successfully created"}), 201
-
-
-
-@api.route("/expense/update/<int:expenseID>", methods=["PUT"])
-def update_expense(expenseID):
-    expense = Expenses.query.filter_by(expenseID=expenseID).first()
-    
-    if not expense:
-        return jsonify({"error": "Expense not found"}), 404
-    
-    data = request.get_json()
-
-    if "amount" not in data:
-        return jsonify({"error": "Missing required field: amount"}), 400
-
-    expense.amount = data["amount"]
-
-    db.session.commit()  
-
-    return jsonify({"msg": "Expense was successfully updated", "expense": expense.serialize()}), 200
-
-
-
-
-@api.route("/expense/delete/<int:expenseID>", methods=["DELETE"])
-def delete_expense(expenseID):
-    expense = Expenses.query.filter_by(expenseID=expenseID).first()
-
-    if not expense:
-        return jsonify({"error": "Expense not found"}), 404
-    
-    db.session.delete(expense)
-    db.session.commit()
-
-    return jsonify({"msg": "Objective successfully deleted"}), 200
-
-
-
-@api.route("/debts", methods=["GET"])
-def get_debts():
-    debts = Debts.query.all()
-    debts_info = [debt.serialize() for debt in debts]
-    return jsonify(debts_info), 200
-
-
-
-@api.route("/debt/<int:debtID>", methods=["GET"])
-def get_debt_by_id(debtID):
-    debt = Debts.query.filter_by(debtID=debtID).first()
-    
-    if not debt:
-        return jsonify({"msg": "Debt does not exist"})
-
-    return jsonify(debt.serialize()), 200
-
-
-
-
-@api.route("/create/debt", methods=["POST"])
-def create_debt():
-    data = request.get_json()
-
-    if "amount" not in data or "debtor" not in data:
-        return jsonify({"error": "Missing required fields"}), 400
-    
-
-    new_debt = Debts(amount_to_pay=data["amount"], debtorID=data["debtor"])
-
-    db.session.add(new_debt)
-    db.session.commit()
-
-    return jsonify({"msg": "Debt was successfully created"}), 201
-
-
-@api.route("/debt/update/<int:debtID>", methods=["PUT"])
-def update_debt(debtID):
-    debt = Debts.query.filter_by(debtID=debtID).first()
-    
-    if not debt:
-        return jsonify({"error": "Debt not found"}), 404
-    
-    data = request.get_json()
-
-    if "amount" not in data:
-        return jsonify({"error": "Missing required field: amount"}), 400
-
-    debt.amount_to_pay = data["amount"]
-
-    db.session.commit()  
-
-    return jsonify({"msg": "Expense was successfully updated", "debt": debt.serialize()}), 200
-
-
-
-
-@api.route("/debt/delete/<int:debtID>", methods=["DELETE"])
-def delete_debt(debtID):
-    debt = Debts.query.filter_by(debtID=debtID).first()
-
-    if not debt:
-        return jsonify({"error": "Expense not found"}), 404
-    
-    db.session.delete(debt)
-    db.session.commit()
-
-    return jsonify({"msg": "Debt successfully deleted"}), 200
-
-
-
-@api.route("/payments", methods=["GET"])
-def get_payments():
-    payments = Payments.query.all()
-    payments_info = [payment.serialize() for payment in payments]
-    return jsonify(payments_info), 200
-
-
-@api.route("/payment/<int:id>", methods=["GET"])
-def get_payment_by_id(id):
-    payment = Payments.query.filter_by(id=id).first()
-    
-    if not payment:
-        return jsonify({"msg": "Payment does not exist"})
-
-    return jsonify(payment.serialize()), 200
-
-
-
-@api.route("/create/payment", methods=["POST"])
-def create_payment():
-    data = request.get_json()
-
-    if "amount" not in data or "payer" not in data or "receiver" not in data:
-        return jsonify({"error": "Missing required fields"}), 400
-
-
-    new_payment = Payments(amount=data["amount"], payerID=data["payer"], receiverID=data["receiver"] )
-
-    db.session.add(new_payment)
-    db.session.commit()
-
-    return jsonify({"msg": "Paymnent was successfully done"}), 201
-
-
-
-
-
-
-@api.route("/objectives", methods=["GET"])
-def get_objectives():
-    objectives = Objectives.query.all()
-    objectives_info = [objective.serialize() for objective in objectives]
-    return jsonify(objectives_info), 200
-
-
-
-@api.route("/objective/<int:id>", methods=["GET"])
-def get_objective_by_id(id):
-    objectives = Objectives.query.filter_by(id=id).first()
-    
-    if not objectives:
-        return jsonify({"msg": "Objective does not exist"})
-
-    return jsonify(objectives.serialize()), 200
-
-
-
-
-@api.route("/create/objective", methods=["POST"])
-def create_objective():
-    data = request.get_json()
-
-    if "name" not in data or "amount" not in data:
-        return jsonify({"error": "Missing required fields"}), 400
-    
-    existing_objective = Objectives.query.filter_by(name=data["name"]).first()
-    if existing_objective:
-        return jsonify({"error": "Group is already registered"}), 400
-
-    new_objective = Objectives(name=data["name"], target_amount=data["amount"])
-
-    db.session.add(new_objective)
-    db.session.commit()
-
-    return jsonify({"msg": "Group was successfully created"}), 201
-
-
-
-@api.route("/objective/delete/<int:id>", methods=["DELETE"])
-def delete_objective(id):
-    objective = Objectives.query.filter_by(id=id).first()
-
-    if not objective:
-        return jsonify({"error": "Objective not found"}), 404
-    
-    db.session.delete(objective)
-    db.session.commit()
-
-    return jsonify({"msg": "Objective successfully deleted"}), 200
-
-
-
-@api.route("/objective/update/<int:id>", methods=["PUT"])
-def update_objective(id):
-    objective = Objectives.query.filter_by(id=id).first()
-    
-    if not objective:
-        return jsonify({"error": "Objective not found"}), 404
-    
-    data = request.get_json()
-
-    if "name" in data:
-        objective.name = data["name"]
-    if "amount" in data:
-        objective.email = data["amount"]
-    
-    db.session.commit()
-    return jsonify({"msg" : "Objective was successfully updated"}), 200
-
-
-
-
-@api.route("/objective/contributions", methods=["POST"])
-def objective_contribution():
-    data = request.get_json()
-
-   
-    if "objective" not in data or "amount" not in data or "user" not in data:
-        return jsonify({"error": "Missing required fields"}), 400
-
-    
-    objective = Objectives.query.filter_by(id=data["objective"]).first()
-    if not objective:
-        return jsonify({"error": "Objective not found"}), 404
-
-    
-    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objectiveID=data["objective"]).scalar()
-    print(total_contributed)
-    
-    total_contributed = total_contributed or 0  
-
-  
-    if total_contributed + data["amount"] > objective.target_amount:
-        return jsonify({"error": "Contribution exceeds target amount"}), 400
-
-  
-    contribution = ObjectivesContributions(amount_contributed=data["amount"], userID=data["user"], objectiveID=data["objective"])
-
-    db.session.add(contribution)
-    db.session.commit()
-
-    return jsonify({"msg": "Contribution was successfully added"}), 201
-
-
-
-@api.route("/messages/<int:sent_to_userid>", methods=["GET"])
-def get_messages_by_id(sent_to_userid):
-    messages = Messages.query.filter_by(sent_to_userid=sent_to_userid).all()
-    
-    if not messages:
-        return jsonify({"error": "No messages found"}), 404
-    
-    user_messages = [message.serialize() for message in messages]
-
-    return jsonify(user_messages), 200
-
-
-
-@api.route("/send/message", methods=["POST"])
-def send_message():
-    data = request.get_json()
-
-    if "to_user" not in data or "message" not in data or "from_user":
-        return jsonify({"error": "Missing required fields"}), 400
-
-    new_message = Messages(sent_to_userid=data["to_user"], message=data["message"], from_userid=data["from_user"])
-
-    db.session.add(new_message)
-    db.session.commit()
-
-    return jsonify({"msg": "Message was successfully sent"}), 201
-
-
-#GET /users ---> funciona
+#GET /users ---> funciona !!
 @api.route('/users', methods=['GET']) 
 def get_all_users():
     users = User.query.all()
@@ -343,7 +30,7 @@ def get_all_users():
     return jsonify(users_list), 200
 
 
-#GET /user --> funciona
+#GET /user --> funciona !!
 @api.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
@@ -352,7 +39,7 @@ def get_user(user_id):
     return jsonify(user.serialize()), 200
 
 
-#POST /users --> funciona 
+#POST /users --> NO funciona, NO da ids nuevos diferentes
 @api.route('/signup', methods=['POST'])
 def add_new_user():
     request_body = request.get_json()
@@ -372,7 +59,7 @@ def add_new_user():
 
 
 
-#DELETE /user --> funciona
+#DELETE /user --> funciona !!
 @api.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get(user_id) 
@@ -401,7 +88,7 @@ def update_user(user_id):
         user.name = request_body["name"]
     if "email" in request_body:
         existing_user = User.query.filter_by(email=request_body["email"]).first()
-        if existing_user and existing_user.userID != user_id:
+        if existing_user and existing_user.user_id != user_id:
             return jsonify({"msg": "Email already in use"}), 400
         user.email = request_body["email"]
     if "password" in request_body:
@@ -413,7 +100,7 @@ def update_user(user_id):
 
 
 
-#GET /groups --> funciona
+#GET /groups --> funciona !!
 @api.route('/groups', methods=['GET'])
 def get_all_groups():
     groups = Group.query.all() 
@@ -421,7 +108,7 @@ def get_all_groups():
     return jsonify(groups_list)
 
 
-#GET /group --> funciona
+#GET /group --> funciona !!
 @api.route('/groups/<int:group_id>', methods=['GET'])
 def get_group(group_id):
     group = Group.query.get(group_id)
@@ -448,7 +135,7 @@ def create_group():
 
     if "members" in request_data:
         for user_id in request_data["members"]:
-            group_to_user = Group_to_user(userID=user_id, groupId=new_group.groupID, created_at=datetime.utcnow())
+            group_to_user = Group_to_user(user_id=user_id, group_id=new_group.group_id, created_at=datetime.utcnow())
             db.session.add(group_to_user)
         
         db.session.commit()
@@ -561,10 +248,331 @@ def remove_user_from_group():
 
 
 
+
+#Funciona
+@api.route("/payments", methods=["GET"])
+def get_payments():
+    payments = Payments.query.all()
+    payments_info = [payment.serialize() for payment in payments]
+    return jsonify(payments_info), 200
+
+
+#Funciona
+@api.route("/payment/<int:id>", methods=["GET"])
+def get_payment_by_id(id):
+    payment = Payments.query.filter_by(id=id).first()
+    
+    if not payment:
+        return jsonify({"msg": "Payment does not exist"})
+
+    return jsonify(payment.serialize()), 200
+
+
+#Funciona
+@api.route("/create/payment", methods=["POST"])
+def create_payment():
+    data = request.get_json()
+
+    if "amount" not in data or "payer_id" not in data or "receiver_id" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+
+
+    new_payment = Payments(amount=data["amount"], payer_id=data["payer_id"], receiver_id=data["receiver_id"] )
+
+    db.session.add(new_payment)
+    db.session.commit()
+
+    return jsonify({"msg": "Paymnent was successfully done"}), 201
+
+#Funciona
+@api.route("/expenses", methods=["GET"])
+def get_expenses():
+    expenses = Expenses.query.all()
+    expenses_info = [expense.serialize() for expense in expenses]
+    return jsonify(expenses_info), 200
+
+#Funciona
+@api.route("/expense/<int:expense_id>", methods=["GET"])
+def get_expense_by_id(expense_id):
+    expense = Expenses.query.filter_by(expense_id=expense_id).first()
+    
+    if not expense:
+        return jsonify({"msg": "Expense does not exist"})
+
+    return jsonify(expense.serialize()), 200
+
+
+#Funciona
+@api.route("/expense/create", methods=["POST"])
+def create_expense():
+    data = request.get_json()
+
+    if "amount" not in data or "description" not in data or "shared_between" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+
+
+    new_expense = Expenses( amount=data["amount"], description=data["description"], shared_between=data["shared_between"])
+
+    db.session.add(new_expense)
+    db.session.commit()
+
+    return jsonify({"msg": "Expense was successfully created"}), 201
+
+
+#Funciona
+@api.route("/expense/update/<int:expense_id>", methods=["PUT"])
+def update_expense(expense_id):
+    expense = Expenses.query.filter_by(expense_id=expense_id).first()
+    
+    if not expense:
+        return jsonify({"error": "Expense not found"}), 404
+    
+    data = request.get_json()
+
+    if "amount" not in data:
+        return jsonify({"error": "Missing required field: amount"}), 400
+
+    expense.amount = data["amount"]
+
+    db.session.commit()  
+
+    return jsonify({"msg": "Expense was successfully updated", "expense": expense.serialize()}), 200
+
+
+
+#Funciona
+@api.route("/expense/delete/<int:expense_id>", methods=["DELETE"])
+def delete_expense(expense_id):
+    expense = Expenses.query.filter_by(expense_id=expense_id).first()
+
+    if not expense:
+        return jsonify({"error": "Expense not found"}), 404
+    
+    db.session.delete(expense)
+    db.session.commit()
+
+    return jsonify({"msg": "Objective successfully deleted"}), 200
+
+
+#Funciona
+@api.route("/debts", methods=["GET"])
+def get_debts():
+    debts = Debts.query.all()
+    debts_info = [debt.serialize() for debt in debts]
+    return jsonify(debts_info), 200
+
+
+#Funciona
+@api.route("/debt/<int:debt_id>", methods=["GET"])
+def get_debt_by_id(debt_id):
+    debt = Debts.query.filter_by(debt_id=debt_id).first()
+    
+    if not debt:
+        return jsonify({"msg": "Debt does not exist"})
+
+    return jsonify(debt.serialize()), 200
+
+
+
+#Funciona
+@api.route("/create/debt", methods=["POST"])
+def create_debt():
+    data = request.get_json()
+
+    if "amount_to_pay" not in data or "debtor_id" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+    
+
+    new_debt = Debts(amount_to_pay=data["amount_to_pay"], debtor_id=data["debtor_id"])
+
+    db.session.add(new_debt)
+    db.session.commit()
+
+    return jsonify({"msg": "Debt was successfully created"}), 201
+
+
+#Funciona
+@api.route("/debt/update/<int:debt_id>", methods=["PUT"])
+def update_debt(debt_id):
+    debt = Debts.query.filter_by(debt_id=debt_id).first()
+    
+    if not debt:
+        return jsonify({"error": "Debt not found"}), 404
+    
+    data = request.get_json()
+
+    if "amount" not in data:
+        return jsonify({"error": "Missing required field: amount"}), 400
+
+    debt.amount_to_pay = data["amount"]
+
+    db.session.commit()  
+
+    return jsonify({"msg": "Expense was successfully updated", "debt": debt.serialize()}), 200
+
+
+
+#Funciona
+@api.route("/debt/delete/<int:debt_id>", methods=["DELETE"])
+def delete_debt(debt_id):
+    debt = Debts.query.filter_by(debt_id=debt_id).first()
+
+    if not debt:
+        return jsonify({"error": "Expense not found"}), 404
+    
+    db.session.delete(debt)
+    db.session.commit()
+
+    return jsonify({"msg": "Debt successfully deleted"}), 200
+
+
+
+#No funciona
+@api.route("/messages/<int:sent_to_user_id>", methods=["GET"])
+def get_messages_by_id(sent_to_user_id):
+    messages = Messages.query.filter_by(sent_to_user_id=sent_to_user_id).all()
+    
+    if not messages:
+        return jsonify({"error": "No messages found"}), 404
+    
+    user_messages = [message.serialize() for message in messages]
+
+    return jsonify(user_messages), 200
+
+
+#No funciona
+@api.route("/send/message", methods=["POST"])
+def send_message():
+    data = request.get_json()
+
+    if "sent_to_user_id" not in data or "message" not in data or "from_user_id" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+
+
+    new_message = Messages(sent_to_user_id=data["sent_to_user_id"], message=data["message"], from_user_id=data["from_user_id"])
+
+    db.session.add(new_message)
+    db.session.commit()
+
+    return jsonify({"msg": "Message was successfully sent"}), 201
+
+
+
+
+
+@api.route("/objectives", methods=["GET"])
+def get_objectives():
+    objectives = Objectives.query.all()
+    objectives_info = [objective.serialize() for objective in objectives]
+    return jsonify(objectives_info), 200
+
+
+
+@api.route("/objective/<int:id>", methods=["GET"])
+def get_objective_by_id(id):
+    objectives = Objectives.query.filter_by(id=id).first()
+    
+    if not objectives:
+        return jsonify({"msg": "Objective does not exist"})
+
+    return jsonify(objectives.serialize()), 200
+
+
+
+
+@api.route("/create/objective", methods=["POST"])
+def create_objective():
+    data = request.get_json()
+
+    if "name" not in data or "amount" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    existing_objective = Objectives.query.filter_by(name=data["name"]).first()
+    if existing_objective:
+        return jsonify({"error": "Group is already registered"}), 400
+
+    new_objective = Objectives(name=data["name"], target_amount=data["amount"])
+
+    db.session.add(new_objective)
+    db.session.commit()
+
+    return jsonify({"msg": "Group was successfully created"}), 201
+
+
+
+@api.route("/objective/delete/<int:id>", methods=["DELETE"])
+def delete_objective(id):
+    objective = Objectives.query.filter_by(id=id).first()
+
+    if not objective:
+        return jsonify({"error": "Objective not found"}), 404
+    
+    db.session.delete(objective)
+    db.session.commit()
+
+    return jsonify({"msg": "Objective successfully deleted"}), 200
+
+
+
+@api.route("/objective/update/<int:id>", methods=["PUT"])
+def update_objective(id):
+    objective = Objectives.query.filter_by(id=id).first()
+    
+    if not objective:
+        return jsonify({"error": "Objective not found"}), 404
+    
+    data = request.get_json()
+
+    if "name" in data:
+        objective.name = data["name"]
+    if "amount" in data:
+        objective.email = data["amount"]
+    
+    db.session.commit()
+    return jsonify({"msg" : "Objective was successfully updated"}), 200
+
+
+
+
+@api.route("/objective/contributions", methods=["POST"])
+def objective_contribution():
+    data = request.get_json()
+
+   
+    if "objective" not in data or "amount" not in data or "user" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    
+    objective = Objectives.query.filter_by(id=data["objective"]).first()
+    if not objective:
+        return jsonify({"error": "Objective not found"}), 404
+
+    
+    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objectiveID=data["objective"]).scalar()
+    print(total_contributed)
+    
+    total_contributed = total_contributed or 0  
+
+  
+    if total_contributed + data["amount"] > objective.target_amount:
+        return jsonify({"error": "Contribution exceeds target amount"}), 400
+
+  
+    contribution = ObjectivesContributions(amount_contributed=data["amount"], userID=data["user"], objectiveID=data["objective"])
+
+    db.session.add(contribution)
+    db.session.commit()
+
+    return jsonify({"msg": "Contribution was successfully added"}), 201
+
+
+
+# Routes to populate the database #
+
 @api.route("/userpopulate", methods=["GET"])
 def user_populate():
     for user in users:
-        new_user = User(userID=user["userID"], name=user["name"], email=user["email"], password=user["password"])
+        new_user = User(user_id=user["user_id"], name=user["name"], email=user["email"], password=user["password"])
         db.session.add(new_user)
     db.session.commit()
     return jsonify("Users have been created")
@@ -572,7 +580,7 @@ def user_populate():
 @api.route("/grouppopulate", methods=["GET"])
 def group_populate():
     for group in groups:
-        new_group = Group(groupID=group["groupID"], group_name=group["group_name"], created_at=group["created_at"], total_Amount=group["total_Amount"])
+        new_group = Group(group_id=group["group_id"], group_name=group["group_name"], created_at=group["created_at"], total_amount=group["total_amount"])
         db.session.add(new_group)
     db.session.commit()
     return jsonify("Groups have been created")
@@ -581,7 +589,7 @@ def group_populate():
 @api.route("/grouptouserpopulate", methods=["GET"])
 def group_to_user_populate():
     for group in group_to_user:
-        new_group_to_user = Group_to_user(id=group["id"],userID=group["userID"], groupId=group["groupId"], created_at=group["created_at"])
+        new_group_to_user = Group_to_user(id=group["id"],user_id=group["user_id"], group_id=group["group_id"], created_at=group["created_at"])
         db.session.add(new_group_to_user)
     db.session.commit()
     return jsonify("Groups_to_user have been created")
@@ -589,7 +597,7 @@ def group_to_user_populate():
 @api.route("/grouppaymentspopulate", methods=["GET"])
 def group_payments_populate():
     for group in group_payments:
-        new_group_payments = Group_payments(id=group["id"],receiverID=group["receiverID"], payerID=group["payerID"], groupID=group["groupID"], amount=group["amount"], payed_at=group["payed_at"])
+        new_group_payments = Group_payments(id=group["id"],receiver_id=group["receiver_id"], payer_id=group["payer_id"], group_id=group["group_id"], amount=group["amount"], payed_at=group["payed_at"])
         db.session.add(new_group_payments)
     db.session.commit()
     return jsonify("Group_payments have been created")
@@ -598,7 +606,7 @@ def group_payments_populate():
 @api.route("/paymentspopulate", methods=["GET"])
 def payments_populate():
     for payment in payments:
-        new_payments = Payments(id=payment["id"], payerID=payment["payerID"], receiverID=payment["receiverID"], amount=payment["amount"], payed_at=payment["payed_at"])
+        new_payments = Payments(id=payment["id"], payer_id=payment["payer_id"], receiver_id=payment["receiver_id"], amount=payment["amount"], payed_at=payment["payed_at"])
         #No deja meter el debtID=payment["debtID"], sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "payments_pkey" DETAIL:  Key (id)=(2) already exists.
 
         db.session.add(new_payments)
@@ -608,7 +616,7 @@ def payments_populate():
 @api.route("/expensespopulate", methods=["GET"])
 def expenses_populate():
     for expense in expenses:
-        new_expense = Expenses(expenseID=expense["expenseID"], payerId=expense["payerId"], shared_between=expense["shared_between"], amount=expense["amount"], description=expense["description"], created_at=expense["created_at"])
+        new_expense = Expenses(expense_id=expense["expense_id"], payer_id=expense["payer_id"], shared_between=expense["shared_between"], amount=expense["amount"], description=expense["description"], created_at=expense["created_at"])
         #En este da problema  groupID=expense["groupID"], dice que no es un int like
         db.session.add(new_expense)
     db.session.commit()
@@ -617,7 +625,7 @@ def expenses_populate():
 @api.route("/debtspopulate", methods=["GET"])
 def debts_populate():
     for debt in debts:
-        new_debt = Debts(debtID=debt["debtID"], expensesID=debt["expensesID"], debtorID=debt["debtorID"], amount_to_pay=debt["amount_to_pay"], is_paid=debt["is_paid"], payed_at=debt["payed_at"])
+        new_debt = Debts(debt_id=debt["debt_id"], expenses_id=debt["expenses_id"], debtor_id=debt["debtor_id"], amount_to_pay=debt["amount_to_pay"], is_paid=debt["is_paid"], payed_at=debt["payed_at"])
         #
         db.session.add(new_debt)
     db.session.commit()
@@ -626,7 +634,7 @@ def debts_populate():
 @api.route("/messagespopulate", methods=["GET"])
 def messages_populate():
     for message in messages:
-        new_message = Messages(id=message["id"], from_userid=message["from_userid"], message=message["message"], sent_at=message["sent_at"])
+        new_message = Messages(id=message["id"], from_user_id=message["from_user_id"],  message=message["message"], sent_at=message["sent_at"])
         #
         db.session.add(new_message)
     db.session.commit()
@@ -635,7 +643,7 @@ def messages_populate():
 @api.route("/objectivespopulate", methods=["GET"])
 def objectives_populate():
     for objective in objectives:
-        new_objective = Objectives(id=objective["id"], groupID=objective["groupID"], name=objective["name"], target_amount=objective["target_amount"], created_at=objective["created_at"], is_completed=objective["is_completed"])
+        new_objective = Objectives(id=objective["id"], group_id=objective["group_id"], name=objective["name"], target_amount=objective["target_amount"], created_at=objective["created_at"], is_completed=objective["is_completed"])
         #
         db.session.add(new_objective)
     db.session.commit()
@@ -644,7 +652,7 @@ def objectives_populate():
 @api.route("/objectivescontributionspopulate", methods=["GET"])
 def objectives_contributions_populate():
     for objective in objectives_contributions:
-        new_objectives_contribution = ObjectivesContributions(id=objective["id"], objectiveID=objective["objectiveID"], userID=objective["userID"], amount_contributed=objective["amount_contributed"], contributed_at=objective["contributed_at"])
+        new_objectives_contribution = ObjectivesContributions(id=objective["id"], objective_id=objective["objective_id"], user_id=objective["user_id"], amount_contributed=objective["amount_contributed"], contributed_at=objective["contributed_at"])
         #
         db.session.add(new_objectives_contribution)
     db.session.commit()

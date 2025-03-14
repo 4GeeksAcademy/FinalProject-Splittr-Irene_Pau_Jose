@@ -47,7 +47,7 @@ class Group(db.Model):
 
     def serialize(self):
         return {
-            "group_id": self.groupID,
+            "group_id": self.group_id,
             "group_name": self.group_name,
             "members": [members.serialize() for members in self.members] if self.members else [],
             "created_at": self.created_at,
@@ -68,8 +68,8 @@ class Group_to_user(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "user_id": self.userID,
-            "group_id": self.groupId,
+            "user_id": self.user_id,
+            "group_id": self.group_id,
             "created_at": self.created_at 
         }
     
@@ -91,9 +91,9 @@ class Group_payments(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "receiver_id": self.receiverID,
-            "payer_id": self.payerID,
-            "group_id": self.groupId,
+            "receiver_id": self.receiver_id,
+            "payer_id": self.payer_id,
+            "group_id": self.group_id,
             "amount": self.amount,
             "payed_at": self.payed_at,
             
@@ -111,14 +111,14 @@ class Payments(db.Model):
     
 
     def __repr__(self):
-        return f'<Payments {self.debtID}>'
+        return f'<Payments {self.debt_id}>'
 
     def serialize(self):
         return {
             "id": self.id,
-            "debt_id": self.debtID,
-            "payer_id": self.payerID,
-            "receiver_id": self.receiverID,
+            "debt_id": self.debt_id,
+            "payer_id": self.payer_id,
+            "receiver_id": self.receiver_id,
             "amount": self.amount,
             "payed_at": self.payed_at
 
@@ -141,9 +141,9 @@ class Expenses(db.Model):
 
     def serialize(self):
         return {
-            "expense_id": self.expenseID,
-            "group_id": self.groupID,
-            "payer_id": self.payerId,
+            "expense_id": self.expense_id,
+            "group_id": self.group_id,
+            "payer_id": self.payer_id,
             "shared_between": self.shared_between,
             "amount": self.amount,
             "description": self.description,
@@ -245,7 +245,7 @@ class ObjectivesContributions(db.Model):
         return {
             "id": self.id,
             "objective_id": self.objective_id,
-            "user_id": self.userID,
+            "user_id": self.user_id,
             "amount_contributed": self.amount_contributed,
             "contributed_at": self.contributed_at
             
