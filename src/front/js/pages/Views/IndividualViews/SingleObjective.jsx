@@ -12,23 +12,23 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems } from '../../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../../Dashboard/listitems.jsx';
-import Chart from '../../Dashboard/Chart.jsx';
-import Deposits from '../../Dashboard/Deposits.jsx';
-import Orders from '../../Dashboard/Orders.jsx';
+
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../../Home.jsx';
+import { Card, Avatar, Tooltip } from "@material-ui/core";
+import { Star, Mail, Edit, Close } from "@material-ui/icons";
+import { PieChart, Pie } from "recharts";
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
-
-import SharedObjectiveCard from './SharedObjectiveCard.jsx';
 
 
 function Copyright() {
@@ -64,10 +64,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: {
+  toolbar: { 
     paddingRight: 20,
     minHeight: 70,
-  },
+   },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
@@ -106,7 +106,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-
+    
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -116,22 +116,41 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
+    top: 30, 
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
   },
   container: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4)
+    paddingBottom: theme.spacing(4),
+    display: 'flex',
+    justifyContent: 'center',
+    width: 'auto',
+    marginTop: "40px",
 
   },
   contactGrid: {
     display: 'flex',
-   
+    
   },
 }));
 
+function createData(id, date, name, amount) {
+  return { id, date, name, amount };
+}
+
+const rows = [
+  createData(0,'Elvis Presley', 312.44),
+  createData(1,'Paul McCartney', 866.99),
+  createData(2,'Tom Scholz', 100.81),
+  createData(3,'Michael Jackson', 654.39),
+  createData(4,'Bruce Springsteen', 212.79),
+];
+
+function preventDefault(event) {
+  event.preventDefault();
+}
 
 export default function SingleObjective() {
   const classes = useStyles();
@@ -144,13 +163,15 @@ export default function SingleObjective() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            
+
             {!open && (
               <IconButton
                 edge="start"
@@ -163,7 +184,7 @@ export default function SingleObjective() {
               </IconButton>
             )}
 
-            
+
             {open && (
               <IconButton
                 edge="start"
@@ -200,19 +221,73 @@ export default function SingleObjective() {
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
 
-            <Grid container spacing={3} className={classes.contactGrid}>
-              {Array.from({ length: 6 }, (_, i) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
-                  <SharedObjectiveCard />
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        </main>
+        <div className={classes.appBarSpacer} />
+        <Container maxWidth="lg" className={classes.container}>
+
+
+          <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
+            <div className="title" style={{ display: "flex", alignItems: "center" }}>
+              <Tooltip title="Favorite">
+                <IconButton>
+                  <Star style={{ color: "#fff" }} />
+                </IconButton>
+              </Tooltip>
+              <Typography variant="h6" style={{ marginLeft: 5 }}>Objective Title</Typography>
+            </div>
+            <Box display="flex" justifyContent="space-around" gap={2}>
+              <Box width={120} alignContent="center" >
+                <Typography variant="body2" style={{ marginTop: 10 }}>Total: 98.5K</Typography>
+                <PieChart width={120} height={120} style={{ marginTop: 50 }}>
+                  <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
+                </PieChart>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed: </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: </Typography>
+              </Box>
+              <Box display="block" justifyContent="center" alignItems="center" gap={3} >
+                <Typography gap={4}>Recent Contributions</Typography>
+                <Table size="small" style={{ marginTop: '16px' }}>
+                  <TableHead >
+                    <TableRow>
+                      <TableCell>Date</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell align="right">Amount</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rows.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>{row.date}</TableCell>
+                        <TableCell>{row.name}</TableCell>
+                        <TableCell align="right">{row.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className={classes.seeMore} style={{ marginTop: '16px' }} >
+                  <Link color="primary" href="#" onClick={preventDefault} >
+                    See more contributions
+                  </Link>
+                </div>
+                <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
+                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
+                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
+                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
+
+                  <Typography>+4 more</Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            <Box display="flex" justifyContent="center" marginTop={2}>
+              <Tooltip title="Edit"><IconButton><Edit style={{ color: "#fff" }} /></IconButton></Tooltip>
+              <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
+            </Box>
+          </Card>
+
+        </Container>
+
       </div>
     </ThemeProvider>
   );
