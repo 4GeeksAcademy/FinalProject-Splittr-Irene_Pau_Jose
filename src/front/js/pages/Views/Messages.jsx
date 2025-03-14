@@ -33,6 +33,7 @@ import StarIcon from '@material-ui/icons/Star';
 import MailIcon from '@material-ui/icons/Mail';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import MessageCard from './IndividualViews/MessageCard.jsx';
 
 function Copyright() {
   return (
@@ -228,92 +229,77 @@ export default function Messages() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  return (
+return (
     <ThemeProvider theme={darkTheme}>
     <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-        <Toolbar className={classes.toolbar}>
-          
-          {!open && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              className={classes.menuButton}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-
-
-          {open && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="close drawer"
-              onClick={handleDrawerClose}
-              className={classes.menuButton}
-            >
-              <ChevronLeftIcon />
-            </IconButton>
-          )}
-
-          <Typography component="h1" variant="h6" noWrap className={classes.title}>
-            Welcome, Pepito!
-          </Typography>
-
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+                 <Toolbar className={classes.toolbar}>
+                   {/* Show MenuIcon when the drawer is closed */}
+                   {!open && (
+                     <IconButton
+                       edge="start"
+                       color="inherit"
+                       aria-label="open drawer"
+                       onClick={handleDrawerOpen}
+                       className={classes.menuButton}
+                     >
+                       <MenuIcon />
+                     </IconButton>
+                   )}
+       
+                   {/* Show ChevronLeftIcon when the drawer is open */}
+                   {open && (
+                     <IconButton
+                       edge="start"
+                       color="inherit"
+                       aria-label="close drawer"
+                       onClick={handleDrawerClose}
+                       className={classes.menuButton}
+                     >
+                       <ChevronLeftIcon />
+                     </IconButton>
+                   )}
+       
+                   <Typography component="h1" variant="h6" noWrap className={classes.title}>
+                     Welcome, Pepito!
+                   </Typography>
+       
+                   <IconButton color="inherit">
+                     <Badge badgeContent={4} color="secondary">
+                       <NotificationsIcon />
+                     </Badge>
+                   </IconButton>
+                 </Toolbar>
+               </AppBar>
       <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
+  variant="permanent"
+  classes={{
+    paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+  }}
+  open={open}
+>
+ 
+  <Divider />
+  <List>{mainListItems}</List>
+  <Divider />
+  <List>{secondaryListItems}</List>
+</Drawer>
+<main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <Container maxWidth="lg" className={classes.container}>
 
-        <Divider />
-        <List>{mainListItems}</List>
-        <Divider />
-        <List>{secondaryListItems}</List>
-      </Drawer>
-      <main className={classes.content} style={{ padding: 16, textAlign: "center", borderRadius: 10, width: "100%", minWidth: "250px" }}>
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
-
-          <Grid container spacing={2} className={classes.contactGrid}>
-            {Array.from({ length: 2 }, (_, i) => (
-              <Grid item xs={12} key={i}>
-                <div>
-                  <Paper className={classes.card}>
-                        <div className={classes.name}>
-                          <div className={classes.initial}>P</div>
-                          <Typography variant="h6" style={{ fontSize: '1rem' }}>Pepito Grillo</Typography>
-                        </div>
-                        <div>
-                          <IconButton className={classes.iconButton}>
-                            <MailIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton className={classes.iconButton}>
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        </div>
-                      </Paper>
-                      </div>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </main>
+          <Grid container spacing={3} justifyContent="center" >
+  {Array.from({ length: 6 }, (_, i) => (
+    <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
+      <MessageCard />
+    </Grid>
+  ))}
+</Grid>
+          </Container>
+        </main>
+      
     </div>
-  </ThemeProvider>
+    </ThemeProvider>
   );
-};
-
+}
