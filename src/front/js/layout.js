@@ -60,7 +60,7 @@ const Layout = () => {
                         <Route element={<About/>} path="/about" />
                         <Route element={<Feedback/>} path="/feedback" />
                         <Route element={<SingleContact/>} path="/singlecontact" />
-                        <Route element={<SingleGroup/>} path="/singlegroup" />
+                        <Route element={<SingleGroup/>} path="/singlegroup/:idgroup" />
                         <Route element={<SingleMessage/>} path="/singlemessage" />
                         <Route element={<SingleObjective/>} path="/singleobjective" />
                     </Routes>

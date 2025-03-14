@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -29,7 +29,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-
+import { useParams } from 'react-router-dom';
+import { getInfoGroup } from '../../../component/callToApi.js';
 
 function Copyright() {
   return (
@@ -163,8 +164,21 @@ export default function SingleGroup() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const[singleGroupInfo, setSingleGroupInfo] = useState([]);
+  const { idgroup } = useParams();
+  console.log(singleGroupInfo);
+  
+  const precio = singleGroupInfo.total_amount
+    const totalPrecioEur = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "EUR",
+    }).format(precio);
 
+  useEffect(()=>{
+    getInfoGroup(setSingleGroupInfo, idgroup);
+  }, [])
 
+  
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -233,17 +247,16 @@ export default function SingleGroup() {
                   <Star style={{ color: "#fff" }} />
                 </IconButton>
               </Tooltip>
-              <Typography variant="h6" style={{ marginLeft: 5 }}>Group Name</Typography>
+              <Typography variant="h6" style={{ marginLeft: 5 }}>{singleGroupInfo.name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
               <Box width={120} alignContent="center" >
-                <Typography variant="body2" style={{ marginTop: 10 }}>Total: 98.5K</Typography>
+                <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPrecioEur} </Typography>
                 <PieChart width={120} height={120} style={{ marginTop: 50 }}>
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Remaining amount: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {singleGroupInfo.created_at} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>

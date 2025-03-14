@@ -28,7 +28,9 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 import GroupCard from './IndividualViews/GroupCard.jsx';
+import { mapGroups } from '../../component/callToApi.js';
 
+import { useState, useEffect } from 'react';
 
 function Copyright() {
   return (
@@ -142,6 +144,15 @@ export default function Groups() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+ const[groups,setGroups] = useState([]);
+ useEffect(()=>{
+
+  mapGroups(setGroups)
+
+ },[])
+ 
+ 
+
   return (
     <ThemeProvider theme={darkTheme}>
     <div className={classes.root}>
@@ -203,11 +214,11 @@ export default function Groups() {
           <Container maxWidth="lg" className={classes.container}>
 
           <Grid container spacing={3} justifyContent="center" >
-  {Array.from({ length: 6 }, (_, i) => (
-    <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
-      <GroupCard />
-    </Grid>
-  ))}
+          {groups.map((group)=> {
+            return(
+
+              <GroupCard group={group}  />  )
+          })}
 </Grid>
           </Container>
         </main>
