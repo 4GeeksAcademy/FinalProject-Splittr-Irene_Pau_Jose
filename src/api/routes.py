@@ -23,16 +23,16 @@ CORS(api)
 
 
 #GET /users ---> funciona !!
-@api.route('/users', methods=['GET']) 
-def get_all_users():
+@api.route('/user', methods=['GET']) 
+def get_users():
     users = User.query.all()
     users_list = [user.serialize() for user in users]  
     return jsonify(users_list), 200
 
 
 #GET /user --> funciona !!
-@api.route('/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
+@api.route('/user/<int:user_id>', methods=['GET'])
+def get_user_by_id(user_id):
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"error": "User not found"}), 404 
@@ -60,7 +60,7 @@ def add_new_user():
 
 
 #DELETE /user --> funciona !!
-@api.route('/users/<int:user_id>', methods=['DELETE'])
+@api.route('/user/delete/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get(user_id) 
     if user is None:
@@ -74,7 +74,7 @@ def delete_user(user_id):
 
 #PUT /user_id --> funciona
 
-@api.route('/users/<int:user_id>', methods=['PUT'])
+@api.route('/user/update/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     user = User.query.get(user_id)  
     if user is None:
@@ -101,16 +101,16 @@ def update_user(user_id):
 
 
 #GET /groups --> funciona !!
-@api.route('/groups', methods=['GET'])
-def get_all_groups():
+@api.route('/group', methods=['GET'])
+def get_groups():
     groups = Group.query.all() 
     groups_list = [group.serialize() for group in groups]  
     return jsonify(groups_list)
 
 
 #GET /group --> funciona !!
-@api.route('/groups/<int:group_id>', methods=['GET'])
-def get_group(group_id):
+@api.route('/group/<int:group_id>', methods=['GET'])
+def get_group_by_id(group_id):
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found"}), 404 
@@ -118,11 +118,11 @@ def get_group(group_id):
 
 
 
-#POST /groups --> funciona
-@api.route('/groups', methods=['POST'])
+#POST /groups --> funciona, poner los miembros como requeridos. 
+@api.route('/group/create', methods=['POST'])
 def create_group():
     request_data = request.get_json()
-    if "Group name" not in request_data:
+    if "group_name" not in request_data:
         return jsonify({"msg": "Group name is required"}), 400
 
     new_group = Group(
@@ -144,13 +144,13 @@ def create_group():
 
 
 #DELETE /group --> funciona
-@api.route('/groups/<int:group_id>', methods=['DELETE'])
+@api.route('/group/delete/<int:group_id>', methods=['DELETE'])
 def delete_group(group_id):
     group = Group.query.get(group_id)
     if not group:
         return jsonify({"msg": "Group not found"}), 404
     
-    group_to_user_entries = Group_to_user.query.filter_by(groupId=group_id).all()
+    group_to_user_entries = Group_to_user.query.filter_by(group_id=group_id).all()
     for entry in group_to_user_entries:
         db.session.delete(entry)
     
@@ -161,7 +161,7 @@ def delete_group(group_id):
 
 
 #PUT /group_id --> funciona
-@api.route('/groups/<int:group_id>', methods=['PUT'])
+@api.route('/group/update/<int:group_id>', methods=['PUT'])
 def update_group(group_id):
     request_data = request.get_json()
     group = Group.query.get(group_id)
@@ -173,10 +173,10 @@ def update_group(group_id):
 
     if "members" in request_data:
         # Borrar los miembros actuales del grupo
-        Group_to_user.query.filter_by(groupId=group_id).delete()
+        Group_to_user.query.filter_by(group_id=group_id).delete()
 
         for user_id in request_data["members"]:
-            group_to_user = Group_to_user(userID=user_id, groupId=group_id, created_at=datetime.utcnow())
+            group_to_user = Group_to_user(user_id=user_id, group_id=group_id, created_at=datetime.utcnow())
             db.session.add(group_to_user)
 
     db.session.commit()
@@ -186,16 +186,16 @@ def update_group(group_id):
 
 
 #POST /groups_users funciona
-@api.route('/groups_users', methods=['POST'])
+@api.route('/group_user', methods=['POST'])
 def add_user_to_group():
     request_data = request.get_json()
 
 
-    if "userID" not in request_data or "groupID" not in request_data:
-        return jsonify({"msg": "Both userID and groupID are required"}), 400
+    if "user_id" not in request_data or "group_id" not in request_data:
+        return jsonify({"msg": "Both user_id and group_id are required"}), 400
     
-    user_id = request_data["userID"]
-    group_id = request_data["groupID"]
+    user_id = request_data["user_id"]
+    group_id = request_data["group_id"]
 
     group = Group.query.get(group_id)
     if not group:
@@ -205,11 +205,11 @@ def add_user_to_group():
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
-    existing_entry = Group_to_user.query.filter_by(userID=user_id, groupId=group_id).first()
+    existing_entry = Group_to_user.query.filter_by(user_id=user_id, group_id=group_id).first()
     if existing_entry:
         return jsonify({"msg": "User is already in the group"}), 400
 
-    new_group_user = Group_to_user(userID=user_id, groupId=group_id, created_at=datetime.utcnow())
+    new_group_user = Group_to_user(user_id=user_id, group_id=group_id, created_at=datetime.utcnow())
     db.session.add(new_group_user)
     db.session.commit()
 
@@ -218,15 +218,15 @@ def add_user_to_group():
 
 
 #DELETE /groups_users funciona
-@api.route('/groups_users', methods=['DELETE'])
+@api.route('/group_user', methods=['DELETE'])
 def remove_user_from_group():
     request_data = request.get_json()
 
-    if "userID" not in request_data or "groupID" not in request_data:
-        return jsonify({"msg": "Both userID and groupID are required"}), 400
+    if "user_id" not in request_data or "group_id" not in request_data:
+        return jsonify({"msg": "Both user_id and group_id are required"}), 400
 
-    user_id = request_data["userID"]
-    group_id = request_data["groupID"]
+    user_id = request_data["user_id"]
+    group_id = request_data["group_id"]
 
     group = Group.query.get(group_id)
     if not group:
@@ -236,7 +236,7 @@ def remove_user_from_group():
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
-    group_to_user_entry = Group_to_user.query.filter_by(userID=user_id, groupId=group_id).first()
+    group_to_user_entry = Group_to_user.query.filter_by(user_id=user_id, group_id=group_id).first()
     if not group_to_user_entry:
         return jsonify({"msg": "User is not part of the group"}), 400
 
@@ -250,7 +250,7 @@ def remove_user_from_group():
 
 
 #Funciona
-@api.route("/payments", methods=["GET"])
+@api.route("/payment", methods=["GET"])
 def get_payments():
     payments = Payments.query.all()
     payments_info = [payment.serialize() for payment in payments]
@@ -285,7 +285,7 @@ def create_payment():
     return jsonify({"msg": "Paymnent was successfully done"}), 201
 
 #Funciona
-@api.route("/expenses", methods=["GET"])
+@api.route("/expense", methods=["GET"])
 def get_expenses():
     expenses = Expenses.query.all()
     expenses_info = [expense.serialize() for expense in expenses]
@@ -355,7 +355,7 @@ def delete_expense(expense_id):
 
 
 #Funciona
-@api.route("/debts", methods=["GET"])
+@api.route("/debt", methods=["GET"])
 def get_debts():
     debts = Debts.query.all()
     debts_info = [debt.serialize() for debt in debts]
@@ -375,7 +375,7 @@ def get_debt_by_id(debt_id):
 
 
 #Funciona
-@api.route("/create/debt", methods=["POST"])
+@api.route("/debt/create", methods=["POST"])
 def create_debt():
     data = request.get_json()
 
@@ -428,7 +428,7 @@ def delete_debt(debt_id):
 
 
 #No funciona
-@api.route("/messages/<int:sent_to_user_id>", methods=["GET"])
+@api.route("/message/<int:sent_to_user_id>", methods=["GET"])
 def get_messages_by_id(sent_to_user_id):
     messages = Messages.query.filter_by(sent_to_user_id=sent_to_user_id).all()
     
@@ -441,7 +441,7 @@ def get_messages_by_id(sent_to_user_id):
 
 
 #No funciona
-@api.route("/send/message", methods=["POST"])
+@api.route("message/send", methods=["POST"])
 def send_message():
     data = request.get_json()
 
@@ -460,7 +460,7 @@ def send_message():
 
 
 
-@api.route("/objectives", methods=["GET"])
+@api.route("/objective", methods=["GET"])
 def get_objectives():
     objectives = Objectives.query.all()
     objectives_info = [objective.serialize() for objective in objectives]
@@ -480,7 +480,7 @@ def get_objective_by_id(id):
 
 
 
-@api.route("/create/objective", methods=["POST"])
+@api.route("/objective/create", methods=["POST"])
 def create_objective():
     data = request.get_json()
 
@@ -534,7 +534,7 @@ def update_objective(id):
 
 
 
-@api.route("/objective/contributions", methods=["POST"])
+@api.route("/objective/contribution", methods=["POST"])
 def objective_contribution():
     data = request.get_json()
 
@@ -558,7 +558,7 @@ def objective_contribution():
         return jsonify({"error": "Contribution exceeds target amount"}), 400
 
   
-    contribution = ObjectivesContributions(amount_contributed=data["amount"], userID=data["user"], objectiveID=data["objective"])
+    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=data["user"], objectiveID=data["objective"])
 
     db.session.add(contribution)
     db.session.commit()
@@ -617,7 +617,7 @@ def payments_populate():
 def expenses_populate():
     for expense in expenses:
         new_expense = Expenses(expense_id=expense["expense_id"], payer_id=expense["payer_id"], shared_between=expense["shared_between"], amount=expense["amount"], description=expense["description"], created_at=expense["created_at"])
-        #En este da problema  groupID=expense["groupID"], dice que no es un int like
+        #En este da problema  group_id=expense["group_id"], dice que no es un int like
         db.session.add(new_expense)
     db.session.commit()
     return jsonify("Expenses have been created")
