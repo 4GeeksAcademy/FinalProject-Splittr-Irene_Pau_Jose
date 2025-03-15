@@ -24,7 +24,7 @@ CORS(api)
 
 #GET /users ---> funciona !!
 @api.route('/users', methods=['GET']) 
-def get_all_users():
+def get_users():
     users = User.query.all()
     users_list = [user.serialize() for user in users]  
     return jsonify(users_list), 200
@@ -32,7 +32,7 @@ def get_all_users():
 
 #GET /user --> funciona !!
 @api.route('/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
+def get_user_by_id(user_id):
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"error": "User not found"}), 404 
@@ -60,7 +60,7 @@ def add_new_user():
 
 
 #DELETE /user --> funciona !!
-@api.route('/users/<int:user_id>', methods=['DELETE'])
+@api.route('/users/delete/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get(user_id) 
     if user is None:
@@ -74,7 +74,7 @@ def delete_user(user_id):
 
 #PUT /user_id --> funciona
 
-@api.route('/users/<int:user_id>', methods=['PUT'])
+@api.route('/users/update/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     user = User.query.get(user_id)  
     if user is None:
@@ -102,7 +102,7 @@ def update_user(user_id):
 
 #GET /groups --> funciona !!
 @api.route('/groups', methods=['GET'])
-def get_all_groups():
+def get_groups():
     groups = Group.query.all() 
     groups_list = [group.serialize() for group in groups]  
     return jsonify(groups_list)
@@ -110,7 +110,7 @@ def get_all_groups():
 
 #GET /group --> funciona !!
 @api.route('/groups/<int:group_id>', methods=['GET'])
-def get_group(group_id):
+def get_group_by_id(group_id):
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found"}), 404 
@@ -118,11 +118,11 @@ def get_group(group_id):
 
 
 
-#POST /groups --> funciona
-@api.route('/groups', methods=['POST'])
+#POST /groups --> funciona, poner los miembros como requeridos. 
+@api.route('/groups/create', methods=['POST'])
 def create_group():
     request_data = request.get_json()
-    if "Group name" not in request_data:
+    if "group_name" not in request_data:
         return jsonify({"msg": "Group name is required"}), 400
 
     new_group = Group(
@@ -144,7 +144,7 @@ def create_group():
 
 
 #DELETE /group --> funciona
-@api.route('/groups/<int:group_id>', methods=['DELETE'])
+@api.route('/groups/delete/<int:group_id>', methods=['DELETE'])
 def delete_group(group_id):
     group = Group.query.get(group_id)
     if not group:
@@ -161,7 +161,7 @@ def delete_group(group_id):
 
 
 #PUT /group_id --> funciona
-@api.route('/groups/<int:group_id>', methods=['PUT'])
+@api.route('/groups/update/<int:group_id>', methods=['PUT'])
 def update_group(group_id):
     request_data = request.get_json()
     group = Group.query.get(group_id)
