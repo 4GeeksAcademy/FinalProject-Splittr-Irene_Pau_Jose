@@ -148,7 +148,7 @@ class Expenses(db.Model):
             "amount": self.amount,
             "description": self.description,
             "created_at": self.created_at,
-
+            
         }
     
 class Debts(db.Model):
