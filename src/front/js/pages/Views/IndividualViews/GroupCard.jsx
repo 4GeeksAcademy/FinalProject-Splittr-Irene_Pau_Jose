@@ -8,11 +8,11 @@ const GroupCard = ({group}) => {
   console.log(group);
   
   return (
-    <> <Link to={`/singlegroup/${group.Id}`}>
+    <> <Link to={`/singlegroup/${group.group_id}`}>
     <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "auto", minWidth: "250px" }}>
-      <Typography variant="h6" style={{ marginBottom: 10 }}>{group.Name} </Typography>
+      <Typography variant="h6" style={{ marginBottom: 10 }}>{group.group_name} </Typography>
       <Box display="flex" justifyContent="center" alignItems="center">
-        <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}> {group.Members.length} </Avatar>
+        <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}> {group.members.length} </Avatar>
     
       </Box>
       <Box display="flex" justifyContent="space-around" marginTop={2}>

@@ -4,7 +4,7 @@ const urlBackend = process.env.BACKEND_URL
 export const mapGroups = async (setGroups) => {
 
     try {
-        const response = await fetch(urlBackend+"groups")
+        const response = await fetch(urlBackend+"group")
         const data = await response.json()
         setGroups(data)
 
@@ -18,13 +18,42 @@ export const mapGroups = async (setGroups) => {
 //Global groups fetch
 
 
-export const getInfoGroup = async ( setSingleGroupInfo, idgroup ) => {
+export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
 
     try {
-        const response = await fetch(urlBackend+"groups/"+ idgroup)
+        const response = await fetch(urlBackend+"group/"+ groupid)
         const data = await response.json()
         setSingleGroupInfo(data)
     } catch (error) {
         console.log(error);
     }
+}
+
+export const mapSharedObjective = async (setSharedObjective) => {
+
+    try {
+        const response = await fetch(urlBackend+"objective")
+        const data = await response.json()
+        setSharedObjective(data)
+        
+        
+    } catch (error) {
+        console.log(error);
+        
+    }
+    
+}
+
+export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid) => {
+
+    try {
+        const response = await fetch(urlBackend+"objective/" + objectiveid)
+        const data = await response.json()
+        setInfoSharedObjective(data)
+        console.log(data);
+    } catch (error) {
+        console.log(error);
+        
+    }
+    
 }

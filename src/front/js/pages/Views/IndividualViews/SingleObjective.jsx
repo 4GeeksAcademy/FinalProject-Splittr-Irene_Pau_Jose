@@ -29,7 +29,9 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { getInfoSharedObjective } from '../../../component/callToApi.js';
 
 function Copyright() {
   return (
@@ -163,7 +165,20 @@ export default function SingleObjective() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const[singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
+  const { objectiveid } = useParams();
+  console.log(singleObjectiveInfo);
+  
+  const price = singleObjectiveInfo.target_amount
+  const totalPriceEur = new Intl.NumberFormat("de-DE", {
+      style: "currency",
+      currency: "EUR",
+  }).format(price);
 
+
+  useEffect(()=>{
+    getInfoSharedObjective(setSingleObjectiveInfo, objectiveid)
+  },[])
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -233,11 +248,11 @@ export default function SingleObjective() {
                   <Star style={{ color: "#fff" }} />
                 </IconButton>
               </Tooltip>
-              <Typography variant="h6" style={{ marginLeft: 5 }}>Objective Title</Typography>
+              <Typography variant="h6" style={{ marginLeft: 5 }}> {singleObjectiveInfo.name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
               <Box width={120} alignContent="center" >
-                <Typography variant="body2" style={{ marginTop: 10 }}>Total: 98.5K</Typography>
+                <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur}</Typography>
                 <PieChart width={120} height={120} style={{ marginTop: 50 }}>
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>

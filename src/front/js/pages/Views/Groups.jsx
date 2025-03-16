@@ -145,6 +145,7 @@ export default function Groups() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
  const[groups,setGroups] = useState([]);
+ 
  useEffect(()=>{
 
   mapGroups(setGroups)
@@ -159,7 +160,6 @@ export default function Groups() {
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
                  <Toolbar className={classes.toolbar}>
-                   {/* Show MenuIcon when the drawer is closed */}
                    {!open && (
                      <IconButton
                        edge="start"
@@ -172,7 +172,7 @@ export default function Groups() {
                      </IconButton>
                    )}
        
-                   {/* Show ChevronLeftIcon when the drawer is open */}
+                   
                    {open && (
                      <IconButton
                        edge="start"
