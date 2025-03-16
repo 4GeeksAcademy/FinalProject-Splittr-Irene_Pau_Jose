@@ -165,17 +165,17 @@ export default function SingleGroup() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const[singleGroupInfo, setSingleGroupInfo] = useState([]);
-  const { idgroup } = useParams();
+  const { groupid } = useParams();
   console.log(singleGroupInfo);
   
-  const precio = singleGroupInfo.total_amount
-    const totalPrecioEur = new Intl.NumberFormat("de-DE", {
+  const price = singleGroupInfo.total_amount
+    const totalPriceEur = new Intl.NumberFormat("de-DE", {
         style: "currency",
         currency: "EUR",
-    }).format(precio);
+    }).format(price);
 
   useEffect(()=>{
-    getInfoGroup(setSingleGroupInfo, idgroup);
+    getInfoGroup(setSingleGroupInfo, groupid);
   }, [])
 
   
@@ -247,11 +247,11 @@ export default function SingleGroup() {
                   <Star style={{ color: "#fff" }} />
                 </IconButton>
               </Tooltip>
-              <Typography variant="h6" style={{ marginLeft: 5 }}>{singleGroupInfo.name} </Typography>
+              <Typography variant="h6" style={{ marginLeft: 5 }}>{singleGroupInfo.group_name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
               <Box width={120} alignContent="center" >
-                <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPrecioEur} </Typography>
+                <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur} </Typography>
                 <PieChart width={120} height={120} style={{ marginTop: 50 }}>
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>

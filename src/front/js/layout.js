@@ -59,10 +59,10 @@ const Layout = () => {
                         <Route element={<Settings/>} path="/settings" />
                         <Route element={<About/>} path="/about" />
                         <Route element={<Feedback/>} path="/feedback" />
-                        <Route element={<SingleContact/>} path="/singlecontact" />
-                        <Route element={<SingleGroup/>} path="/singlegroup/:idgroup" />
+                        <Route element={<SingleContact/>} path="/singlecontact/" />
+                        <Route element={<SingleGroup/>} path="/singlegroup/:groupid" />
                         <Route element={<SingleMessage/>} path="/singlemessage" />
-                        <Route element={<SingleObjective/>} path="/singleobjective" />
+                        <Route element={<SingleObjective/>} path="/singleobjective/:objectiveid" />
                     </Routes>
                     <Footer />
                 </ScrollToTop>

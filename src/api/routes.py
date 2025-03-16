@@ -351,7 +351,7 @@ def delete_expense(expense_id):
     db.session.delete(expense)
     db.session.commit()
 
-    return jsonify({"msg": "Objective successfully deleted"}), 200
+    return jsonify({"msg": "Expense successfully deleted"}), 200
 
 
 #Funciona
@@ -441,13 +441,18 @@ def get_messages_by_id(sent_to_user_id):
 
 
 #No funciona
-@api.route("message/send", methods=["POST"])
+@api.route("/message/send", methods=["POST"])
 def send_message():
     data = request.get_json()
 
     if "sent_to_user_id" not in data or "message" not in data or "from_user_id" not in data:
         return jsonify({"error": "Missing required fields"}), 400
 
+    to_user = User.query.get(data["sent_to_user_id"])
+    from_user = User.query.get(data["from_user_id"])
+
+    if not to_user or not from_user:
+        return jsonify({"error": "User not found"}), 404
 
     new_message = Messages(sent_to_user_id=data["sent_to_user_id"], message=data["message"], from_user_id=data["from_user_id"])
 

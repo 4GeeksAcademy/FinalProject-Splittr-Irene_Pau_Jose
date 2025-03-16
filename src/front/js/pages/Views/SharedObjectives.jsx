@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -27,7 +27,10 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
+
+
 import SharedObjectiveCard from './IndividualViews/SharedObjectiveCard.jsx';
+import { mapSharedObjective } from '../../component/callToApi.js';
 
 
 function Copyright() {
@@ -143,6 +146,13 @@ export default function SharedObjectives() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const[sharedObjectives,setSharedObjectives] = useState([]);
+
+  useEffect(()=>{
+    mapSharedObjective(setSharedObjectives)
+
+  },[])
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -204,11 +214,11 @@ export default function SharedObjectives() {
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} className={classes.contactGrid}>
-              {Array.from({ length: 6 }, (_, i) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
-                  <SharedObjectiveCard />
-                </Grid>
-              ))}
+              {sharedObjectives.map((sharedObjective)=> {
+                          return(
+              
+                            <SharedObjectiveCard sharedObjective={sharedObjective}  />  )
+              })}
             </Grid>
           </Container>
         </main>
