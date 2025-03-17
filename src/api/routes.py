@@ -10,6 +10,8 @@ from flask_cors import CORS
 from datetime import datetime
 from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions
 
+
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 #from api import api
 
 api = Blueprint('api', __name__)
@@ -21,30 +23,11 @@ CORS(api)
 #def test():
 #    return jsonify({"message": "API funcionando"})
 
-
-#GET /users ---> funciona !!
-@api.route('/user', methods=['GET']) 
-def get_users():
-    users = User.query.all()
-    users_list = [user.serialize() for user in users]  
-    return jsonify(users_list), 200
-
-
-#GET /user --> funciona !!
-@api.route('/user/<int:user_id>', methods=['GET'])
-def get_user_by_id(user_id):
-    user = User.query.get(user_id)
-    if user is None:
-        return jsonify({"error": "User not found"}), 404 
-    return jsonify(user.serialize()), 200
-
-
-#POST /users --> NO funciona, NO da ids nuevos diferentes
 @api.route('/signup', methods=['POST'])
 def add_new_user():
     request_body = request.get_json()
-    if "email" not in request_body or "password" not in request_body:
-        return jsonify({"msg": "Email and password are required"}), 400
+    if "email" not in request_body or "password" not in request_body or "name" not in request_body:
+        return jsonify({"msg": "Please fill all fields"}), 400
     
     exist = User.query.filter_by(email=request_body["email"]).first()
     if exist:
@@ -55,7 +38,54 @@ def add_new_user():
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({"msg":"New user created"}), 201
+    return jsonify(new_user.serialize(), {"msg":"New user created"}), 201
+
+
+@api.route("/login", methods=["POST"])
+def handle_login():
+    email= request.json.get("email", None)
+    password= request.json.get("password", None)    
+
+    user = User.query.filter_by(email = email, password=password).first()
+
+    if user is None:
+        return jsonify({"msg": "Bad email or password"}), 401
+
+    access_token = create_access_token(identity=str(user.user_id))
+    return jsonify({"token" : access_token, "user_id": user.user_id})
+
+
+#GET /users ---> funciona !!
+@api.route('/user', methods=['GET'])
+@jwt_required()
+def get_users():
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)
+
+    if user is None:
+        return jsonify({"msg": "User not found"}), 401
+
+    users = User.query.all()
+    users_list = [user.serialize() for user in users]  
+
+    return jsonify(users_list), 200
+
+#GET /user --> funciona !!
+@api.route('/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user_by_id(user_id):
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)  
+
+    if user is None:
+        return jsonify({"msg": "User not found"}), 401
+    
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404 
+    return jsonify(user.serialize()), 200
+
+
 
 
 
@@ -75,6 +105,7 @@ def delete_user(user_id):
 #PUT /user_id --> funciona
 
 @api.route('/user/update/<int:user_id>', methods=['PUT'])
+
 def update_user(user_id):
     user = User.query.get(user_id)  
     if user is None:
@@ -102,7 +133,13 @@ def update_user(user_id):
 
 #GET /groups --> funciona !!
 @api.route('/group', methods=['GET'])
-def get_groups(): #Tengo que hacer un filtro por user_id que me devuelva solamente los grupos donde el usuario está, mas adelante será a través de la token
+@jwt_required()
+def get_groups():
+    current_user_id = get_jwt_identity()  # 🔐 Get the logged-in user ID
+    user = User.query.get(current_user_id)  # 🔐 Fetch the logged-in user
+
+    if user is None:
+        return jsonify({"msg": "User not found"}), 401 #Tengo que hacer un filtro por user_id que me devuelva solamente los grupos donde el usuario está, mas adelante será a través de la token
     groups = Group.query.all() 
     groups_list = [group.serialize() for group in groups]  
     return jsonify(groups_list)
@@ -589,7 +626,7 @@ def objective_contribution():
 @api.route("/userpopulate", methods=["GET"])
 def user_populate():
     for user in users:
-        new_user = User(name=user["name"], email=user["email"], password=user["password"])
+        new_user = User( name=user["name"], email=user["email"], password=user["password"])
         db.session.add(new_user)
     db.session.commit()
     return jsonify("Users have been created")

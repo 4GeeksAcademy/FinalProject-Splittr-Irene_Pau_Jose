@@ -80,41 +80,28 @@ export default function SignUp() {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <Typography component="h1" variant="h5">
+          <Typography component="h1" variant="h5" style={{ marginBottom: "16px" }} >
             Sign up
           </Typography>
-          <form className={classes.form} noValidate>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+          <form className={classes.form} noValidate >
+          <Grid container spacing={2}>
+              <Grid item xs={12} spacing={2} >
                 <TextField
-                  className={classes.input}
-                  autoComplete="fname"
-                  name="firstName"
+                  className={classes.form}
                   variant="outlined"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  InputLabelProps={{ style: { color: '#cccccc' } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  className={classes.input}
-                  variant="outlined"
+                  
                   required
                   fullWidth
                   id="lastName"
-                  label="Last Name"
-                  name="lastName"
+                  label="Name"
+                  name="Name"
                   autoComplete="lname"
                   InputLabelProps={{ style: { color: '#cccccc' } }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  className={classes.input}
+                  className={classes.form}
                   variant="outlined"
                   required
                   fullWidth
@@ -127,7 +114,7 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  className={classes.input}
+                  className={classes.form}
                   variant="outlined"
                   required
                   fullWidth
@@ -140,9 +127,9 @@ export default function SignUp() {
                 />
               </Grid>
               <Grid item xs={12}>
-                
               </Grid>
-            </Grid>
+              </Grid>
+            
             <Button
               type="submit"
               fullWidth
