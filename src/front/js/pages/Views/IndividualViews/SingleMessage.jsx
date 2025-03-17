@@ -10,7 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
-import { mainListItems } from '../../Dashboard/listitems.jsx';
+import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../../Dashboard/listitems.jsx';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -76,17 +76,17 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(2),
         gap: theme.spacing(1),
     },
-        messageBubble: { padding: theme.spacing(1), borderRadius: '10px', marginBottom: theme.spacing(1) },
+    messageBubble: { padding: theme.spacing(1), borderRadius: '10px', marginBottom: theme.spacing(1) },
     sent: {
-        alignSelf: 'flex-end', 
+        alignSelf: 'flex-end',
         backgroundColor: '#36393F',
         marginLeft: 'auto',
     },
     received: {
-        alignSelf: 'flex-start', 
+        alignSelf: 'flex-start',
         backgroundColor: '#424549',
     },
-    
+
     messageInput: { padding: theme.spacing(2), borderTop: `1px solid ${theme.palette.divider}` },
 }));
 export default function TextMessages() {
@@ -138,7 +138,7 @@ export default function TextMessages() {
                 </AppBar>
                 <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
                     <Divider />
-                    <List>{mainListItems}</List>
+                    <List><MainListItems /></List>
                     <Divider />
                     <List>{secondaryListItems}</List>
                 </Drawer>

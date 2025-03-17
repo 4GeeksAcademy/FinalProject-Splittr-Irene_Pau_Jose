@@ -66,10 +66,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { 
+  toolbar: {
     paddingRight: 20,
     minHeight: 70,
-   },
+  },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
@@ -108,7 +108,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-    
+
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -118,7 +118,7 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30, 
+    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
@@ -134,7 +134,7 @@ const useStyles = makeStyles((theme) => ({
   },
   contactGrid: {
     display: 'flex',
-    
+
   },
 }));
 
@@ -143,11 +143,11 @@ function createData(id, date, name, amount) {
 }
 
 const rows = [
-  createData(0,'Elvis Presley', 312.44),
-  createData(1,'Paul McCartney', 866.99),
-  createData(2,'Tom Scholz', 100.81),
-  createData(3,'Michael Jackson', 654.39),
-  createData(4,'Bruce Springsteen', 212.79),
+  createData(0, 'Elvis Presley', 312.44),
+  createData(1, 'Paul McCartney', 866.99),
+  createData(2, 'Tom Scholz', 100.81),
+  createData(3, 'Michael Jackson', 654.39),
+  createData(4, 'Bruce Springsteen', 212.79),
 ];
 
 function preventDefault(event) {
@@ -165,20 +165,20 @@ export default function SingleObjective() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  const[singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
+  const [singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
   const { objectiveid } = useParams();
   console.log(singleObjectiveInfo);
-  
+
   const price = singleObjectiveInfo.target_amount
   const totalPriceEur = new Intl.NumberFormat("de-DE", {
-      style: "currency",
-      currency: "EUR",
+    style: "currency",
+    currency: "EUR",
   }).format(price);
 
 
-  useEffect(()=>{
+  useEffect(() => {
     getInfoSharedObjective(setSingleObjectiveInfo, objectiveid)
-  },[])
+  }, [])
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -232,7 +232,7 @@ export default function SingleObjective() {
         >
 
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>

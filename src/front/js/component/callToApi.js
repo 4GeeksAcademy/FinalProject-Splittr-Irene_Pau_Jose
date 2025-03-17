@@ -1,10 +1,10 @@
 
 const urlBackend = process.env.BACKEND_URL
 
-export const mapGroups = async (setGroups) => {
+export const mapGroups = async (setGroups, userid) => {
 
     try {
-        const response = await fetch(urlBackend+"group")
+        const response = await fetch(urlBackend+"group/user/" + userid)
         const data = await response.json()
         setGroups(data)
 
@@ -56,4 +56,13 @@ export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid
         
     }
     
+}
+
+export const mapContacts = async (setContacts) => {
+
+    try {
+        response
+    } catch (error) {
+        
+    }
 }

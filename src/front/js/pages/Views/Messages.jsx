@@ -18,7 +18,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../Dashboard/listitems.jsx';
+import { MainListItems } from '../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
@@ -157,7 +157,7 @@ const useStyles = makeStyles((theme) => {
     },
     contactGrid: {
       display: 'flex',
-      
+
     },
     card: {
       display: 'flex',
@@ -204,15 +204,15 @@ const useStyles = makeStyles((theme) => {
       paddingBottom: theme.spacing(4),
       display: 'flex',
       justifyContent: 'center',
-      
-      
-  
+
+
+
     },
     contactGrid: {
       display: 'flex',
       justifyContent: 'center',
-      
-      
+
+
     },
   };
 });
@@ -229,77 +229,77 @@ export default function Messages() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-return (
+  return (
     <ThemeProvider theme={darkTheme}>
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-                 <Toolbar className={classes.toolbar}>
-                   {/* Show MenuIcon when the drawer is closed */}
-                   {!open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="open drawer"
-                       onClick={handleDrawerOpen}
-                       className={classes.menuButton}
-                     >
-                       <MenuIcon />
-                     </IconButton>
-                   )}
-       
-                   {/* Show ChevronLeftIcon when the drawer is open */}
-                   {open && (
-                     <IconButton
-                       edge="start"
-                       color="inherit"
-                       aria-label="close drawer"
-                       onClick={handleDrawerClose}
-                       className={classes.menuButton}
-                     >
-                       <ChevronLeftIcon />
-                     </IconButton>
-                   )}
-       
-                   <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                     Welcome, Pepito!
-                   </Typography>
-       
-                   <IconButton color="inherit">
-                     <Badge badgeContent={4} color="secondary">
-                       <NotificationsIcon />
-                     </Badge>
-                   </IconButton>
-                 </Toolbar>
-               </AppBar>
-      <Drawer
-  variant="permanent"
-  classes={{
-    paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-  }}
-  open={open}
->
- 
-  <Divider />
-  <List>{mainListItems}</List>
-  <Divider />
-  <List>{secondaryListItems}</List>
-</Drawer>
-<main className={classes.content}>
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+          <Toolbar className={classes.toolbar}>
+            {/* Show MenuIcon when the drawer is closed */}
+            {!open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+
+            {/* Show ChevronLeftIcon when the drawer is open */}
+            {open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
+
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, Pepito!
+            </Typography>
+
+            <IconButton color="inherit">
+              <Badge badgeContent={4} color="secondary">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          variant="permanent"
+          classes={{
+            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+          }}
+          open={open}
+        >
+
+          <Divider />
+          <List><MainListItems /></List>
+          <Divider />
+          <List>{secondaryListItems}</List>
+        </Drawer>
+        <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
 
-          <Grid container spacing={3} justifyContent="center" >
-  {Array.from({ length: 6 }, (_, i) => (
-    <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
-      <MessageCard />
-    </Grid>
-  ))}
-</Grid>
+            <Grid container spacing={3} justifyContent="center" >
+              {Array.from({ length: 6 }, (_, i) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
+                  <MessageCard />
+                </Grid>
+              ))}
+            </Grid>
           </Container>
         </main>
-      
-    </div>
+
+      </div>
     </ThemeProvider>
   );
 }
