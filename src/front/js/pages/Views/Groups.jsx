@@ -32,6 +32,8 @@ import { mapGroups } from '../../component/callToApi.js';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
 
 function Copyright() {
   return (
@@ -145,9 +147,13 @@ export default function Groups() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const{store,actions}=useContext(Context);
+  
   const [groups, setGroups] = useState([]);
 
   const { userid } = useParams();
+  console.log(userid);
+  
 
   useEffect(() => {
 
@@ -208,7 +214,7 @@ export default function Groups() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
