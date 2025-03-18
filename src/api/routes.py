@@ -31,7 +31,7 @@ def add_new_user():
     
     exist = User.query.filter_by(email=request_body["email"]).first()
     if exist:
-        return jsonify({"msg":"User already exists"}), 400
+        return jsonify({"msg":"Email already exists"}), 401
    
     new_user =User(email=request_body["email"],name=request_body["name"], password = request_body["password"])
     
@@ -55,6 +55,8 @@ def handle_login():
     return jsonify({"token" : access_token, "user_id": user.user_id})
 
 
+
+
 #GET /users ---> funciona !!
 @api.route('/user', methods=['GET'])
 @jwt_required()
@@ -63,7 +65,7 @@ def get_users():
     user = User.query.get(current_user_id)
 
     if user is None:
-        return jsonify({"msg": "User not found"}), 401
+        return jsonify({"msg": "You need to be logged in"}), 401
 
     users = User.query.all()
     users_list = [user.serialize() for user in users]  
@@ -78,7 +80,7 @@ def get_user_by_id(user_id):
     user = User.query.get(current_user_id)  
 
     if user is None:
-        return jsonify({"msg": "User not found"}), 401
+        return jsonify({"msg": "You need to be logged in"}), 401
     
     user = User.query.get(user_id)
     if user is None:
@@ -91,7 +93,14 @@ def get_user_by_id(user_id):
 
 #DELETE /user --> funciona !!
 @api.route('/user/delete/<int:user_id>', methods=['DELETE'])
+@jwt_required()
 def delete_user(user_id):
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)  
+
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     user = User.query.get(user_id) 
     if user is None:
         return jsonify({"msg": "User not found"}), 404
@@ -105,8 +114,14 @@ def delete_user(user_id):
 #PUT /user_id --> funciona
 
 @api.route('/user/update/<int:user_id>', methods=['PUT'])
-
+@jwt_required()
 def update_user(user_id):
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)  
+
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     user = User.query.get(user_id)  
     if user is None:
         return jsonify({"msg": "User not found"}), 404  
@@ -135,11 +150,13 @@ def update_user(user_id):
 @api.route('/group', methods=['GET'])
 @jwt_required()
 def get_groups():
-    current_user_id = get_jwt_identity()  # 🔐 Get the logged-in user ID
-    user = User.query.get(current_user_id)  # 🔐 Fetch the logged-in user
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
 
     if user is None:
-        return jsonify({"msg": "User not found"}), 401 #Tengo que hacer un filtro por user_id que me devuelva solamente los grupos donde el usuario está, mas adelante será a través de la token
+        return jsonify({"msg": "User not found"}), 400
     groups = Group.query.all() 
     groups_list = [group.serialize() for group in groups]  
     return jsonify(groups_list)
@@ -147,7 +164,13 @@ def get_groups():
 
 #GET /group --> funciona !!
 @api.route('/group/<int:group_id>', methods=['GET'])
+@jwt_required()
 def get_group_by_id(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found"}), 404 
@@ -155,7 +178,13 @@ def get_group_by_id(group_id):
 
 
 @api.route('/group/user/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_group_by_user_id(user_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     group_membership = Group_to_user.query.filter_by(user_id=user_id).all()
 
     if not group_membership:
@@ -169,7 +198,13 @@ def get_group_by_user_id(user_id):
 
 #POST /groups --> funciona, poner los miembros como requeridos. 
 @api.route('/group/create', methods=['POST'])
+@jwt_required()
 def create_group():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     request_data = request.get_json()
     if "group_name" not in request_data:
         return jsonify({"msg": "Group name is required"}), 400
@@ -194,7 +229,13 @@ def create_group():
 
 #DELETE /group --> funciona
 @api.route('/group/delete/<int:group_id>', methods=['DELETE'])
+@jwt_required()
 def delete_group(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     group = Group.query.get(group_id)
     if not group:
         return jsonify({"msg": "Group not found"}), 404
@@ -211,7 +252,13 @@ def delete_group(group_id):
 
 #PUT /group_id --> funciona
 @api.route('/group/update/<int:group_id>', methods=['PUT'])
+@jwt_required()
 def update_group(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
     group = Group.query.get(group_id)
     if not group:
@@ -236,7 +283,13 @@ def update_group(group_id):
 
 #POST /groups_users funciona
 @api.route('/group_user', methods=['POST'])
+@jwt_required()
 def add_user_to_group():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
 
 
@@ -267,8 +320,14 @@ def add_user_to_group():
 
 
 #DELETE /groups_users funciona
-@api.route('/group_user', methods=['DELETE'])
+@api.route('/group_user/delete', methods=['DELETE'])
+@jwt_required()
 def remove_user_from_group():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
 
     if "user_id" not in request_data or "group_id" not in request_data:
@@ -300,7 +359,13 @@ def remove_user_from_group():
 
 #Funciona
 @api.route("/payment", methods=["GET"])
+@jwt_required()
 def get_payments():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     payments = Payments.query.all()
     payments_info = [payment.serialize() for payment in payments]
     return jsonify(payments_info), 200
@@ -319,7 +384,13 @@ def get_payment_by_id(id):
 
 #Funciona
 @api.route("/payment/create", methods=["POST"])
+@jwt_required()
 def create_payment():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     data = request.get_json()
 
     if "amount" not in data or "payer_id" not in data or "receiver_id" not in data:
@@ -335,14 +406,26 @@ def create_payment():
 
 #Funciona
 @api.route("/expense", methods=["GET"])
+@jwt_required()
 def get_expenses():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     expenses = Expenses.query.all()
     expenses_info = [expense.serialize() for expense in expenses]
     return jsonify(expenses_info), 200
 
 #Funciona
 @api.route("/expense/<int:expense_id>", methods=["GET"])
+@jwt_required()
 def get_expense_by_id(expense_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     expense = Expenses.query.filter_by(expense_id=expense_id).first()
     
     if not expense:
@@ -353,7 +436,13 @@ def get_expense_by_id(expense_id):
 
 #Funciona
 @api.route("/expense/create", methods=["POST"])
+@jwt_required()
 def create_expense():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     data = request.get_json()
 
     if "amount" not in data or "description" not in data or "shared_between" not in data:
