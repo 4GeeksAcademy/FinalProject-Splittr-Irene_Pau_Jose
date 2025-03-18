@@ -281,7 +281,13 @@ def update_group(group_id):
 
 #get contactos activos de un usuario 
 @api.route('/user_contacts/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_user_contacts(user_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     user = User.query.get(user_id)
     if not user:
         return jsonify({"msg": "User not found"}), 404
@@ -296,7 +302,13 @@ def get_user_contacts(user_id):
 
 #añadir un contacto 
 @api.route('/user_contacts', methods=['POST'])
+@jwt_required()
 def add_contact():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     request_data = request.get_json()
 
     if "user_id" not in request_data or "contact_id" not in request_data:
@@ -328,8 +340,14 @@ def add_contact():
 
 
 #editar estado de un contacto, activo o inactivo 
-@api.route('/user_contacts/<int:user_id>/<int:contact_id>', methods=['PUT'])
+@api.route('/user_contacts/<int:contact_id>', methods=['PUT'])
+@jwt_required()
 def update_contact_status(user_id, contact_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
 
     if "is_active" not in request_data:
@@ -353,10 +371,16 @@ def update_contact_status(user_id, contact_id):
     }), 200
 
 
-#delete definitivamente un contacto 
-@api.route('/user_contacts/<int:user_id>/<int:contact_id>', methods=['DELETE'])
-def hard_delete_contact(user_id, contact_id):
-    contact_entry = User_Contacts.query.filter_by(user_id=user_id, contact_id=contact_id).first()
+#delete definitivamente un contacto, funciona, hace falta solo poner el id de la relación de contacto en el link
+@api.route('/user_contacts/<int:contact_id>', methods=['DELETE'])
+@jwt_required()
+def hard_delete_contact(contact_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
+    contact_entry = User_Contacts.query.filter_by(user_id=current_user_id, contact_id=contact_id).first()
 
     if not contact_entry:
         return jsonify({"msg": "Contact relationship not found"}), 404
@@ -365,6 +389,7 @@ def hard_delete_contact(user_id, contact_id):
     db.session.commit()
 
     return jsonify({"msg": "Contact permanently deleted"}), 200
+
 
 
 #POST /groups_users funciona
@@ -690,7 +715,13 @@ def send_message():
 
 
 @api.route("/objective", methods=["GET"])
+@jwt_required()
 def get_objectives():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     objectives = Objectives.query.all()
     objectives_info = [objective.serialize() for objective in objectives]
     return jsonify(objectives_info), 200
@@ -698,7 +729,13 @@ def get_objectives():
 
 
 @api.route("/objective/<int:id>", methods=["GET"])
+@jwt_required()
 def get_objective_by_id(id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     objectives = Objectives.query.filter_by(id=id).first()
     
     if not objectives:
@@ -710,27 +747,39 @@ def get_objective_by_id(id):
 
 
 @api.route("/objective/create", methods=["POST"])
+@jwt_required()
 def create_objective():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     data = request.get_json()
 
-    if "name" not in data or "amount" not in data:
+    if "name" not in data or "target_amount" not in data:
         return jsonify({"error": "Missing required fields"}), 400
     
     existing_objective = Objectives.query.filter_by(name=data["name"]).first()
     if existing_objective:
-        return jsonify({"error": "Group is already registered"}), 400
+        return jsonify({"error": "Objective is already registered"}), 400
 
     new_objective = Objectives(name=data["name"], target_amount=data["amount"])
 
     db.session.add(new_objective)
     db.session.commit()
 
-    return jsonify({"msg": "Group was successfully created"}), 201
+    return jsonify({"msg": "Objective was successfully created"}), 201
 
 
 
 @api.route("/objective/delete/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_objective(id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     objective = Objectives.query.filter_by(id=id).first()
 
     if not objective:
@@ -744,7 +793,13 @@ def delete_objective(id):
 
 
 @api.route("/objective/update/<int:id>", methods=["PUT"])
+@jwt_required()
 def update_objective(id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     objective = Objectives.query.filter_by(id=id).first()
     
     if not objective:
@@ -754,8 +809,8 @@ def update_objective(id):
 
     if "name" in data:
         objective.name = data["name"]
-    if "amount" in data:
-        objective.email = data["amount"]
+    if "target_amount" in data:
+        objective.target_amount = data["target_amount"]
     
     db.session.commit()
     return jsonify({"msg" : "Objective was successfully updated"}), 200
@@ -764,35 +819,40 @@ def update_objective(id):
 
 
 @api.route("/objective/contribution", methods=["POST"])
+@jwt_required()
 def objective_contribution():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     data = request.get_json()
 
-   
     if "objective" not in data or "amount" not in data or "user" not in data:
         return jsonify({"error": "Missing required fields"}), 400
 
-    
     objective = Objectives.query.filter_by(id=data["objective"]).first()
     if not objective:
         return jsonify({"error": "Objective not found"}), 404
 
-    
-    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objectiveID=data["objective"]).scalar()
+    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objective_id=data["objective"]).scalar()
     print(total_contributed)
-    
+
     total_contributed = total_contributed or 0  
 
-  
     if total_contributed + data["amount"] > objective.target_amount:
         return jsonify({"error": "Contribution exceeds target amount"}), 400
+    
+    if objective.is_completed:
+        return jsonify({"error": "Objective is already completed"}), 400
 
-  
-    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=data["user"], objectiveID=data["objective"])
+    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=data["user"], objective_id=data["objective"])
 
     db.session.add(contribution)
     db.session.commit()
 
     return jsonify({"msg": "Contribution was successfully added"}), 201
+
 
 
 
