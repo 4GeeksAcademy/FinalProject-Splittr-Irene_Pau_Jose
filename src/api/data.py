@@ -79,3 +79,11 @@ objectives_contributions = [
     {"id": 4, "objective_id": 3, "user_id": 4, "amount_contributed": 400, "contributed_at": "2024-03-05T18:45:00"},
     {"id": 5, "objective_id": 4, "user_id": 5, "amount_contributed": 150, "contributed_at": "2024-04-10T12:10:00"}
 ]
+
+user_contacts = [
+    { "user_id": 1, "contact_id": 2, "created_at": "2024-01-01T12:10:00"},
+    { "user_id": 1, "contact_id": 3, "created_at": "2024-01-02T13:15:00"},
+    { "user_id": 2, "contact_id": 4, "created_at": "2024-02-11T14:30:00"},
+    { "user_id": 3, "contact_id": 5, "created_at": "2024-03-16T08:45:00"},
+    { "user_id": 4, "contact_id": 1, "created_at": "2024-05-06T10:00:00"}
+]

@@ -55,6 +55,30 @@ class Group(db.Model):
             "expenses": self.expenses if self.expenses else None,
         }
 
+class User_Contacts(db.Model):
+    __tablename__ = "user_contacts"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
+    contact_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.now()) 
+    is_active = db.Column(db.Boolean, default=True)
+
+    user = db.relationship("User", foreign_keys=[user_id], backref="contacts_as_user")
+    contact = db.relationship("User", foreign_keys=[contact_id], backref="contacts_as_contact")
+
+    def __repr__(self):
+        return f'<User_Contacts {self.user_id} -> {self.contact_id}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "contact_id": self.contact_id,
+            "created_at": self.created_at,
+            "is_active": self.is_active,
+        }
+
+
 
 class Group_to_user(db.Model):
     __tablename__ = "group_to_user"
