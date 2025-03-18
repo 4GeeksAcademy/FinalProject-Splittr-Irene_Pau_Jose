@@ -13,12 +13,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			userInfo: {}
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
+			},
+
+			getUser : async () =>{
+				const response = await fetch(process.env.BACKEND_URL + "/user", {
+					headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        "Content-Type": "application/json"
+                    },
+				})
+				const data = response.json()
+				setStore({userInfo: data})
+				return data
+
 			},
 
 			getMessage: async () => {

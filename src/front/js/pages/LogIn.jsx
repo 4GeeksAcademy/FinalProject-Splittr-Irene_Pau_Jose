@@ -14,6 +14,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
+import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
 
 function Copyright() {
   return (
@@ -70,6 +72,44 @@ export const LogIn = () => {
     },
   });
 
+  const navigate = useNavigate()
+  const[data,setData]= useState({
+      "email":"",
+      "password":"",
+  })
+
+  const handleChange = (e) => {
+    setData({
+        ...data, [e.target.name]: e.target.value
+    })
+}
+const handleSubmit = async (e) =>{
+    e.preventDefault()
+    try {
+        const response = await fetch(`${process.env.BACKEND_URL}/login`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json",
+                
+
+            }
+        }) 
+        if (!response.ok){
+            alert("Incorrect login details")
+            return
+        }
+        const responseData = await response.json()
+        localStorage.setItem("token", responseData.token)
+        navigate("/dashboard")
+
+    } catch (error) {
+        console.log(error);
+        
+
+    }
+        
+}
 
   const classes = useStyles();
 
@@ -91,7 +131,7 @@ export const LogIn = () => {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <form className={classes.form} noValidate>
+          <form className={classes.form} noValidate onSubmit={handleSubmit}>
             <TextField
               variant="outlined"
               margin="normal"
@@ -102,6 +142,8 @@ export const LogIn = () => {
               name="email"
               autoComplete="email"
               autoFocus
+              onChange={handleChange}
+              value={data.email}
             />
             <TextField
               className={classes.form}
@@ -114,6 +156,8 @@ export const LogIn = () => {
               name="password"
               autoComplete="password"
               autoFocus
+              onChange={handleChange}
+              value={data.password}
               
             />
             <FormControlLabel
@@ -126,6 +170,7 @@ export const LogIn = () => {
               variant="contained"
               color="primary"
               className={classes.submit}
+              
             >
               Sign In
             </Button>
