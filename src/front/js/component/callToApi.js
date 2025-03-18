@@ -4,7 +4,12 @@ const urlBackend = process.env.BACKEND_URL
 export const mapGroups = async (setGroups, userid) => {
 
     try {
-        const response = await fetch(urlBackend+"group/user/" + userid)
+        const response = await fetch(urlBackend+"/group/user/" + userid, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+        })
         const data = await response.json()
         setGroups(data)
 

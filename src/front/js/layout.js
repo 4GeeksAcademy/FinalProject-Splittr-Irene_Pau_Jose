@@ -52,7 +52,7 @@ const Layout = () => {
                         <Route element={<ListOfContacts/>} path="/listofcontacts" />
                         <Route element={<Dashboard/>} path="/dashboard" />
                         <Route element={<Home/>} path="/home" />
-                        <Route element={<Groups/>} path="/groups/user/:userid" />
+                        <Route element={<Groups/>} path="/group/user/:userid" />
                         <Route element={<SharedObjectives/>} path="/sharedobjectives" />
                         <Route element={<Messages/>} path="/messages" />
                         <Route element={<FavouriteContacts/>} path="/favouritecontacts" />
