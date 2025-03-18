@@ -104,17 +104,17 @@ export const LogIn = () => {
               autoFocus
             />
             <TextField
-              className={classes.input}
+              className={classes.form}
               variant="outlined"
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="password"
+              label="Password"
+              name="password"
+              autoComplete="password"
               autoFocus
-              InputLabelProps={{ style: { color: '#cccccc' } }}
+              
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}

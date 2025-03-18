@@ -18,8 +18,8 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from './listitems.jsx';
-import { secondaryListItems } from './listitems.jsx';
+
+import { MainListItems, secondaryListItems } from './listitems.jsx';
 import Chart from './Chart.jsx';
 import Deposits from './Deposits.jsx';
 import Orders from './Orders.jsx';
@@ -193,7 +193,7 @@ export default function Dashboard() {
         >
           
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems/> </List>
           <Divider />
           <List>{secondaryListItems}</List> 
         </Drawer>

@@ -189,7 +189,7 @@ class Debts(db.Model):
 
 
     def __repr__(self):
-        return f'<Debts {self.debtID}>'
+        return f'<Debts {self.debt_id}>'
 
     def serialize(self):
         return {
@@ -207,7 +207,7 @@ class Debts(db.Model):
 class Messages (db.Model):
     __tablename__="messages"
     id=db.Column(db.Integer, unique=True, primary_key=True)
-    sent_to_user_id=db.relationship("User", backref="messages")
+    sent_to_user_id=db.Column(db.Integer, db.ForeignKey("user.user_id"))
     from_user_id=db.Column(db.Integer, db.ForeignKey("user.user_id"))
     message=db.Column(db.String(200))
     sent_at=db.Column(db.DateTime)

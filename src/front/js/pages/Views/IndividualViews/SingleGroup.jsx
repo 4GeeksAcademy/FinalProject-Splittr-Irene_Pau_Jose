@@ -16,7 +16,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../../Dashboard/listitems.jsx';
+import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../../Dashboard/listitems.jsx';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -65,10 +65,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { 
+  toolbar: {
     paddingRight: 20,
     minHeight: 70,
-   },
+  },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-    
+
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -117,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30, 
+    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
@@ -133,7 +133,7 @@ const useStyles = makeStyles((theme) => ({
   },
   contactGrid: {
     display: 'flex',
-    
+
   },
 }));
 
@@ -142,11 +142,11 @@ function createData(id, date, name, amount) {
 }
 
 const rows = [
-  createData(0,'Elvis Presley', 312.44),
-  createData(1,'Paul McCartney', 866.99),
-  createData(2,'Tom Scholz', 100.81),
-  createData(3,'Michael Jackson', 654.39),
-  createData(4,'Bruce Springsteen', 212.79),
+  createData(0, 'Elvis Presley', 312.44),
+  createData(1, 'Paul McCartney', 866.99),
+  createData(2, 'Tom Scholz', 100.81),
+  createData(3, 'Michael Jackson', 654.39),
+  createData(4, 'Bruce Springsteen', 212.79),
 ];
 
 function preventDefault(event) {
@@ -164,21 +164,21 @@ export default function SingleGroup() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  const[singleGroupInfo, setSingleGroupInfo] = useState([]);
+  const [singleGroupInfo, setSingleGroupInfo] = useState([]);
   const { groupid } = useParams();
   console.log(singleGroupInfo);
-  
-  const price = singleGroupInfo.total_amount
-    const totalPriceEur = new Intl.NumberFormat("de-DE", {
-        style: "currency",
-        currency: "EUR",
-    }).format(price);
 
-  useEffect(()=>{
+  const price = singleGroupInfo.total_amount
+  const totalPriceEur = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(price);
+
+  useEffect(() => {
     getInfoGroup(setSingleGroupInfo, groupid);
   }, [])
 
-  
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -231,7 +231,7 @@ export default function SingleGroup() {
         >
 
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
@@ -279,7 +279,7 @@ export default function SingleGroup() {
                 </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
-                    See more 
+                    See more
                   </Link>
                 </div>
                 <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>

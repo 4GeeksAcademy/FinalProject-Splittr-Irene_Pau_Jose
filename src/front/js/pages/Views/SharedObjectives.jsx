@@ -18,7 +18,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../Dashboard/listitems.jsx';
+import { MainListItems } from '../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
@@ -130,7 +130,7 @@ const useStyles = makeStyles((theme) => ({
   },
   contactGrid: {
     display: 'flex',
-   
+
   },
 }));
 
@@ -146,12 +146,12 @@ export default function SharedObjectives() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  const[sharedObjectives,setSharedObjectives] = useState([]);
+  const [sharedObjectives, setSharedObjectives] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     mapSharedObjective(setSharedObjectives)
 
-  },[])
+  }, [])
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -159,7 +159,7 @@ export default function SharedObjectives() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            
+
             {!open && (
               <IconButton
                 edge="start"
@@ -172,7 +172,7 @@ export default function SharedObjectives() {
               </IconButton>
             )}
 
-            
+
             {open && (
               <IconButton
                 edge="start"
@@ -205,7 +205,7 @@ export default function SharedObjectives() {
         >
 
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
@@ -214,10 +214,10 @@ export default function SharedObjectives() {
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} className={classes.contactGrid}>
-              {sharedObjectives.map((sharedObjective)=> {
-                          return(
-              
-                            <SharedObjectiveCard sharedObjective={sharedObjective}  />  )
+              {sharedObjectives.map((sharedObjective) => {
+                return (
+
+                  <SharedObjectiveCard sharedObjective={sharedObjective} />)
               })}
             </Grid>
           </Container>

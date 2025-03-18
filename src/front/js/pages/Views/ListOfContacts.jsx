@@ -18,7 +18,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../Dashboard/listitems.jsx';
+import { MainListItems } from '../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
@@ -27,7 +27,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import ContactCard from './IndividualViews/ContactCard.jsx';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
-
+import { useEffect, useState } from 'react';
 
 function Copyright() {
   return (
@@ -62,10 +62,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { 
+  toolbar: {
     paddingRight: 20,
     minHeight: 70,
-   },
+  },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
@@ -148,7 +148,7 @@ export default function ListOfContacts() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            
+
             {!open && (
               <IconButton
                 edge="start"
@@ -194,7 +194,7 @@ export default function ListOfContacts() {
         >
 
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>

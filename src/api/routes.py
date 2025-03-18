@@ -10,6 +10,8 @@ from flask_cors import CORS
 from datetime import datetime
 from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts
 
+
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 #from api import api
 
 api = Blueprint('api', __name__)
@@ -21,47 +23,84 @@ CORS(api)
 #def test():
 #    return jsonify({"message": "API funcionando"})
 
-
-#GET /users ---> funciona !!
-@api.route('/user', methods=['GET']) 
-def get_users():
-    users = User.query.all()
-    users_list = [user.serialize() for user in users]  
-    return jsonify(users_list), 200
-
-
-#GET /user --> funciona !!
-@api.route('/user/<int:user_id>', methods=['GET'])
-def get_user_by_id(user_id):
-    user = User.query.get(user_id)
-    if user is None:
-        return jsonify({"error": "User not found"}), 404 
-    return jsonify(user.serialize()), 200
-
-
-#POST /users --> NO funciona, NO da ids nuevos diferentes
 @api.route('/signup', methods=['POST'])
 def add_new_user():
     request_body = request.get_json()
-    if "email" not in request_body or "password" not in request_body:
-        return jsonify({"msg": "Email and password are required"}), 400
+    if "email" not in request_body or "password" not in request_body or "name" not in request_body:
+        return jsonify({"msg": "Please fill all fields"}), 400
     
     exist = User.query.filter_by(email=request_body["email"]).first()
     if exist:
-        return jsonify({"msg":"User already exists"}), 400
+        return jsonify({"msg":"Email already exists"}), 401
    
     new_user =User(email=request_body["email"],name=request_body["name"], password = request_body["password"])
     
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({"msg":"New user created"}), 201
+    return jsonify(new_user.serialize(), {"msg":"New user created"}), 201
+
+
+@api.route("/login", methods=["POST"])
+def handle_login():
+    email= request.json.get("email", None)
+    password= request.json.get("password", None)    
+
+    user = User.query.filter_by(email = email, password=password).first()
+
+    if user is None:
+        return jsonify({"msg": "Bad email or password"}), 401
+
+    access_token = create_access_token(identity=str(user.user_id))
+    return jsonify({"token" : access_token, "user_id": user.user_id})
+
+
+
+
+#GET /users ---> funciona !!
+@api.route('/user', methods=['GET'])
+@jwt_required()
+def get_users():
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)
+
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    users = User.query.all()
+    users_list = [user.serialize() for user in users]  
+
+    return jsonify(users_list), 200
+
+#GET /user --> funciona !!
+@api.route('/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user_by_id(user_id):
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)  
+
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404 
+    return jsonify(user.serialize()), 200
+
+
 
 
 
 #DELETE /user --> funciona !!
 @api.route('/user/delete/<int:user_id>', methods=['DELETE'])
+@jwt_required()
 def delete_user(user_id):
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)  
+
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     user = User.query.get(user_id) 
     if user is None:
         return jsonify({"msg": "User not found"}), 404
@@ -75,7 +114,14 @@ def delete_user(user_id):
 #PUT /user_id --> funciona
 
 @api.route('/user/update/<int:user_id>', methods=['PUT'])
+@jwt_required()
 def update_user(user_id):
+    current_user_id = get_jwt_identity()  
+    user = User.query.get(current_user_id)  
+
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     user = User.query.get(user_id)  
     if user is None:
         return jsonify({"msg": "User not found"}), 404  
@@ -102,7 +148,15 @@ def update_user(user_id):
 
 #GET /groups --> funciona !!
 @api.route('/group', methods=['GET'])
+@jwt_required()
 def get_groups():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    if user is None:
+        return jsonify({"msg": "User not found"}), 400
     groups = Group.query.all() 
     groups_list = [group.serialize() for group in groups]  
     return jsonify(groups_list)
@@ -110,23 +164,53 @@ def get_groups():
 
 #GET /group --> funciona !!
 @api.route('/group/<int:group_id>', methods=['GET'])
+@jwt_required()
 def get_group_by_id(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     group = Group.query.get(group_id)
     if group is None:
         return jsonify({"error": "Group not found"}), 404 
     return jsonify(group.serialize())
 
 
+@api.route('/group/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_group_by_user_id(user_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    group_membership = Group_to_user.query.filter_by(user_id=user_id).all()
+
+    if not group_membership:
+        return jsonify({"error": "User is not in any groups"}), 404 
+    
+    group_ids = [membership.group_id for membership in group_membership]
+
+    groups = Group.query.filter(Group.group_id.in_(group_ids)).all()
+
+    return jsonify([group.serialize() for group in groups]), 200
 
 #POST /groups --> funciona, poner los miembros como requeridos. 
 @api.route('/group/create', methods=['POST'])
+@jwt_required()
 def create_group():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     request_data = request.get_json()
     if "group_name" not in request_data:
         return jsonify({"msg": "Group name is required"}), 400
 
     new_group = Group(
-        group_name=request_data["Group name"],
+        group_name=request_data["group_name"],
         created_at=datetime.utcnow()
     )
     
@@ -145,7 +229,13 @@ def create_group():
 
 #DELETE /group --> funciona
 @api.route('/group/delete/<int:group_id>', methods=['DELETE'])
+@jwt_required()
 def delete_group(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     group = Group.query.get(group_id)
     if not group:
         return jsonify({"msg": "Group not found"}), 404
@@ -162,7 +252,13 @@ def delete_group(group_id):
 
 #PUT /group_id --> funciona
 @api.route('/group/update/<int:group_id>', methods=['PUT'])
+@jwt_required()
 def update_group(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
     group = Group.query.get(group_id)
     if not group:
@@ -273,7 +369,13 @@ def hard_delete_contact(user_id, contact_id):
 
 #POST /groups_users funciona
 @api.route('/group_user', methods=['POST'])
+@jwt_required()
 def add_user_to_group():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
 
 
@@ -304,8 +406,14 @@ def add_user_to_group():
 
 
 #DELETE /groups_users funciona
-@api.route('/group_user', methods=['DELETE'])
+@api.route('/group_user/delete', methods=['DELETE'])
+@jwt_required()
 def remove_user_from_group():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     request_data = request.get_json()
 
     if "user_id" not in request_data or "group_id" not in request_data:
@@ -337,7 +445,13 @@ def remove_user_from_group():
 
 #Funciona
 @api.route("/payment", methods=["GET"])
+@jwt_required()
 def get_payments():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     payments = Payments.query.all()
     payments_info = [payment.serialize() for payment in payments]
     return jsonify(payments_info), 200
@@ -355,8 +469,14 @@ def get_payment_by_id(id):
 
 
 #Funciona
-@api.route("/create/payment", methods=["POST"])
+@api.route("/payment/create", methods=["POST"])
+@jwt_required()
 def create_payment():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     data = request.get_json()
 
     if "amount" not in data or "payer_id" not in data or "receiver_id" not in data:
@@ -372,14 +492,26 @@ def create_payment():
 
 #Funciona
 @api.route("/expense", methods=["GET"])
+@jwt_required()
 def get_expenses():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     expenses = Expenses.query.all()
     expenses_info = [expense.serialize() for expense in expenses]
     return jsonify(expenses_info), 200
 
 #Funciona
 @api.route("/expense/<int:expense_id>", methods=["GET"])
+@jwt_required()
 def get_expense_by_id(expense_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     expense = Expenses.query.filter_by(expense_id=expense_id).first()
     
     if not expense:
@@ -390,7 +522,13 @@ def get_expense_by_id(expense_id):
 
 #Funciona
 @api.route("/expense/create", methods=["POST"])
+@jwt_required()
 def create_expense():
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
     data = request.get_json()
 
     if "amount" not in data or "description" not in data or "shared_between" not in data:
@@ -663,7 +801,7 @@ def objective_contribution():
 @api.route("/userpopulate", methods=["GET"])
 def user_populate():
     for user in users:
-        new_user = User(user_id=user["user_id"], name=user["name"], email=user["email"], password=user["password"])
+        new_user = User( name=user["name"], email=user["email"], password=user["password"])
         db.session.add(new_user)
     db.session.commit()
     return jsonify("Users have been created")
@@ -671,7 +809,7 @@ def user_populate():
 @api.route("/grouppopulate", methods=["GET"])
 def group_populate():
     for group in groups:
-        new_group = Group(group_id=group["group_id"], group_name=group["group_name"], created_at=group["created_at"], total_amount=group["total_amount"])
+        new_group = Group(group_name=group["group_name"], created_at=group["created_at"], total_amount=group["total_amount"])
         db.session.add(new_group)
     db.session.commit()
     return jsonify("Groups have been created")
@@ -680,7 +818,7 @@ def group_populate():
 @api.route("/grouptouserpopulate", methods=["GET"])
 def group_to_user_populate():
     for group in group_to_user:
-        new_group_to_user = Group_to_user(id=group["id"],user_id=group["user_id"], group_id=group["group_id"], created_at=group["created_at"])
+        new_group_to_user = Group_to_user(user_id=group["user_id"], group_id=group["group_id"], created_at=group["created_at"])
         db.session.add(new_group_to_user)
     db.session.commit()
     return jsonify("Groups_to_user have been created")
@@ -701,7 +839,7 @@ def user_contacts_populate():
 @api.route("/grouppaymentspopulate", methods=["GET"])
 def group_payments_populate():
     for group in group_payments:
-        new_group_payments = Group_payments(id=group["id"],receiver_id=group["receiver_id"], payer_id=group["payer_id"], group_id=group["group_id"], amount=group["amount"], payed_at=group["payed_at"])
+        new_group_payments = Group_payments(receiver_id=group["receiver_id"], payer_id=group["payer_id"], group_id=group["group_id"], amount=group["amount"], payed_at=group["payed_at"])
         db.session.add(new_group_payments)
     db.session.commit()
     return jsonify("Group_payments have been created")
@@ -710,8 +848,7 @@ def group_payments_populate():
 @api.route("/paymentspopulate", methods=["GET"])
 def payments_populate():
     for payment in payments:
-        new_payments = Payments(id=payment["id"], payer_id=payment["payer_id"], receiver_id=payment["receiver_id"], amount=payment["amount"], payed_at=payment["payed_at"])
-        #No deja meter el debtID=payment["debtID"], sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "payments_pkey" DETAIL:  Key (id)=(2) already exists.
+        new_payments = Payments(payer_id=payment["payer_id"], receiver_id=payment["receiver_id"], amount=payment["amount"], payed_at=payment["payed_at"])
 
         db.session.add(new_payments)
     db.session.commit()
@@ -720,7 +857,7 @@ def payments_populate():
 @api.route("/expensespopulate", methods=["GET"])
 def expenses_populate():
     for expense in expenses:
-        new_expense = Expenses(expense_id=expense["expense_id"], payer_id=expense["payer_id"], shared_between=expense["shared_between"], amount=expense["amount"], description=expense["description"], created_at=expense["created_at"])
+        new_expense = Expenses( payer_id=expense["payer_id"], shared_between=expense["shared_between"], amount=expense["amount"], description=expense["description"], created_at=expense["created_at"])
         #En este da problema  group_id=expense["group_id"], dice que no es un int like
         db.session.add(new_expense)
     db.session.commit()
@@ -729,7 +866,7 @@ def expenses_populate():
 @api.route("/debtspopulate", methods=["GET"])
 def debts_populate():
     for debt in debts:
-        new_debt = Debts(debt_id=debt["debt_id"], expenses_id=debt["expenses_id"], debtor_id=debt["debtor_id"], amount_to_pay=debt["amount_to_pay"], is_paid=debt["is_paid"], payed_at=debt["payed_at"])
+        new_debt = Debts( expenses_id=debt["expenses_id"], debtor_id=debt["debtor_id"], amount_to_pay=debt["amount_to_pay"], is_paid=debt["is_paid"], payed_at=debt["payed_at"])
         #
         db.session.add(new_debt)
     db.session.commit()
@@ -738,7 +875,7 @@ def debts_populate():
 @api.route("/messagespopulate", methods=["GET"])
 def messages_populate():
     for message in messages:
-        new_message = Messages(id=message["id"], from_user_id=message["from_user_id"],  message=message["message"], sent_at=message["sent_at"])
+        new_message = Messages( from_user_id=message["from_user_id"],  message=message["message"], sent_at=message["sent_at"], sent_to_user_id=message["sent_to_user_id"])
         #
         db.session.add(new_message)
     db.session.commit()
@@ -747,7 +884,7 @@ def messages_populate():
 @api.route("/objectivespopulate", methods=["GET"])
 def objectives_populate():
     for objective in objectives:
-        new_objective = Objectives(id=objective["id"], group_id=objective["group_id"], name=objective["name"], target_amount=objective["target_amount"], created_at=objective["created_at"], is_completed=objective["is_completed"])
+        new_objective = Objectives( group_id=objective["group_id"], name=objective["name"], target_amount=objective["target_amount"], created_at=objective["created_at"], is_completed=objective["is_completed"])
         #
         db.session.add(new_objective)
     db.session.commit()
@@ -756,7 +893,7 @@ def objectives_populate():
 @api.route("/objectivescontributionspopulate", methods=["GET"])
 def objectives_contributions_populate():
     for objective in objectives_contributions:
-        new_objectives_contribution = ObjectivesContributions(id=objective["id"], objective_id=objective["objective_id"], user_id=objective["user_id"], amount_contributed=objective["amount_contributed"], contributed_at=objective["contributed_at"])
+        new_objectives_contribution = ObjectivesContributions(objective_id=objective["objective_id"], user_id=objective["user_id"], amount_contributed=objective["amount_contributed"], contributed_at=objective["contributed_at"])
         #
         db.session.add(new_objectives_contribution)
     db.session.commit()

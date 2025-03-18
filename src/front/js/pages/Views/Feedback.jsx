@@ -18,7 +18,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../Dashboard/listitems.jsx';
+import { MainListItems } from '../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
@@ -70,10 +70,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { 
+  toolbar: {
     paddingRight: 20,
     minHeight: 70,
-   },
+  },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
@@ -201,51 +201,51 @@ export default function Feedback() {
         >
 
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
         <Box
-  sx={{
-    width: "100%",
-    maxWidth: "600px", 
-    padding: "0 16px",
-    marginTop: "80px", 
-    margin: "0 auto",
-  }}
->
-  <Box sx={{ marginBottom: "20px" }}>
-    <h3>We'd love to hear from you!</h3>
-    <TextField
-      id="outlined-textarea"
-      label="Name"
-      variant="outlined"
-      fullWidth
-    />
-  </Box>
+          sx={{
+            width: "100%",
+            maxWidth: "600px",
+            padding: "0 16px",
+            marginTop: "80px",
+            margin: "0 auto",
+          }}
+        >
+          <Box sx={{ marginBottom: "20px" }}>
+            <h3>We'd love to hear from you!</h3>
+            <TextField
+              id="outlined-textarea"
+              label="Name"
+              variant="outlined"
+              fullWidth
+            />
+          </Box>
 
-  <Box sx={{ marginBottom: "20px" }}>
-    <TextField
-      id="outlined-multiline"
-      label="Feedback"
-      variant="outlined"
-      multiline
-      rows={8}
-      fullWidth
-    />
-  </Box>
+          <Box sx={{ marginBottom: "20px" }}>
+            <TextField
+              id="outlined-multiline"
+              label="Feedback"
+              variant="outlined"
+              multiline
+              rows={8}
+              fullWidth
+            />
+          </Box>
 
-  <Button
-    variant="contained"
-    color="primary"
-    sendIcon={<Icon>send</Icon>}
-    sx={{
-      width: "100%",
-    }}
-  >
-    Send
-  </Button>
-</Box>
+          <Button
+            variant="contained"
+            color="primary"
+            sendIcon={<Icon>send</Icon>}
+            sx={{
+              width: "100%",
+            }}
+          >
+            Send
+          </Button>
+        </Box>
 
       </div>
     </ThemeProvider>

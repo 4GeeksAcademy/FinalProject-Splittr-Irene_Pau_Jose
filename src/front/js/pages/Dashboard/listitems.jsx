@@ -19,48 +19,56 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import InfoIcon from '@material-ui/icons/Info';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 
+import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 
-export const mainListItems = (
-  <div>
-   <ListItem button component={Link} to="/dashboard">
-      <ListItemIcon>
-        <DashboardIcon />
-      </ListItemIcon>
-      <ListItemText primary="Home" />
-    </ListItem>
-    <ListItem button component={Link} to="/listofcontacts">
-      <ListItemIcon>
-        <AccountCircleIcon />
-      </ListItemIcon>
-      <ListItemText primary="List Of Contacts" />
-    </ListItem>
-    <ListItem button component={Link} to="/groups">
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Groups" />
-    </ListItem>
-    <ListItem button component={Link} to="/sharedobjectives">
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText primary="Shared objetives" />
-    </ListItem>
-    <ListItem button component={Link} to="/messages">
-      <ListItemIcon>
-        <MessageIcon />
-      </ListItemIcon>
-      <ListItemText primary="Messages" />
-    </ListItem>
-    <ListItem button component={Link} to="/favouritecontacts">
-      <ListItemIcon>
-        <FavoriteIcon />
-      </ListItemIcon>
-      <ListItemText primary="Favourite Contacts" />
-    </ListItem>
-    
-  </div>
-);
+
+export const MainListItems = () => {
+
+  const { userid } = useParams();
+  return(
+
+    <div>
+     <ListItem button component={Link} to="/dashboard">
+        <ListItemIcon>
+          <DashboardIcon />
+        </ListItemIcon>
+        <ListItemText primary="Home" />
+      </ListItem>
+      <ListItem button component={Link} to="/listofcontacts">
+        <ListItemIcon>
+          <AccountCircleIcon />
+        </ListItemIcon>
+        <ListItemText primary="List Of Contacts" />
+      </ListItem>
+      <ListItem button component={Link} to={`/group/user/${userid}`}>
+        <ListItemIcon>
+          <PeopleIcon />
+        </ListItemIcon>
+        <ListItemText primary="Groups" />
+      </ListItem>
+      <ListItem button component={Link} to="/sharedobjectives">
+        <ListItemIcon>
+          <BarChartIcon />
+        </ListItemIcon>
+        <ListItemText primary="Shared objetives" />
+      </ListItem>
+      <ListItem button component={Link} to="/messages">
+        <ListItemIcon>
+          <MessageIcon />
+        </ListItemIcon>
+        <ListItemText primary="Messages" />
+      </ListItem>
+      <ListItem button component={Link} to="/favouritecontacts">
+        <ListItemIcon>
+          <FavoriteIcon />
+        </ListItemIcon>
+        <ListItemText primary="Favourite Contacts" />
+      </ListItem>
+      
+    </div>
+  )
+};
 
 export const secondaryListItems = (
   <div>

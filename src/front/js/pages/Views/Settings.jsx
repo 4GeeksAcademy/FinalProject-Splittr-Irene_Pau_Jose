@@ -18,7 +18,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../Dashboard/listitems.jsx';
+import { MainListItems } from '../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
@@ -74,10 +74,10 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { 
+  toolbar: {
     paddingRight: 20,
     minHeight: 70,
-   },
+  },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
@@ -153,7 +153,7 @@ export default function Settings() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const [state, setState] = useState({
-    Language: 'English',  
+    Language: 'English',
   });
 
   const handleChange = (event) => {
@@ -212,121 +212,121 @@ export default function Settings() {
         >
 
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
         <Box
-  sx={{
-    width: "50%",
-    padding: "0 16px",
-    marginTop: "80px",
-    margin: "0 auto",
-    display: "flex",
-    flexDirection: "column", 
+          sx={{
+            width: "50%",
+            padding: "0 16px",
+            marginTop: "80px",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
 
-  }}
->
-  <Box sx={{ marginBottom: "20px"}}>
-    <h3>Settings</h3>
-    <h5>User</h5>
-
-
-  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-    <TextField
-      id="outlined-textarea"
-      label="Change name"
-      variant="outlined"
-      fullWidth
-      placeholder="Current user"
-
-    />
-<Box sx={{marginLeft:"40px"}}>
-  <Button>Change</Button>
-  </Box>
-  </Box>
-  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-    <TextField
-      id="outlined-textarea"
-      label="Change email"
-      variant="outlined"
-      fullWidth
-      placeholder="Current email"
-    />
-<Box sx={{marginLeft:"40px"}}>
-  <Button>Change</Button>
-  </Box>
-  </Box>
-  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-    <TextField
-      id="outlined-textarea"
-      label="Change password"
-      variant="outlined"
-      type="password"
-      fullWidth
-    />
-<Box sx={{marginLeft:"40px"}}>
-  <Button>Change</Button>
-  </Box>
-    
-  </Box>
-  
-  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-  <TextField
-    id="date"
-    label="Birthday"
-    type="date"
-    defaultValue="2017-05-24"
-    variant="outlined"
-    fullWidth
-    InputLabelProps={{
-      shrink: true,
-    }}
-  />
-<Box sx={{marginLeft:"40px"}}>
-  <Button>Change</Button>
-  </Box>
-</Box>
+          }}
+        >
+          <Box sx={{ marginBottom: "20px" }}>
+            <h3>Settings</h3>
+            <h5>User</h5>
 
 
-  <h5>Preferences</h5>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="outlined-textarea"
+                label="Change name"
+                variant="outlined"
+                fullWidth
+                placeholder="Current user"
+
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+            </Box>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="outlined-textarea"
+                label="Change email"
+                variant="outlined"
+                fullWidth
+                placeholder="Current email"
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+            </Box>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="outlined-textarea"
+                label="Change password"
+                variant="outlined"
+                type="password"
+                fullWidth
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+
+            </Box>
+
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="date"
+                label="Birthday"
+                type="date"
+                defaultValue="2017-05-24"
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+            </Box>
 
 
-  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-  <FormControl variant="outlined" fullWidth>
-    <InputLabel htmlFor="outlined-age-native-simple">Language</InputLabel>
-    <Select
-      native
-      value={state.Language}
-      onChange={handleChange}
-      label="Language"
-      inputProps={{
-        name: 'Language',
-        id: 'outlined-age-native-simple',
-      }}
-    >
-      <option aria-label="None" value="" />
-      <option value={10}>English</option>
-      <option value={20}>Spanish</option>
-      <option value={30}>French</option>
-      <option value={40}>Italian</option>
-      <option value={50}>German</option>
-      <option value={60}>Portuguese</option>
-    </Select>
-  </FormControl>
-<Box sx={{marginLeft:"40px"}}>
-  <Button>Change</Button>
-  </Box>
-</Box>
-<Box sx={{ marginBottom: "20px", marginTop:"60px", display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
-  <Button>Log out</Button>
-  <Button variant="outlined" color="secondary">Delete account</Button>
-</Box>
+            <h5>Preferences</h5>
 
 
-  
-  </Box>
-</Box>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel htmlFor="outlined-age-native-simple">Language</InputLabel>
+                <Select
+                  native
+                  value={state.Language}
+                  onChange={handleChange}
+                  label="Language"
+                  inputProps={{
+                    name: 'Language',
+                    id: 'outlined-age-native-simple',
+                  }}
+                >
+                  <option aria-label="None" value="" />
+                  <option value={10}>English</option>
+                  <option value={20}>Spanish</option>
+                  <option value={30}>French</option>
+                  <option value={40}>Italian</option>
+                  <option value={50}>German</option>
+                  <option value={60}>Portuguese</option>
+                </Select>
+              </FormControl>
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+            </Box>
+            <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+              <Button>Log out</Button>
+              <Button variant="outlined" color="secondary">Delete account</Button>
+            </Box>
+
+
+
+          </Box>
+        </Box>
 
 
 

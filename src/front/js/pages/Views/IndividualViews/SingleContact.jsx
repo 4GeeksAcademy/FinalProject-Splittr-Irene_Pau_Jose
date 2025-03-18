@@ -10,7 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
-import { mainListItems } from '../../Dashboard/listitems.jsx';
+import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../../Dashboard/listitems.jsx';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -127,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
     width: 200,
     height: 200,
     fontSize: '4rem',
-    transition: 'width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out', 
+    transition: 'width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out',
     '@media (max-width:900px)': {
       width: 160,
       height: 160,
@@ -156,17 +156,17 @@ const useStyles = makeStyles((theme) => ({
 export default function ListOfContacts() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false); 
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
   const handleDeleteClick = () => {
-    setOpenDeleteDialog(true); 
+    setOpenDeleteDialog(true);
   };
 
   const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false); 
+    setOpenDeleteDialog(false);
   };
 
   const handleConfirmDelete = () => {
@@ -214,7 +214,7 @@ export default function ListOfContacts() {
         </AppBar>
         <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
