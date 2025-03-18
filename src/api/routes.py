@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user
+from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts
 
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
 from datetime import datetime
-from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions
+from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts
 
 #from api import api
 
@@ -183,6 +183,92 @@ def update_group(group_id):
 
     return jsonify(group.serialize()), 200
 
+#get contactos activos de un usuario 
+@api.route('/user_contacts/<int:user_id>', methods=['GET'])
+def get_user_contacts(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    contacts = User_Contacts.query.filter_by(user_id=user_id, is_active=True).all()
+    
+    return jsonify({
+        "user_id": user_id,
+        "contacts": [contact.serialize() for contact in contacts]
+    }), 200
+
+
+#añadir un contacto 
+@api.route('/user_contacts', methods=['POST'])
+def add_contact():
+    request_data = request.get_json()
+
+    if "user_id" not in request_data or "contact_id" not in request_data:
+        return jsonify({"msg": "Both user_id and contact_id are required"}), 400
+
+    user_id = request_data["user_id"]
+    contact_id = request_data["contact_id"]
+
+    if user_id == contact_id:
+        return jsonify({"msg": "A user cannot add themselves as a contact"}), 400
+
+    user = User.query.get(user_id)
+    contact = User.query.get(contact_id)
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+    if not contact:
+        return jsonify({"msg": "Contact not found"}), 404
+
+    existing_entry = User_Contacts.query.filter_by(user_id=user_id, contact_id=contact_id).first()
+    if existing_entry:
+        return jsonify({"msg": "User is already a contact"}), 400
+
+    new_contact = User_Contacts(user_id=user_id, contact_id=contact_id, created_at=datetime.utcnow())
+    db.session.add(new_contact)
+    db.session.commit()
+
+    return jsonify({"msg": "Contact added successfully"}), 201
+
+
+#editar estado de un contacto, activo o inactivo 
+@api.route('/user_contacts/<int:user_id>/<int:contact_id>', methods=['PUT'])
+def update_contact_status(user_id, contact_id):
+    request_data = request.get_json()
+
+    if "is_active" not in request_data:
+        return jsonify({"msg": "is_active field is required"}), 400
+
+    contact_entry = User_Contacts.query.filter_by(user_id=user_id, contact_id=contact_id).first()
+
+    if not contact_entry:
+        return jsonify({"msg": "Contact relationship not found"}), 404
+
+    contact_entry.is_active = request_data["is_active"]
+    db.session.commit()
+
+    status = "activated" if contact_entry.is_active else "deactivated"
+
+    return jsonify({
+        "msg": f"Contact {status} successfully",
+        "user_id": user_id,
+        "contact_id": contact_id,
+        "is_active": contact_entry.is_active
+    }), 200
+
+
+#delete definitivamente un contacto 
+@api.route('/user_contacts/<int:user_id>/<int:contact_id>', methods=['DELETE'])
+def hard_delete_contact(user_id, contact_id):
+    contact_entry = User_Contacts.query.filter_by(user_id=user_id, contact_id=contact_id).first()
+
+    if not contact_entry:
+        return jsonify({"msg": "Contact relationship not found"}), 404
+
+    db.session.delete(contact_entry)
+    db.session.commit()
+
+    return jsonify({"msg": "Contact permanently deleted"}), 200
 
 
 #POST /groups_users funciona
@@ -598,6 +684,19 @@ def group_to_user_populate():
         db.session.add(new_group_to_user)
     db.session.commit()
     return jsonify("Groups_to_user have been created")
+
+@api.route("/usercontactspopulate", methods=["GET"])
+def user_contacts_populate():
+    for contact in user_contacts:
+        new_contact = User_Contacts(
+            user_id=contact["user_id"],
+            contact_id=contact["contact_id"],
+            created_at=contact["created_at"]
+        )
+        db.session.add(new_contact)
+
+    db.session.commit()
+    return jsonify("User_contacts have been populated")
 
 @api.route("/grouppaymentspopulate", methods=["GET"])
 def group_payments_populate():
