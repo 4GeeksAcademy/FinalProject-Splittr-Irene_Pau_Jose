@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -25,9 +25,8 @@ import Deposits from './Deposits.jsx';
 import Orders from './Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../Home.jsx';
-
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
 
 function Copyright() {
   return (
@@ -141,6 +140,19 @@ export default function Dashboard() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const{store,actions}=useContext(Context);
+  const[user,setUser]= useState(store.userInfo);
+  console.log(user);
+  
+  useEffect(()=>{
+    const getUser = async()=> {
+      const data = await actions.getUser()
+      setUser(data)
+
+    } 
+    getUser();
+  },[])
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -193,7 +205,7 @@ export default function Dashboard() {
         >
           
           <Divider />
-          <List><MainListItems/> </List>
+          <List><MainListItems user={user} /> </List>
           <Divider />
           <List>{secondaryListItems}</List> 
         </Drawer>

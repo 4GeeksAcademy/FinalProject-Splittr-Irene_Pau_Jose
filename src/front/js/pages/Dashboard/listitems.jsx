@@ -21,11 +21,15 @@ import MailOutlineIcon from '@material-ui/icons/MailOutline';
 
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
+
+export const MainListItems = ({user}) => {
+
+  const{store,actions}=useContext(Context);
 
 
-export const MainListItems = () => {
 
-  const { userid } = useParams();
   return(
 
     <div>
@@ -41,7 +45,7 @@ export const MainListItems = () => {
         </ListItemIcon>
         <ListItemText primary="List Of Contacts" />
       </ListItem>
-      <ListItem button component={Link} to={`/group/user/${userid}`}>
+      <ListItem button component={Link} to={`/group/user/${user.user_id}`}>
         <ListItemIcon>
           <PeopleIcon />
         </ListItemIcon>
