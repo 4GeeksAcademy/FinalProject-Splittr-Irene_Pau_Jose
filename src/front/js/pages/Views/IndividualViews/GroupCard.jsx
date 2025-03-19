@@ -23,7 +23,7 @@ const GroupCard = ({group}) => {
     </Card>
     </Link>
     </>
-  );
+  );x
 };
 
 export default GroupCard;

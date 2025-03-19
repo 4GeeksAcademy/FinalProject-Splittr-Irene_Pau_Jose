@@ -29,8 +29,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-import { useParams } from 'react-router-dom';
 import { getInfoGroup } from '../../../component/callToApi.js';
+import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../../store/appContext.js';
+
 
 function Copyright() {
   return (
@@ -164,6 +167,8 @@ export default function SingleGroup() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const{store,actions}=useContext(Context);
+
   const [singleGroupInfo, setSingleGroupInfo] = useState([]);
   const { groupid } = useParams();
   console.log(singleGroupInfo);
@@ -231,7 +236,7 @@ export default function SingleGroup() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo}/></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>

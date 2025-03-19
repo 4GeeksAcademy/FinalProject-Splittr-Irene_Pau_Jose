@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const MessageCard = ({message}) => {
     return (
         <>
-            <Link to={`/message/${message.id}`}>
+            <Link to="/singlemessage">
                 <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "left", borderRadius: 10, width: "auto", minWidth: "250px" }}>
                     <Box display="flex" justifyContent="left" alignItems="center"> 
                         <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5, marginBottom: "0px" }}>{message.from_user_initial} </Avatar>
