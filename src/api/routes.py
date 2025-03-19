@@ -763,6 +763,28 @@ def get_messages_by_user_id(user_id):
     return jsonify([message.serialize() for message in messages]), 200
 
 
+@api.route('/message/conversation/<int:other_user_id>', methods=['GET'])
+@jwt_required()
+def get_conversation(other_user_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)  
+    
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
+    messages = Messages.query.filter(
+        ((Messages.sent_to_user_id == current_user_id) & (Messages.from_user_id == other_user_id)) |
+        ((Messages.sent_to_user_id == other_user_id) & (Messages.from_user_id == current_user_id))
+    ).order_by(Messages.sent_at).all()
+
+    if not messages:
+        return jsonify({"error": "No messages found between these users"}), 404
+
+    return jsonify([message.serialize() for message in messages]), 200
+
+
+
+
 #No funciona
 @api.route("/message/send", methods=["POST"])
 @jwt_required()

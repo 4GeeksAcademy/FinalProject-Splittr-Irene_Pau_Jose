@@ -58,6 +58,12 @@ debts = [
 
 messages = [
     {"id": 1, "from_user_id": 1, "sent_to_user_id": 3, "message": "Hello, team!", "sent_at": "2024-01-10T09:00:00"},
+    {"id": 1, "from_user_id": 1, "sent_to_user_id": 3, "message": "que pesada", "sent_at": "2024-04-10T09:00:00"},
+    {"id": 1, "from_user_id": 4, "sent_to_user_id": 3, "message": "que pesada", "sent_at": "2024-04-10T09:00:00"},
+    {"id": 1, "from_user_id": 2, "sent_to_user_id": 3, "message": "que pesada", "sent_at": "2024-04-10T09:00:00"},
+    {"id": 1, "from_user_id": 1, "sent_to_user_id": 3, "message": "calla oh", "sent_at": "2024-07-10T09:00:00"},
+    {"id": 8, "from_user_id": 3, "sent_to_user_id": 1, "message": "Hello, team!", "sent_at": "2024-02-10T10:00:00"},
+    {"id": 9, "from_user_id": 3, "sent_to_user_id": 1, "message": "ya no quiero", "sent_at": "2024-01-10T11:00:00"},
     {"id": 2, "from_user_id": 2, "sent_to_user_id": 1,"message": "Let's split the bill.", "sent_at": "2024-02-15T14:00:00"},
     {"id": 3, "from_user_id": 3, "sent_to_user_id": 4,"message": "Meeting at 5 PM?", "sent_at": "2024-03-20T16:30:00"},
     {"id": 4, "from_user_id": 4, "sent_to_user_id": 5,"message": "Don't forget to contribute.", "sent_at": "2024-04-25T18:45:00"},
