@@ -49,7 +49,7 @@ const Layout = () => {
                         <Route element={<h1>Not found!</h1>} />
                         <Route element={<LogIn/>} path="/login" />
                         <Route element={<SignUp/>} path="/signup" />
-                        <Route element={<ListOfContacts/>} path="/listofcontacts" />
+                        <Route element={<ListOfContacts/>} path="/user_contacts/user/:userid" />
                         <Route element={<Dashboard/>} path="/dashboard" />
                         <Route element={<Home/>} path="/home" />
                         <Route element={<Groups/>} path="/group/user/:userid" />
