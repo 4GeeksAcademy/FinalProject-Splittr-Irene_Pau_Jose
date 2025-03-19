@@ -25,8 +25,11 @@ import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../Home.jsx';
+
+
+import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
 
 
 import SharedObjectiveCard from './IndividualViews/SharedObjectiveCard.jsx';
@@ -147,9 +150,11 @@ export default function SharedObjectives() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const [sharedObjectives, setSharedObjectives] = useState([]);
-
+  const { userid } = useParams();
+    console.log(userid);
+  
   useEffect(() => {
-    mapSharedObjective(setSharedObjectives)
+    mapSharedObjective(setSharedObjectives,userid)
 
   }, [])
 

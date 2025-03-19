@@ -54,7 +54,7 @@ const Layout = () => {
                         <Route element={<Home/>} path="/home" />
                         <Route element={<Groups/>} path="/group/user/:userid" />
                         <Route element={<SharedObjectives/>} path="/sharedobjectives" />
-                        <Route element={<Messages/>} path="/messages" />
+                        <Route element={<Messages/>} path="/message/user/:userid" />
                         <Route element={<FavouriteContacts/>} path="/favouritecontacts" />
                         <Route element={<Settings/>} path="/settings" />
                         <Route element={<About/>} path="/about" />

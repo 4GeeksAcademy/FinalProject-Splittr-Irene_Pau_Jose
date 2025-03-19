@@ -29,7 +29,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         "Content-Type": "application/json"
                     },
 				})
-				const data = response.json()
+				const data = await response.json()
 				setStore({userInfo: data})
 				return data
 

@@ -203,27 +203,35 @@ class Debts(db.Model):
             
         }
     
-
-class Messages (db.Model):
-    __tablename__="messages"
-    id=db.Column(db.Integer, unique=True, primary_key=True)
-    sent_to_user_id=db.Column(db.Integer, db.ForeignKey("user.user_id"))
-    from_user_id=db.Column(db.Integer, db.ForeignKey("user.user_id"))
-    message=db.Column(db.String(200))
-    sent_at=db.Column(db.DateTime)
-
+class Messages(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    sent_to_user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
+    from_user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
+    message = db.Column(db.String(200))
+    sent_at = db.Column(db.DateTime)
 
     def __repr__(self):
         return f'<Messages {self.id}>'
 
     def serialize(self):
+        
+        sender = User.query.get(self.from_user_id)
+        recipient = User.query.get(self.sent_to_user_id)
+
+        sender_initial = sender.name[0] if sender and sender.name else None
+        recipient_initial = recipient.name[0] if recipient and recipient.name else None
+
         return {
             "id": self.id,
             "sent_to_user_id": self.sent_to_user_id,
+            "sent_to_user_name": recipient.name if recipient else None,  
+            "sent_to_user_initial": recipient_initial,
             "from_user_id": self.from_user_id,
+            "from_user_name": sender.name if sender else None,  
+            "from_user_initial": sender_initial,
             "message": self.message,
             "sent_at": self.sent_at
-            
         }
     
 
@@ -254,7 +262,7 @@ class Objectives(db.Model):
 
 class ObjectivesContributions(db.Model):
 
-    __tablename__="objetive_contributions"
+    __tablename__="objective_contributions"
     id = db.Column(db.Integer, unique=True, primary_key=True)
     objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
