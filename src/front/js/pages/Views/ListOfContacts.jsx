@@ -135,18 +135,18 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     overflow: 'auto',
     width: '100%',
-},
-container: {
+  },
+  container: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(4),
     width: '100%',
-},
-contactGrid: {
+  },
+  contactGrid: {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
     padding: theme.spacing(1),
-},
+  },
 }));
 
 
@@ -162,7 +162,7 @@ export default function ListOfContacts() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const { store, actions } = useContext(Context);
-  
+
   const [contacts, setContacts] = useState([]);
 
   const { userid } = useParams();
@@ -170,9 +170,9 @@ export default function ListOfContacts() {
 
   useEffect(() => {
     mapContacts(setContacts, userid);
-  }, []); 
-  
-console.log(contacts)
+  }, []);
+
+  console.log(contacts)
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -231,17 +231,17 @@ console.log(contacts)
           <List>{secondaryListItems}</List>
         </Drawer>
         <main className={classes.content}>
-                <div className={classes.appBarSpacer} />
-                <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={2} className={classes.contactGrid}>
-    {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
-        <ContactCard key={contact.id} contact={contact} />
-    ))}
-    {contacts && (!contacts.contacts || !Array.isArray(contacts.contacts)) && (
-        <div>No se encontraron contactos o la estructura es incorrecta.</div>
-    )}
-    {!contacts && <div>Cargando contactos...</div>}
-</Grid>
+          <div className={classes.appBarSpacer} />
+          <Container maxWidth="lg" className={classes.container}>
+            <Grid container spacing={2} className={classes.contactGrid}>
+              {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
+                <ContactCard key={contact.id} contact={contact} />
+              ))}
+              {contacts && (!contacts.contacts || !Array.isArray(contacts.contacts)) && (
+                <div>No se encontraron contactos o la estructura es incorrecta.</div>
+              )}
+              {!contacts && <div>Cargando contactos...</div>}
+            </Grid>
           </Container>
         </main>
       </div>
