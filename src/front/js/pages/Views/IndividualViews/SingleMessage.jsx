@@ -21,6 +21,12 @@ import { Box, TextField, InputAdornment } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { Card, CardContent } from '@material-ui/core';
 
+import { getInfoConversation } from '../../../component/callToApi.js';
+import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../../store/appContext.js';
+import { useEffect } from 'react';
+
 const darkTheme = createMuiTheme({
     palette: {
         type: 'dark',
@@ -88,6 +94,22 @@ const useStyles = makeStyles((theme) => ({
     },
 
     messageInput: { padding: theme.spacing(2), borderTop: `1px solid ${theme.palette.divider}` },
+    sent: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#4CAF50',
+        borderRadius: '10px',
+        padding: '10px 15px',
+        maxWidth: '60%',
+    },
+
+    received: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#2C2F33',
+        borderRadius: '10px',
+        padding: '10px 15px',
+        maxWidth: '60%',
+        border: '2px solid #ffffff',
+    },
 }));
 export default function TextMessages() {
     const classes = useStyles();
@@ -108,6 +130,20 @@ export default function TextMessages() {
             setNewMessage('');
         }
     };
+
+    const { store, actions } = useContext(Context);
+
+    const [conversation, setConversation] = useState([]);
+
+    const { otheruserid } = useParams();
+    console.log(conversation);
+
+
+    useEffect(() => {
+
+        getInfoConversation(setConversation, otheruserid)
+
+    }, [])
 
 
     return (
@@ -138,7 +174,7 @@ export default function TextMessages() {
                 </AppBar>
                 <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
                     <Divider />
-                    <List><MainListItems /></List>
+                    <List><MainListItems user={store.userInfo} /></List>
                     <Divider />
                     <List>{secondaryListItems}</List>
                 </Drawer>
@@ -147,23 +183,27 @@ export default function TextMessages() {
                     <Card className={classes.card} variant="outlined">
                         <CardContent className={classes.cardContent}>
                             <Box display="flex" alignItems="center" marginBottom={2}>
-                                <Avatar className={classes.avatar}>PP</Avatar>
+                                <Avatar className={classes.avatar}>{conversation?.[0]?.from_user_initial}</Avatar>
                                 <Box ml={2}>
-                                    <Typography variant="h6">Pepito Pepe</Typography>
+                                    <Typography variant="h6">{conversation?.[0]?.from_user_name}</Typography>
                                 </Box>
                             </Box>
                             <div className={classes.messages}>
-                                {messages.map((message, index) => (
-                                    <div
-                                        key={index}
-                                        className={clsx(
-                                            classes.messageBubble,
-                                            message.sender === 'me' ? classes.sent : classes.received
-                                        )}
-                                    >
-                                        <Typography>{message.text}</Typography>
-                                    </div>
-                                ))}
+                                {conversation && Array.isArray(conversation) && conversation.length > 0 ? (
+                                    conversation.map((message, index) => (
+                                        <div
+                                            key={index}
+                                            className={clsx(
+                                                classes.messageBubble,
+                                                message.from_user_id === store.userInfo?.user_id ? classes.sent : classes.received
+                                            )}
+                                        >
+                                            <Typography>{message.message}</Typography>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <Typography color="textSecondary"></Typography>
+                                )}
                             </div>
                             <div className={classes.messageInput}>
                                 <TextField

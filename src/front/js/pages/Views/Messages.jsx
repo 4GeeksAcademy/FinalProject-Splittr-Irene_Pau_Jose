@@ -226,19 +226,20 @@ export default function Messages() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-   const{store,actions}=useContext(Context);
-    
-    const [messages, setMessages] = useState([]);
+  const { store, actions } = useContext(Context);
+
+  const [messages, setMessages] = useState([]);
+console.log(messages);
+
+  const { userid } = useParams();
   
-    const { userid } = useParams();
-    console.log(userid);
-    
-  
-    useEffect(() => {
-  
-      mapMessages(setMessages, userid)
-  
-    }, [])
+
+
+  useEffect(() => {
+
+    mapMessages(setMessages, userid)
+
+  }, [])
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -301,11 +302,28 @@ export default function Messages() {
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} justifyContent="center" >
-            {messages.map((message) => {
-                return (
+            {messages && Array.isArray(messages) && messages.length > 0 ? (
+                (() => {
+                  const currentUser = store.userInfo;
+                  if (!currentUser || !currentUser.user_id) {
+                    return null
+                  }
+                  const currentUserId = currentUser.user_id;
 
-                  <MessageCard message={message} />)
-              })}
+                  const filteredMessages = messages.filter(
+                    message => message.from_user_id !== currentUserId
+                  );
+
+                  const uniqueUserIds = [...new Set(filteredMessages.map(message => message.from_user_id))];
+
+                  return uniqueUserIds.map(uniqueUserId => {
+                    const firstMessageFromUser = filteredMessages.find(message => message.from_user_id === uniqueUserId);
+                    return <MessageCard key={uniqueUserId} message={firstMessageFromUser} />;
+                  });
+                })()
+              ) : (
+                <Typography variant="subtitle1" color="textSecondary"></Typography>
+              )}
             </Grid>
           </Container>
         </main>

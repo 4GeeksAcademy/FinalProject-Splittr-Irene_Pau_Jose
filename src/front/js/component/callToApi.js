@@ -100,18 +100,18 @@ export const mapMessages = async (setMessages, userid) => {
     
 }
 
-export const getInfoMessage= async (setInfoMessage, messageid) => {
+export const getInfoConversation= async (setConversation, otheruserid) => {
 
     try {
-        const response = await fetch(urlBackend+"message/" + messageid, {
+        const response = await fetch(urlBackend+"/message/conversation/" + otheruserid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
             }
             ,})
         const data = await response.json()
-        setInfoMessage(data)
-        console.log(data);
+        setConversation(data)
+        
     } catch (error) {
         console.log(error);
         

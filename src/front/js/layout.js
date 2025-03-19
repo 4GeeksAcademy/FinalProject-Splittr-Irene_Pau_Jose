@@ -61,7 +61,7 @@ const Layout = () => {
                         <Route element={<Feedback/>} path="/feedback" />
                         <Route element={<SingleContact/>} path="/singlecontact/" />
                         <Route element={<SingleGroup/>} path="/singlegroup/:groupid" />
-                        <Route element={<SingleMessage/>} path="/singlemessage" />
+                        <Route element={<SingleMessage/>} path="/message/conversation/:otheruserid" />
                         <Route element={<SingleObjective/>} path="/singleobjective/:objectiveid" />
                     </Routes>
                     <Footer />
