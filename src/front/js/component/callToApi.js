@@ -26,7 +26,12 @@ export const mapGroups = async (setGroups, userid) => {
 export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
 
     try {
-        const response = await fetch(urlBackend+"group/"+ groupid)
+        const response = await fetch(urlBackend+"group/"+ groupid, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            }, 
+        })
         const data = await response.json()
         setSingleGroupInfo(data)
     } catch (error) {
@@ -37,7 +42,12 @@ export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
 export const mapSharedObjective = async (setSharedObjective) => {
 
     try {
-        const response = await fetch(urlBackend+"objective")
+        const response = await fetch(urlBackend+"objective", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+    })
         const data = await response.json()
         setSharedObjective(data)
         
@@ -52,7 +62,12 @@ export const mapSharedObjective = async (setSharedObjective) => {
 export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid) => {
 
     try {
-        const response = await fetch(urlBackend+"objective/" + objectiveid)
+        const response = await fetch(urlBackend+"objective/" + objectiveid, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            }
+            ,})
         const data = await response.json()
         setInfoSharedObjective(data)
         console.log(data);
@@ -63,11 +78,41 @@ export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid
     
 }
 
-export const mapContacts = async (setContacts) => {
+
+export const mapMessages = async (setMessages, userid) => {
 
     try {
-        response
+        const response = await fetch(urlBackend+"/message/user/" + userid, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+        })
+        const data = await response.json()
+        setMessages(data)
+
     } catch (error) {
+        console.log(error);
         
     }
+    
+}
+
+export const getInfoMessage= async (setInfoMessage, messageid) => {
+
+    try {
+        const response = await fetch(urlBackend+"message/" + messageid, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            }
+            ,})
+        const data = await response.json()
+        setInfoMessage(data)
+        console.log(data);
+    } catch (error) {
+        console.log(error);
+        
+    }
+    
 }
