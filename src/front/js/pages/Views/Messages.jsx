@@ -20,20 +20,17 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
 import { secondaryListItems } from '../Dashboard/listitems.jsx';
-import Chart from '../Dashboard/Chart.jsx';
-import Deposits from '../Dashboard/Deposits.jsx';
-import Orders from '../Dashboard/Orders.jsx';
+
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../Home.jsx';
-import ContactCard from './IndividualViews/ContactCard.jsx';
-
-import StarIcon from '@material-ui/icons/Star';
-import MailIcon from '@material-ui/icons/Mail';
-import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
 import MessageCard from './IndividualViews/MessageCard.jsx';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
+import { mapMessages } from '../../component/callToApi.js';
+
 
 function Copyright() {
   return (
@@ -229,6 +226,20 @@ export default function Messages() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+   const{store,actions}=useContext(Context);
+    
+    const [messages, setMessages] = useState([]);
+  
+    const { userid } = useParams();
+    console.log(userid);
+    
+  
+    useEffect(() => {
+  
+      mapMessages(setMessages, userid)
+  
+    }, [])
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -281,7 +292,7 @@ export default function Messages() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List>{secondaryListItems}</List>
         </Drawer>
@@ -290,11 +301,11 @@ export default function Messages() {
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} justifyContent="center" >
-              {Array.from({ length: 6 }, (_, i) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} gap={3} key={i}>
-                  <MessageCard />
-                </Grid>
-              ))}
+            {messages.map((message) => {
+                return (
+
+                  <MessageCard message={message} />)
+              })}
             </Grid>
           </Container>
         </main>

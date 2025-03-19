@@ -740,6 +740,29 @@ def get_messages_by_id(sent_to_user_id):
     return jsonify(user_messages), 200
 
 
+@api.route('/message/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_messages_by_user_id(user_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    received_messages = Messages.query.filter_by(sent_to_user_id=user_id).all()
+
+    sent_messages = Messages.query.filter_by(from_user_id=user_id).all()
+
+    messages = received_messages + sent_messages
+
+    if not messages:
+        return jsonify({"error": "No messages found for this user"}), 404 
+
+    messages.sort(key=lambda msg: msg.sent_at, reverse=True)
+
+    return jsonify([message.serialize() for message in messages]), 200
+
+
 #No funciona
 @api.route("/message/send", methods=["POST"])
 @jwt_required()
@@ -780,6 +803,19 @@ def get_objectives():
         return jsonify({"msg": "You need to be logged in"}), 401
     
     objectives = Objectives.query.all()
+    objectives_info = [objective.serialize() for objective in objectives]
+    return jsonify(objectives_info), 200
+
+
+@api.route("/objective/user/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_objectives_by_user(user_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+    
+    objectives = Objectives.query.all(user_id=user_id)
     objectives_info = [objective.serialize() for objective in objectives]
     return jsonify(objectives_info), 200
 
