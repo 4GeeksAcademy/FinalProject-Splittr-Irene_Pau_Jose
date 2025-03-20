@@ -19,7 +19,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
-import { secondaryListItems } from '../Dashboard/listitems.jsx';
+import { SecondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
@@ -148,13 +148,13 @@ export default function Groups() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  const{store,actions}=useContext(Context);
-  
+  const { store, actions } = useContext(Context);
+
   const [groups, setGroups] = useState([]);
 
   const { userid } = useParams();
   console.log(userid);
-  
+
 
   useEffect(() => {
 
@@ -217,7 +217,7 @@ export default function Groups() {
           <Divider />
           <List><MainListItems user={store.userInfo} /></List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />

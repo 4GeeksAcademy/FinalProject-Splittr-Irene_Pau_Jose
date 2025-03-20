@@ -41,10 +41,10 @@ export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
     }
 }
 
-export const mapSharedObjective = async (setSharedObjective) => {
+export const mapSharedObjective = async (setSharedObjective, userid ) => {
 
     try {
-        const response = await fetch(urlBackend+"objective", {
+        const response = await fetch(urlBackend+"/objective/user" + userid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"

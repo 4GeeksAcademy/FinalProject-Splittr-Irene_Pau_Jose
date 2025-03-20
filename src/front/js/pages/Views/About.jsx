@@ -19,7 +19,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
-import { secondaryListItems } from '../Dashboard/listitems.jsx';
+import { SecondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
@@ -27,7 +27,8 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
-
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
 
 function Copyright() {
   return (
@@ -141,6 +142,8 @@ export default function About() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const { store, actions } = useContext(Context);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -193,10 +196,21 @@ export default function About() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
+        <Box sx={{
+            width: "100%",
+            maxWidth: "600px",
+            padding: "0 16px",
+            marginTop: "80px",
+            margin: "0 auto",
+          }}>
+          <Typography component="h1" variant="h6" noWrap className={classes.title}>
+            Welcome, Pepito!
+          </Typography>
+        </Box>
 
       </div>
     </ThemeProvider>

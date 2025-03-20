@@ -24,16 +24,17 @@ import { useEffect } from 'react';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
 
-export const MainListItems = ({user}) => {
+export const MainListItems = ({ user }) => {
 
-  const{store,actions}=useContext(Context);
+  const { store, actions } = useContext(Context);
+  console.log(user);
 
 
 
-  return(
+  return (
 
     <div>
-     <ListItem button component={Link} to="/dashboard">
+      <ListItem button component={Link} to="/dashboard">
         <ListItemIcon>
           <DashboardIcon />
         </ListItemIcon>
@@ -63,37 +64,40 @@ export const MainListItems = ({user}) => {
         </ListItemIcon>
         <ListItemText primary="Messages" />
       </ListItem>
-      <ListItem button component={Link} to="/favouritecontacts">
-        <ListItemIcon>
-          <FavoriteIcon />
-        </ListItemIcon>
-        <ListItemText primary="Favourite Contacts" />
-      </ListItem>
       
+
     </div>
   )
 };
 
-export const secondaryListItems = (
-  <div>
-    
-    <ListItem button component={Link} to="/settings">
-      <ListItemIcon>
-        <SettingsIcon />
-      </ListItemIcon>
-      <ListItemText primary="Settings" />
-    </ListItem>
-    <ListItem button component={Link} to="/about">
-      <ListItemIcon>
-        <InfoIcon />
-      </ListItemIcon>
-      <ListItemText primary="About" />
-    </ListItem>
-    <ListItem button component={Link} to="/feedback">
-      <ListItemIcon>
-        <MailOutlineIcon />
-      </ListItemIcon>
-      <ListItemText primary="Feedback" />
-    </ListItem>
-  </div>
-);
+export const SecondaryListItems = ({ user }) => {
+
+  const { store, actions } = useContext(Context);
+  console.log(user);
+
+
+  return (
+    <div>
+
+      <ListItem button component={Link} to="/settings" >
+        <ListItemIcon>
+          <SettingsIcon />
+        </ListItemIcon>
+        <ListItemText primary="Settings" />
+      </ListItem>
+      <ListItem button component={Link} to="/about">
+        <ListItemIcon>
+          <InfoIcon />
+        </ListItemIcon>
+        <ListItemText primary="About" />
+      </ListItem>
+      <ListItem button component={Link} to="/feedback">
+        <ListItemIcon>
+          <MailOutlineIcon />
+        </ListItemIcon>
+        <ListItemText primary="Feedback" />
+      </ListItem>
+    </div>
+  )
+}
+
