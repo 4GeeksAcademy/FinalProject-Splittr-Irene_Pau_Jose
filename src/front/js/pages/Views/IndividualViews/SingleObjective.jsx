@@ -17,7 +17,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems } from '../../Dashboard/listitems.jsx';
-import { secondaryListItems } from '../../Dashboard/listitems.jsx';
+import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Card, Avatar, Tooltip } from "@material-ui/core";
@@ -234,7 +234,7 @@ export default function SingleObjective() {
           <Divider />
           <List><MainListItems /></List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
 
         <div className={classes.appBarSpacer} />

@@ -19,7 +19,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
-import { secondaryListItems } from '../Dashboard/listitems.jsx';
+import { SecondaryListItems } from '../Dashboard/listitems.jsx';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
@@ -229,10 +229,10 @@ export default function Messages() {
   const { store, actions } = useContext(Context);
 
   const [messages, setMessages] = useState([]);
-console.log(messages);
+  console.log(messages);
 
   const { userid } = useParams();
-  
+
 
 
   useEffect(() => {
@@ -295,14 +295,14 @@ console.log(messages);
           <Divider />
           <List><MainListItems user={store.userInfo} /></List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} justifyContent="center" >
-            {messages && Array.isArray(messages) && messages.length > 0 ? (
+              {messages && Array.isArray(messages) && messages.length > 0 ? (
                 (() => {
                   const currentUser = store.userInfo;
                   if (!currentUser || !currentUser.user_id) {

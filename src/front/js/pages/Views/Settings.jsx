@@ -19,7 +19,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
-import { secondaryListItems } from '../Dashboard/listitems.jsx';
+import { SecondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
@@ -39,7 +39,8 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
-
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
 
 function Copyright() {
   return (
@@ -160,6 +161,8 @@ export default function Settings() {
     setState({ ...state, Language: event.target.value });
   };
 
+  const { store, actions } = useContext(Context);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -212,9 +215,9 @@ export default function Settings() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo}/></List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
         <Box
           sx={{

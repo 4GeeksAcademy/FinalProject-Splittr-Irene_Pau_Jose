@@ -19,7 +19,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
-import { secondaryListItems } from '../Dashboard/listitems.jsx';
+import { SecondaryListItems } from '../Dashboard/listitems.jsx';
 import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
@@ -151,10 +151,10 @@ export default function SharedObjectives() {
 
   const [sharedObjectives, setSharedObjectives] = useState([]);
   const { userid } = useParams();
-    console.log(userid);
-  
+  console.log(userid);
+
   useEffect(() => {
-    mapSharedObjective(setSharedObjectives,userid)
+    mapSharedObjective(setSharedObjectives, userid)
 
   }, [])
 
@@ -212,7 +212,7 @@ export default function SharedObjectives() {
           <Divider />
           <List><MainListItems /></List>
           <Divider />
-          <List>{secondaryListItems}</List>
+          <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
