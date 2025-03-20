@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
@@ -15,22 +15,25 @@ import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button';
 import Avatar from '@material-ui/core/Avatar';
-import { deepOrange, deepPurple } from '@material-ui/core/colors';
+import { deepPurple } from '@material-ui/core/colors';
 import MailIcon from '@material-ui/icons/Mail';
-import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
-import { Box } from '@material-ui/core';
-import { useMediaQuery } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import { getContactInfo } from '../../../component/callToApi.js';
+import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../../store/appContext.js';
+import { createMuiTheme } from '@material-ui/core/styles';
+
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -39,37 +42,28 @@ const darkTheme = createMuiTheme({
     background: { default: '#23272A', paper: '#2C2F33' },
     text: { primary: '#ffffff', secondary: '#b9bbbe' },
   },
-  overrides: {
-    MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
-    MuiToolbar: { root: { color: '#ffffff' } },
-    MuiTypography: { root: { color: '#ffffff' } },
-    MuiIconButton: { root: { color: '#ffffff !important' } },
-    MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
+    overrides: {
+      MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
+      MuiToolbar: { root: { color: '#ffffff' } },
+      MuiTypography: { root: { color: '#ffffff' } },
+      MuiIconButton: { root: { color: '#ffffff !important' } },
+      MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
+    },
   },
-});
+);
+
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: {
-    paddingRight: 20,
-    minHeight: 70,
-  },
-  toolbarIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-  },
+  toolbar: { paddingRight: 20, minHeight: 70 },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    backgroundColor: '#000000',
-    color: theme.palette.text.primary,
   },
   appBarShift: {
     marginLeft: drawerWidth,
@@ -78,100 +72,58 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    backgroundColor: '#000000',
-    color: theme.palette.text.primary,
   },
   menuButton: { marginRight: 36 },
   title: { flexGrow: 1 },
-  drawerPaper: {
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    top: 30,
-  },
+  drawerPaper: { width: drawerWidth, transition: theme.transitions.create('width') },
   drawerPaperClose: {
     overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
   },
   container: {
     paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
     display: 'flex',
     justifyContent: 'center',
     width: '100%',
     height: '100vh',
-    marginTop: "10%",
   },
   card: {
     width: "40%",
     maxWidth: "700px",
-    height: "50%",
-    maxHeight: "800px",
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
     alignItems: 'center',
   },
   avatar: {
     backgroundColor: deepPurple[500],
-    width: 200,
-    height: 200,
-    fontSize: '4rem',
-    transition: 'width 0.3s ease-in-out, height 0.3s ease-in-out, font-size 0.3s ease-in-out',
-    '@media (max-width:900px)': {
-      width: 160,
-      height: 160,
-      fontSize: '3.5rem',
-    },
-    '@media (max-width:600px)': {
-      width: 120,
-      height: 120,
-      fontSize: '3rem',
-    },
-    '@media (max-width:400px)': {
-      width: 80,
-      height: 80,
-      fontSize: '2rem',
-    }
-  },
-
-  cardContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    textAlign: 'center',
+    width: 120,
+    height: 120,
+    fontSize: '3rem',
   },
 }));
 
-export default function ListOfContacts() {
+export default function SingleContact() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  const [open, setOpen] = useState(true);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  const {store, actions} = useContext(Context); 
+  const [contact, setContact] = useState([]);
+  const { contactid } = useParams();
+  console.log(contact)
+
+  useEffect(() => {
+      getContactInfo(setContact, contactid);
+  }, []);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
-
-  const handleDeleteClick = () => {
-    setOpenDeleteDialog(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
-  };
-
+  const handleDeleteClick = () => setOpenDeleteDialog(true);
+  const handleCloseDeleteDialog = () => setOpenDeleteDialog(false);
   const handleConfirmDelete = () => {
     setOpenDeleteDialog(false);
-    // aquí el código para eliminar el contacto
+    // Código para eliminar contacto
   };
 
   return (
@@ -180,31 +132,13 @@ export default function ListOfContacts() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            {!open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                className={classes.menuButton}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
-            {open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="close drawer"
-                onClick={handleDrawerClose}
-                className={classes.menuButton}
-              >
-                <ChevronLeftIcon />
-              </IconButton>
-            )}
-            <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
-            </Typography>
+            <IconButton color="inherit" onClick={open ? handleDrawerClose : handleDrawerOpen}>
+              {open ? <ChevronLeftIcon /> : <MenuIcon />}
+            </IconButton>
+            <Typography variant="h6" noWrap className={classes.title} style={{ color: darkTheme.palette.text.primary }}>
+  Welcome, Pepito!
+</Typography>
+
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
@@ -212,58 +146,38 @@ export default function ListOfContacts() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
+        <Drawer variant="permanent" open={open} classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }}>
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo}/></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
-
         <div className={classes.container}>
-          <Card className={classes.card} variant="outlined">
-            <CardContent className={classes.cardContent}>
-              <Avatar className={classes.avatar}>PP</Avatar>
-              <Box sx={{ marginTop: "10px" }}>
-                <Typography variant="h5" component="h2">
-                  Pepito Pepe
-                </Typography>
-                <Typography color="textSecondary">pepitopepe@gmail.com</Typography>
-              </Box>
-              <Box sx={{ marginTop: "10px" }}>
-                <Typography variant="body2" component="p">
-                  Mutual groups:
-                </Typography>
-                <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={1}>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-
-                  <Typography>+4 more</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-            <CardActions>
-              <Button><MailIcon fontSize="large" /></Button>
-              <Button color="secondary" onClick={handleDeleteClick}>
-                <CloseIcon fontSize="large" />
-              </Button>
-            </CardActions>
-          </Card>
+          {contact ? (
+            <Card className={classes.card} variant="outlined">
+              <CardContent>
+                <Avatar className={classes.avatar}>
+                  {contact.contact_initial}
+                </Avatar>
+                <Typography variant="h5">{contact.contact_name}</Typography>
+                <Typography color="textSecondary">{contact.contact_email}</Typography>
+              </CardContent>
+              <CardActions>
+                <Button><MailIcon /></Button>
+                <Button color="secondary" onClick={handleDeleteClick}><CloseIcon /></Button>
+              </CardActions>
+            </Card>
+          ) : (
+            <Typography variant="h6" color="textSecondary">Cargando contacto...</Typography>
+          )}
         </div>
       </div>
-
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Delete contact</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this contact?
-        </DialogContent>
+        <DialogContent>Are you sure you want to delete this contact?</DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="secondary">
-            Delete
-          </Button>
+          <Button onClick={handleCloseDeleteDialog} color="primary">Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="secondary">Delete</Button>
         </DialogActions>
       </Dialog>
     </ThemeProvider>

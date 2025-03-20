@@ -27,7 +27,14 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import ContactCard from './IndividualViews/ContactCard.jsx';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
+
 import { useEffect, useState } from 'react';
+import { mapContacts } from '../../component/callToApi.js';
+
+import { useParams } from 'react-router-dom';
+import { useContext } from 'react';
+import { Context } from '../../store/appContext.js';
+
 
 function Copyright() {
   return (
@@ -124,9 +131,21 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(4)
 
   },
+  content: {
+    flexGrow: 1,
+    overflow: 'auto',
+    width: '100%',
+  },
+  container: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(4),
+    width: '100%',
+  },
   contactGrid: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    width: '100%',
+    padding: theme.spacing(1),
   },
 }));
 
@@ -141,6 +160,19 @@ export default function ListOfContacts() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+
+  const { store, actions } = useContext(Context);
+
+  const [contacts, setContacts] = useState([]);
+
+  const { userid } = useParams();
+
+
+  useEffect(() => {
+    mapContacts(setContacts, userid);
+  }, []);
+
+
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -194,20 +226,21 @@ export default function ListOfContacts() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
-
             <Grid container spacing={2} className={classes.contactGrid}>
-              {Array.from({ length: 6 }, (_, i) => (
-                <Grid item xs={12} key={i}>
-                  <ContactCard />
-                </Grid>
+              {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
+                <ContactCard key={contact.id} contact={contact} />
               ))}
+              {contacts && (!contacts.contacts || !Array.isArray(contacts.contacts)) && (
+                <div>No se encontraron contactos o la estructura es incorrecta.</div>
+              )}
+              {!contacts && <div>Cargando contactos...</div>}
             </Grid>
           </Container>
         </main>

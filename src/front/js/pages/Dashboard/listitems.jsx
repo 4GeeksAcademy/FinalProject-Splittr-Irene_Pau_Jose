@@ -40,7 +40,7 @@ export const MainListItems = ({ user }) => {
         </ListItemIcon>
         <ListItemText primary="Home" />
       </ListItem>
-      <ListItem button component={Link} to="/listofcontacts">
+      <ListItem button component={Link} to={`/user_contacts/user/${user.user_id}`}>
         <ListItemIcon>
           <AccountCircleIcon />
         </ListItemIcon>
