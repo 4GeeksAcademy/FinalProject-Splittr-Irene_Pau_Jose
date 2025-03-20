@@ -336,6 +336,23 @@ def add_contact():
     return jsonify({"msg": "Contact added successfully"}), 201
 
 
+@api.route('/singlecontact/<int:contact_id>', methods=['GET'])
+@jwt_required()
+def get_single_contact(contact_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    contact = User_Contacts.query.filter_by(user_id=current_user_id, contact_id=contact_id, is_active=True).first()
+    
+    if not contact:
+        return jsonify({"msg": "Contact not found"}), 404
+
+    return jsonify(contact.serialize()), 200
+
+
+
 #editar estado de un contacto, activo o inactivo 
 @api.route('/user_contacts/<int:contact_id>', methods=['PUT'])
 @jwt_required()

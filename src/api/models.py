@@ -70,8 +70,16 @@ class User_Contacts(db.Model):
         return f'<User_Contacts {self.user_id} -> {self.contact_id}>'
 
     def serialize(self):
+        contact = User.query.get(self.contact_id)
+
+        contact_initial = contact.name[0] if contact and contact.name else None
+
+
         return {
             "id": self.id,
+            "contact_name": contact.name if contact else None, 
+            "contact_email": contact.email, 
+            "contact_initial": contact_initial,
             "user_id": self.user_id,
             "contact_id": self.contact_id,
             "created_at": self.created_at,

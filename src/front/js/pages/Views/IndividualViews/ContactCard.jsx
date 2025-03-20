@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
         [theme.breakpoints.down('sm')]: {
             fontSize: '0.875rem',
-        },
+        }, 
     },
     initial: {
         width: 40,
@@ -79,8 +79,8 @@ const ContactCard = ({ contact }) => {
             <Link to={`/singlecontact/${contact.contact_id}`}>
                 <Paper className={classes.card}>
                     <div className={classes.name}>
-                        <div className={classes.initial}>P</div>
-                        <Typography variant="h6" style={{ fontSize: '1rem' }}>{contact.contact_id}</Typography>
+                        <div className={classes.initial}>{contact.contact_initial}</div>
+                        <Typography variant="h6" style={{ fontSize: '1rem' }}>{contact.contact_name}</Typography>
                     </div>
                     <div>
                         <IconButton className={classes.iconButton}>

@@ -27,7 +27,6 @@ import { Context } from '../../store/appContext.js';
 export const MainListItems = ({user}) => {
 
   const{store,actions}=useContext(Context);
-console.log(user);
 
 
 

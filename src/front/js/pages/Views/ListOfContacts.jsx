@@ -166,13 +166,13 @@ export default function ListOfContacts() {
   const [contacts, setContacts] = useState([]);
 
   const { userid } = useParams();
-  console.log(userid);
+
 
   useEffect(() => {
     mapContacts(setContacts, userid);
   }, []);
 
-  console.log(contacts)
+
 
   return (
     <ThemeProvider theme={darkTheme}>

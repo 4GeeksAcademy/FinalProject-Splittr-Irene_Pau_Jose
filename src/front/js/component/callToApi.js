@@ -88,12 +88,31 @@ export const mapContacts = async (setContacts, userid) => {
             },
         })
         const data = await response.json()
-        setContacts(data)
+        setContacts(data);
+        console.log(data);
+        
     } catch (error) {
         console.log(error);
     }
 };
     
+export const getContactInfo = async (setSingleContactInfo, contactId) => {
+    try {
+        const response = await fetch(urlBackend + "/singlecontact/"+ contactId, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            }
+        });
+        const data = await response.json();
+        setSingleContactInfo(data);
+            console.log(data);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
 
 export const deleteContact = async (userId, contactId, isActive) => {
     try {
