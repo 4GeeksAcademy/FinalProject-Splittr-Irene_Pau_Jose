@@ -242,20 +242,20 @@ class Messages(db.Model):
             "sent_at": self.sent_at
         }
     
-
 class Objectives(db.Model):
-    __tablename__="objectives"
-    id=db.Column(db.Integer, unique=True, primary_key=True)
-    group_id=db.Column(db.Integer, db.ForeignKey("group.group_id"))
-    name=db.Column(db.String(20), nullable=False)
-    target_amount=db.Column(db.Integer, nullable=False)
-    created_at=db.Column(db.DateTime)
-    is_completed=db.Column(db.Boolean, nullable=False, default=False)
+    __tablename__ = "objectives"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey("group.group_id"))
+    name = db.Column(db.String(20), nullable=False)
+    target_amount = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime)
+    is_completed = db.Column(db.Boolean, nullable=False, default=False)
     
-
+    # Relationship with Group
+    group = db.relationship("Group", backref="objectives")
 
     def __repr__(self):
-        return f'<Objectives {self.name}>'
+        return f'<Objective {self.name}>'
 
     def serialize(self):
         return {
@@ -264,9 +264,9 @@ class Objectives(db.Model):
             "name": self.name,
             "target_amount": self.target_amount,
             "created_at": self.created_at,
-            "is_completed": self.is_completed
+            "is_completed": self.is_completed,
+            "participants": [member.user.serialize() for member in self.group.members] if self.group else []
         }
-    
 
 class ObjectivesContributions(db.Model):
 

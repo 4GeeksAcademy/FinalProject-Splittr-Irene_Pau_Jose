@@ -20,13 +20,8 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../Dashboard/listitems.jsx';
 import { SecondaryListItems } from '../Dashboard/listitems.jsx';
-import Chart from '../Dashboard/Chart.jsx';
-import Deposits from '../Dashboard/Deposits.jsx';
-import Orders from '../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../Home.jsx';
+import Avatar from '@material-ui/core/Avatar';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
 
@@ -35,7 +30,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Splittr
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -72,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -105,7 +99,6 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -117,17 +110,64 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
     top: 30,
   },
-  appBarSpacer: {
-    minHeight: theme.spacing(4),
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    height: '100vh',
+    overflow: 'auto',
   },
   container: {
-    paddingTop: theme.spacing(1),
+    paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4)
-
   },
-  contactGrid: {
+  paper: {
+    padding: theme.spacing(3),
+    marginBottom: theme.spacing(3),
     display: 'flex',
+    flexDirection: 'column',
+  },
+  aboutTitle: {
+    marginBottom: theme.spacing(3),
+    textAlign: 'center',
+  },
+  sectionTitle: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    color: theme.palette.primary.main,
+    borderBottom: `1px solid ${theme.palette.primary.main}`,
+    paddingBottom: theme.spacing(1),
+  },
+  featureList: {
+    paddingLeft: theme.spacing(2),
+  },
+  featureItem: {
+    marginBottom: theme.spacing(1),
+  },
+  creatorsContainer: {
+    display: 'flex',
+    justifyContent: 'space-around',
     flexWrap: 'wrap',
+    marginTop: theme.spacing(3),
+  },
+  creatorCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    margin: theme.spacing(2),
+  },
+  avatar: {
+    width: theme.spacing(10),
+    height: theme.spacing(10),
+    backgroundColor: theme.palette.grey[700],
+    marginBottom: theme.spacing(1),
+    fontSize: '1.5rem',
+  },
+  creatorName: {
+    marginTop: theme.spacing(1),
+    marginBottom: 0,
+  },
+  creatorRole: {
+    color: theme.palette.text.secondary,
   },
 }));
 
@@ -140,7 +180,6 @@ export default function About() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const { store, actions } = useContext(Context);
 
@@ -194,26 +233,101 @@ export default function About() {
           }}
           open={open}
         >
-
           <Divider />
           <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
-        <Box sx={{
-            width: "100%",
-            maxWidth: "600px",
-            padding: "0 16px",
-            marginTop: "80px",
-            margin: "0 auto",
-          }}>
-          <Typography component="h1" variant="h6" noWrap className={classes.title}>
-            Welcome, Pepito!
-          </Typography>
-        </Box>
-
+        
+        <main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <Container maxWidth="lg" className={classes.container}>
+            <Typography component="h1" variant="h4" className={classes.aboutTitle}>
+              About Splittr
+            </Typography>
+            
+            <Paper className={classes.paper}>
+              <Typography variant="h6" className={classes.sectionTitle}>
+                Our Mission
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Splittr was born from a simple idea: make sharing expenses with friends, family, and colleagues 
+                as easy and stress-free as possible. We believe that money matters shouldn't get in the way of 
+                relationships, which is why we've created a comprehensive platform that helps you manage shared 
+                expenses effortlessly.
+              </Typography>
+            </Paper>
+            
+            <Paper className={classes.paper}>
+              <Typography variant="h6" className={classes.sectionTitle}>
+                Key Features
+              </Typography>
+              <ul className={classes.featureList}>
+                <li className={classes.featureItem}>
+                  <Typography variant="body1">
+                    <strong>Split Bills Effortlessly</strong> - Divide expenses equally or customize splits based on individual contributions.
+                  </Typography>
+                </li>
+                <li className={classes.featureItem}>
+                  <Typography variant="body1">
+                    <strong>Direct Payments</strong> - Send and receive payments directly through the app between users in your contacts.
+                  </Typography>
+                </li>
+                <li className={classes.featureItem}>
+                  <Typography variant="body1">
+                    <strong>Create and Manage Groups</strong> - Organize expenses by creating groups for roommates, trips, events, or any shared spending situation.
+                  </Typography>
+                </li>
+                <li className={classes.featureItem}>
+                  <Typography variant="body1">
+                    <strong>Set Shared Objectives</strong> - Create financial goals with friends and track progress towards them together.
+                  </Typography>
+                </li>
+                <li className={classes.featureItem}>
+                  <Typography variant="body1">
+                    <strong>Expense History</strong> - Keep track of all shared expenses and payments in one place.
+                  </Typography>
+                </li>
+              </ul>
+            </Paper>
+            
+            <Paper className={classes.paper}>
+              <Typography variant="h6" className={classes.sectionTitle}>
+                The Team Behind Splittr
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Splittr was created by two passionate developers committed to solving everyday financial challenges through technology.
+              </Typography>
+              
+              <div className={classes.creatorsContainer}>
+                <div className={classes.creatorCard}>
+                  <Avatar className={classes.avatar}>JR</Avatar>
+                  <Typography variant="h6" className={classes.creatorName}>
+                    José Riobó Cicero
+                  </Typography>
+                  <Typography variant="body2" className={classes.creatorRole}>
+                    Co-Founder & Lead Developer
+                  </Typography>
+                </div>
+                
+                <div className={classes.creatorCard}>
+                  <Avatar className={classes.avatar}>IB</Avatar>
+                  <Typography variant="h6" className={classes.creatorName}>
+                    Irene Batlle Molla
+                  </Typography>
+                  <Typography variant="body2" className={classes.creatorRole}>
+                    Co-Founder & UX Designer
+                  </Typography>
+                </div>
+              </div>
+            </Paper>
+            
+            <Box pt={4}>
+              <Copyright />
+            </Box>
+          </Container>
+        </main>
       </div>
     </ThemeProvider>
   );
 }
-

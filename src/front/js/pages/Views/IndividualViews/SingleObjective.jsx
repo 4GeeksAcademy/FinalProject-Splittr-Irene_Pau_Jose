@@ -16,7 +16,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems } from '../../Dashboard/listitems.jsx';
+import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -32,6 +32,9 @@ import TableRow from '@material-ui/core/TableRow';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getInfoSharedObjective } from '../../../component/callToApi.js';
+import { useContext } from 'react';
+import { Context } from '../../../store/appContext.js';
+
 
 function Copyright() {
   return (
@@ -165,6 +168,7 @@ export default function SingleObjective() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const { store, actions } = useContext(Context);
   const [singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
   const { objectiveid } = useParams();
   console.log(singleObjectiveInfo);
@@ -232,7 +236,7 @@ export default function SingleObjective() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo}  /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
@@ -257,8 +261,8 @@ export default function SingleObjective() {
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed:  </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {singleObjectiveInfo.created_at} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Recent Contributions</Typography>
