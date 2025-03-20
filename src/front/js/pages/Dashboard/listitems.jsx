@@ -27,7 +27,6 @@ import { Context } from '../../store/appContext.js';
 export const MainListItems = ({user}) => {
 
   const{store,actions}=useContext(Context);
-console.log(user);
 
 
 
@@ -40,7 +39,7 @@ console.log(user);
         </ListItemIcon>
         <ListItemText primary="Home" />
       </ListItem>
-      <ListItem button component={Link} to="/listofcontacts">
+      <ListItem button component={Link} to={`/user_contacts/user/${user.user_id}`}>
         <ListItemIcon>
           <AccountCircleIcon />
         </ListItemIcon>
