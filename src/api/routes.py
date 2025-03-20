@@ -846,36 +846,52 @@ def get_objectives():
     return jsonify(objectives_info), 200
 
 
+
+
 @api.route("/objective/user/<int:user_id>", methods=["GET"])
 @jwt_required()
-def get_objectives_by_user(user_id):
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
-    if user is None:
-        return jsonify({"msg": "You need to be logged in"}), 401
+def get_objectives_by_user_id(user_id):
+    current_user_id = get_jwt_identity()
     
-    objectives = Objectives.query.all(user_id=user_id)
-    objectives_info = [objective.serialize() for objective in objectives]
-    return jsonify(objectives_info), 200
+    if not User.query.get(current_user_id):
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    group_membership = Group_to_user.query.filter(Group_to_user.user_id == user_id).all()
+    
+    if not group_membership:
+        return jsonify({"error": "User is not in any groups"}), 404
+
+    group_ids = [membership.group_id for membership in group_membership]
+
+    objectives = Objectives.query.filter(Objectives.group_id.in_(group_ids)).all()
+
+    return jsonify([objective.serialize() for objective in objectives]), 200
 
 
-
-@api.route("/objective/<int:id>", methods=["GET"])
+@api.route("/objective/<int:objective_id>", methods=["GET"])
 @jwt_required()
-def get_objective_by_id(id):
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
-    if user is None:
+def get_objective_by_id(objective_id):
+    current_user_id = get_jwt_identity()
+    
+    if not User.query.get(current_user_id):
         return jsonify({"msg": "You need to be logged in"}), 401
     
-    objectives = Objectives.query.filter_by(id=id).first()
+    objective = Objectives.query.get(objective_id)
     
-    if not objectives:
-        return jsonify({"msg": "Objective does not exist"})
-
-    return jsonify(objectives.serialize()), 200
-
-
+    if not objective:
+        return jsonify({"error": "Objective not found"}), 404
+    
+    group = Group.query.get(objective.group_id)
+    
+    user_membership = Group_to_user.query.filter_by(
+        user_id=current_user_id, 
+        group_id=objective.group_id
+    ).first()
+    
+    if not user_membership:
+        return jsonify({"error": "You don't have permission to view this objective"}), 403
+    
+    return jsonify(objective.serialize()), 200
 
 
 @api.route("/objective/create", methods=["POST"])

@@ -27,7 +27,7 @@ import { Context } from '../../store/appContext.js';
 export const MainListItems = ({ user }) => {
 
   const { store, actions } = useContext(Context);
-  console.log(user);
+ 
 
 
 
@@ -52,7 +52,7 @@ export const MainListItems = ({ user }) => {
         </ListItemIcon>
         <ListItemText primary="Groups" />
       </ListItem>
-      <ListItem button component={Link} to={`/sharedobjectives/`}>
+      <ListItem button component={Link} to={`/objective/user/${user.user_id}`}>
         <ListItemIcon>
           <BarChartIcon />
         </ListItemIcon>
@@ -73,7 +73,7 @@ export const MainListItems = ({ user }) => {
 export const SecondaryListItems = ({ user }) => {
 
   const { store, actions } = useContext(Context);
-  console.log(user);
+  
 
 
   return (

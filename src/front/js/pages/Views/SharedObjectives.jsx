@@ -149,6 +149,7 @@ export default function SharedObjectives() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+ const { store, actions } = useContext(Context);
   const [sharedObjectives, setSharedObjectives] = useState([]);
   const { userid } = useParams();
   console.log(userid);
@@ -210,7 +211,7 @@ export default function SharedObjectives() {
         >
 
           <Divider />
-          <List><MainListItems /></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
