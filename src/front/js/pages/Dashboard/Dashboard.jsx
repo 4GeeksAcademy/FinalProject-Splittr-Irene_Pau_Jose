@@ -27,6 +27,8 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
+import { useParams } from 'react-router-dom';
+import { mapTransactions } from '../../component/callToApi.js';
 
 function Copyright() {
   return (
@@ -142,16 +144,18 @@ export default function Dashboard() {
 
   const { store, actions } = useContext(Context);
   const [user, setUser] = useState(store.userInfo);
-  console.log(user);
+  
+  const [transactions, setTransactions] = useState([]);
+  const { userid } = useParams();
 
   useEffect(() => {
     const getUser = async () => {
       const data = await actions.getUser()
       setUser(data)
-
     }
     getUser();
   }, [])
+
 
   return (
     <ThemeProvider theme={darkTheme}>

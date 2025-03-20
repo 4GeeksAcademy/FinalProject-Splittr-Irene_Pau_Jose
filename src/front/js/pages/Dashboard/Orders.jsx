@@ -1,29 +1,15 @@
-import React from 'react';
-import Link from '@material-ui/core/Link';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Title from './Title.jsx';
-
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, date, name, shipTo, paymentMethod, amount };
-}
-
-const rows = [
-  createData(0, '16 Mar, 2019', 'Elvis Presley', 'Tupelo, MS', 'VISA ⠀•••• 3719', 312.44),
-  createData(1, '16 Mar, 2019', 'Paul McCartney', 'London, UK', 'VISA ⠀•••• 2574', 866.99),
-  createData(2, '16 Mar, 2019', 'Tom Scholz', 'Boston, MA', 'MC ⠀•••• 1253', 100.81),
-  createData(3, '16 Mar, 2019', 'Michael Jackson', 'Gary, IN', 'AMEX ⠀•••• 2000', 654.39),
-  createData(4, '15 Mar, 2019', 'Bruce Springsteen', 'Long Branch, NJ', 'VISA ⠀•••• 5919', 212.79),
-];
-
-function preventDefault(event) {
-  event.preventDefault();
-}
+import React, { useEffect, useState, useContext } from "react";
+import Link from "@material-ui/core/Link";
+import { makeStyles } from "@material-ui/core/styles";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Title from "./Title.jsx";
+import { Context } from "../../store/appContext.js";
+import { useParams } from "react-router-dom";
+import { mapTransactions } from "../../component/callToApi.js";
 
 const useStyles = makeStyles((theme) => ({
   seeMore: {
@@ -33,34 +19,85 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Orders() {
   const classes = useStyles();
+  const { store, actions } = useContext(Context);
+  const [transactions, setTransactions] = useState({
+    group_payments: [],
+    objective_contributions: [],
+    received_payments: [],
+    sent_payments: [],
+  });
+
+  useEffect(() => {
+    console.log("Orders component mounted, attempting to fetch transactions");
+    mapTransactions(setTransactions);
+  }, []);
+
+
+  console.log("Current transactions state:", transactions);
+  const formattedTransactions = [
+    ...transactions.group_payments.map((tx) => ({
+      id: `group_${tx.id}`,
+      date: new Date(tx.payed_at),
+      type: "Group Payment",
+      from: tx.payer_name,
+      to: `${tx.group_name} (to ${tx.receiver_name})`,
+      amount: tx.amount
+    })),
+    ...transactions.objective_contributions.map((tx) => ({
+      id: `objective_${tx.id}`,
+      date: new Date(tx.contributed_at),
+      type: "Objective Contribution",
+      from: tx.user_name,
+      to: tx.objective_name,
+      amount: tx.amount_contributed
+    })),
+    ...transactions.received_payments.map((tx) => ({
+      id: `received_${tx.id}`,
+      date: new Date(tx.payed_at),
+      type: "Received Payment",
+      from: tx.payer_name,
+      to: tx.receiver_name,
+      amount: tx.amount
+    })),
+    ...transactions.sent_payments.map((tx) => ({
+      id: `sent_${tx.id}`,
+      date: new Date(tx.payed_at),
+      type: "Sent Payment",
+      from: tx.payer_name,
+      to: tx.receiver_name,
+      amount: tx.amount
+    }))
+  ];
+
+  const sortedTransactions = formattedTransactions.sort((a, b) => b.date - a.date);
   return (
     <React.Fragment>
-      <Title>Recent Orders</Title>
+      <Title>Recent Transactions</Title>
       <Table size="small">
         <TableHead>
           <TableRow>
             <TableCell>Date</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Ship To</TableCell>
-            <TableCell>Payment Method</TableCell>
-            <TableCell align="right">Sale Amount</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>From</TableCell>
+            <TableCell>To</TableCell>
+            <TableCell align="right">Amount (€)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.date}</TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.shipTo}</TableCell>
-              <TableCell>{row.paymentMethod}</TableCell>
-              <TableCell align="right">{row.amount}</TableCell>
+          {sortedTransactions.map((tx) => (
+            <TableRow key={tx.id}>
+              <TableCell>{tx.date.toLocaleDateString()}</TableCell>
+              <TableCell>{tx.type}</TableCell>
+              <TableCell>{tx.from}</TableCell>
+              <TableCell>{tx.to}</TableCell>
+              <TableCell align="right">{tx.amount} €</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
       <div className={classes.seeMore}>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          See more orders
+        <Link color="primary" href="#" onClick={(e) => e.preventDefault()}>
+          See more transactions
         </Link>
       </div>
     </React.Fragment>

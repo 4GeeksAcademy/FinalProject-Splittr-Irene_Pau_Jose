@@ -108,52 +108,47 @@ class Group_to_user(db.Model):
 
 class Group_payments(db.Model):
     __tablename__ = "group_payments"
-    id = db.Column(db.Integer,unique=True, primary_key=True)
+    id = db.Column(db.Integer, unique=True, primary_key=True)
     receiver_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
     payer_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey("group.group_id"), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     payed_at = db.Column(db.DateTime)
-    
-
-
-    def __repr__(self):
-        return f'<Group_payments {self.id}>'
 
     def serialize(self):
+        payer = User.query.get(self.payer_id)
+        receiver = User.query.get(self.receiver_id)
+        group = Group.query.get(self.group_id)
+
         return {
             "id": self.id,
-            "receiver_id": self.receiver_id,
-            "payer_id": self.payer_id,
-            "group_id": self.group_id,
+            "payer_name": payer.name if payer else "Unknown",
+            "receiver_name": receiver.name if receiver else (group.group_name if group else "Unknown"),
+            "group_name": group.group_name if group else None,
             "amount": self.amount,
-            "payed_at": self.payed_at,
-            
+            "payed_at": self.payed_at
         }
-
 
 class Payments(db.Model):
     __tablename__ = "payments"
-    id = db.Column(db.Integer,unique=True, primary_key=True)
+    id = db.Column(db.Integer, unique=True, primary_key=True)
     debt_id = db.Column(db.Integer, db.ForeignKey("debts.debt_id"))
     payer_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     receiver_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     amount = db.Column(db.Integer, nullable=False)
     payed_at = db.Column(db.DateTime)
-    
-
-    def __repr__(self):
-        return f'<Payments {self.debt_id}>'
 
     def serialize(self):
+        payer = User.query.get(self.payer_id)
+        receiver = User.query.get(self.receiver_id)
+
         return {
             "id": self.id,
             "debt_id": self.debt_id,
-            "payer_id": self.payer_id,
-            "receiver_id": self.receiver_id,
+            "payer_name": payer.name if payer else "Unknown",
+            "receiver_name": receiver.name if receiver else "Unknown",
             "amount": self.amount,
             "payed_at": self.payed_at
-
         }
     
 class Expenses(db.Model):
@@ -269,25 +264,22 @@ class Objectives(db.Model):
         }
 
 class ObjectivesContributions(db.Model):
-
-    __tablename__="objective_contributions"
+    __tablename__ = "objective_contributions"
     id = db.Column(db.Integer, unique=True, primary_key=True)
     objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
-    amount_contributed=db.Column(db.Integer, nullable=False)
-    contributed_at=db.Column(db.DateTime)
-
-    
-    def __repr__(self):
-        return f'<ObjectivesContributions {self.objective_id}>'
+    amount_contributed = db.Column(db.Integer, nullable=False)
+    contributed_at = db.Column(db.DateTime)
 
     def serialize(self):
+        user = User.query.get(self.user_id)
+        objective = Objectives.query.get(self.objective_id)
+
         return {
             "id": self.id,
-            "objective_id": self.objective_id,
-            "user_id": self.user_id,
+            "user_name": user.name if user else "Unknown",
+            "objective_name": objective.name if objective else "Unknown",
             "amount_contributed": self.amount_contributed,
             "contributed_at": self.contributed_at
-            
         }
     

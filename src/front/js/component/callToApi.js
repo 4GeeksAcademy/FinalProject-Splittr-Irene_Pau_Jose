@@ -179,3 +179,25 @@ export const getInfoConversation= async (setConversation, otheruserid) => {
         
     }
 };
+
+
+export const mapTransactions = async (setTransactions) => {
+    try {
+        const response = await fetch(urlBackend + "/transaction/user/" , {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            console.error("Response not OK:", response.status, response.statusText);
+            throw new Error("Failed to fetch transactions");
+        }
+
+        const data = await response.json();
+        console.log("Full transaction data received:", JSON.stringify(data));
+        setTransactions(data);
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+    }
+};

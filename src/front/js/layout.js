@@ -50,7 +50,7 @@ const Layout = () => {
                         <Route element={<LogIn/>} path="/login" />
                         <Route element={<SignUp/>} path="/signup" />
                         <Route element={<ListOfContacts/>} path="/user_contacts/user/:userid" />
-                        <Route element={<Dashboard/>} path="/dashboard" />
+                        <Route element={<Dashboard/>} path="/dashboard/" />
                         <Route element={<Home/>} path="/home" />
                         <Route element={<Groups/>} path="/group/user/:userid" />
                         <Route element={<SharedObjectives/>} path="/objective/user/:userid" />
