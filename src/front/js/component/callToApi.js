@@ -41,6 +41,25 @@ export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
     }
 }
 
+export const getGroupDebts = async (setGroupDebts, groupId) => {
+    try {
+      const response = await fetch(urlBackend+"/group/group_debts/"+groupId, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = await response.json();
+      setGroupDebts(data);
+      console.log(data)
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+
 export const mapSharedObjective = async (setSharedObjective, userid ) => {
 
     try {
@@ -79,6 +98,25 @@ export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid
     }
     
 }
+
+export const getObjectiveContributions = async (setContributions, objectiveId) => {
+    try {
+      const response = await fetch( urlBackend + "/objective/contribution/" + objectiveId, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = await response.json();
+      setContributions(data);
+      console.log(data); 
+  
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
 
 
 export const mapContacts = async (setContacts, userid) => {
@@ -200,3 +238,4 @@ export const mapTransactions = async (setTransactions) => {
         console.error("Error fetching transactions:", error);
     }
 };
+

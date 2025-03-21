@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts
+from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts;
 
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
 from datetime import datetime
-from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts
+from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts, group_debts;
 
 
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -275,6 +275,25 @@ def update_group(group_id):
     db.session.commit()
 
     return jsonify(group.serialize()), 200
+
+@api.route('/group/group_debts/<int:group_id>', methods=['GET'])
+@jwt_required()  
+def get_group_debts(group_id):
+    current_user_id = get_jwt_identity() 
+    user = User.query.get(current_user_id)  
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401 
+    
+    debts = Group_debts.query.filter_by(group_id=group_id).all()
+    
+    if not debts:
+        return jsonify({"error": "No debts found for this group"}), 404
+
+    debt_list = [debt.serialize() for debt in debts]
+
+    return jsonify(debt_list)
+
+
 
 #get contactos activos de un usuario 
 @api.route('/user_contacts/<int:user_id>', methods=['GET'])
@@ -1002,6 +1021,25 @@ def objective_contribution():
     return jsonify({"msg": "Contribution was successfully added"}), 201
 
 
+@api.route("/objective/contribution/<int:objective_id>", methods=["GET"])
+@jwt_required()
+def get_objective_contributions(objective_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
+    contributions = ObjectivesContributions.query.filter_by(objective_id=objective_id).all()
+
+    if not contributions:
+        return jsonify({"error": "No contributions found for this objective"}), 404
+
+    contribution_list = [contribution.serialize() for contribution in contributions]
+
+    return jsonify(contribution_list), 200
+
+
+
 @api.route('/transaction/user/', methods=['GET'])
 @jwt_required()
 def get_user_transactions():
@@ -1073,6 +1111,22 @@ def group_payments_populate():
         db.session.add(new_group_payments)
     db.session.commit()
     return jsonify("Group_payments have been created")
+
+@api.route("/groupdebtspopulate", methods=["GET"])
+def group_debts_populate():
+    for debt in group_debts:
+        new_group_debt = Group_debts(
+            debtor_id=debt["debtor_id"],
+            creditor_id=debt["creditor_id"],
+            group_id=debt["group_id"],
+            amount=debt["amount"],
+            payed_at=debt["payed_at"],
+            is_paid=debt["is_paid"]
+        )
+        db.session.add(new_group_debt)
+    db.session.commit()
+    return jsonify("Group_debts have been created")
+
 
 
 @api.route("/paymentspopulate", methods=["GET"])
