@@ -246,11 +246,7 @@ class Objectives(db.Model):
     created_at = db.Column(db.DateTime)
     is_completed = db.Column(db.Boolean, nullable=False, default=False)
     
-    # Relationship with Group
     group = db.relationship("Group", backref="objectives")
-
-    def __repr__(self):
-        return f'<Objective {self.name}>'
 
     def serialize(self):
         return {
@@ -260,7 +256,15 @@ class Objectives(db.Model):
             "target_amount": self.target_amount,
             "created_at": self.created_at,
             "is_completed": self.is_completed,
-            "participants": [member.user.serialize() for member in self.group.members] if self.group else []
+            "participants": [
+                {
+                    "id": member.user.user_id,
+                    "name": member.user.name if member.user else "Unknown",
+                    "email": member.user.email if member.user else "Unknown",
+                    "initial": member.user.name[0] if member.user and member.user.name else None
+                }
+                for member in self.group.members
+            ] if self.group else []
         }
 
 class ObjectivesContributions(db.Model):

@@ -220,11 +220,9 @@ export default function SharedObjectives() {
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} className={classes.contactGrid}>
-              {sharedObjectives.map((sharedObjective) => {
-                return (
-
-                  <SharedObjectiveCard sharedObjective={sharedObjective} />)
-              })}
+            {Array.isArray(sharedObjectives) && sharedObjectives.map((sharedObjective, index) => (
+  <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective} />
+))}
             </Grid>
           </Container>
         </main>

@@ -33,6 +33,7 @@ import { getInfoGroup } from '../../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
+import { formatDate } from '../../../utilities/formatDate.js';
 
 
 function Copyright() {
@@ -261,7 +262,7 @@ export default function SingleGroup() {
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Remaining amount: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {singleGroupInfo.created_at} </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleGroupInfo.created_at)} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>
