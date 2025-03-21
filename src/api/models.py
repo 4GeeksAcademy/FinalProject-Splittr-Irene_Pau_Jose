@@ -282,11 +282,19 @@ class Objectives(db.Model):
     group = db.relationship("Group", backref="objectives")
 
     def serialize(self):
+        total_contributed = db.session.query(
+            db.func.coalesce(db.func.sum(ObjectivesContributions.amount_contributed), 0)
+        ).filter_by(objective_id=self.id).scalar()
+        
+        remaining_amount = max(self.target_amount - total_contributed, 0)
+
         return {
             "id": self.id,
             "group_id": self.group_id,
             "name": self.name,
             "target_amount": self.target_amount,
+            "total_contributed": total_contributed,
+            "remaining_amount": remaining_amount,
             "created_at": self.created_at,
             "is_completed": self.is_completed,
             "participants": [
@@ -299,6 +307,7 @@ class Objectives(db.Model):
                 for member in self.group.members
             ] if self.group else []
         }
+    
 
 class ObjectivesContributions(db.Model):
     __tablename__ = "objective_contributions"
