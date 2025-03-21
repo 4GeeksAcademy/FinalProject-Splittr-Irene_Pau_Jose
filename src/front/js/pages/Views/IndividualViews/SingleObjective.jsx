@@ -20,9 +20,9 @@ import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { Card, Avatar, Tooltip } from "@material-ui/core";
+import { Card, Avatar, Tooltip, Button } from "@material-ui/core";
 import { Star, Mail, Edit, Close } from "@material-ui/icons";
-import { PieChart, Pie } from "recharts";
+import { PieChart, Pie, Cell, Label } from "recharts";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -35,6 +35,7 @@ import { getInfoSharedObjective } from '../../../component/callToApi.js';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { formatDate } from '../../../utilities/formatDate.js';
+
 
 
 function Copyright() {
@@ -170,7 +171,7 @@ export default function SingleObjective() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const { store, actions } = useContext(Context);
-  const [singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
+  const [singleObjectiveInfo, setSingleObjectiveInfo] = useState({});
   const { objectiveid } = useParams();
   console.log(singleObjectiveInfo);
 
@@ -185,9 +186,38 @@ export default function SingleObjective() {
     getInfoSharedObjective(setSingleObjectiveInfo, objectiveid)
   }, [])
 
+  const totalAmount = singleObjectiveInfo.target_amount || 0;
+  const contributedAmount = singleObjectiveInfo.total_contributed || 0;
+  const remainingAmount = singleObjectiveInfo.remaining_amount || totalAmount;
+
+  const percentageCompleted =
+    totalAmount > 0 ? ((contributedAmount / totalAmount) * 100).toFixed(1) : 0;
+
+
+  const totalAmountFormatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(totalAmount);
+
+  const remainingAmountFormatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(remainingAmount);
+
+  const contributedAmountFormatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(contributedAmount);
+
+
+  const pieData = [
+    { name: "Completed", value: contributedAmount, fill: "#6a89cc" },
+    { name: "Remaining", value: remainingAmount, fill: "#2C2F33" },
+  ];
+
+
   const participants = singleObjectiveInfo.participants || [];
-  
-  const visibleParticipants = participants.slice(0, 5);
+  const visibleParticipants = participants.slice(0, 5); // Mostrar máximo 5 participantes
   const remainingCount = Math.max(0, participants.length - 5);
 
   return (
@@ -263,11 +293,31 @@ export default function SingleObjective() {
             <Box display="flex" justifyContent="space-around" gap={2}>
               <Box width={120} alignContent="center" >
                 <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur}</Typography>
-                <PieChart width={120} height={120} style={{ marginTop: 50 }}>
-                  <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
-                </PieChart>
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  <PieChart width={150} height={150}>
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      innerRadius={50}
+                      outerRadius={60}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                      <Label
+                        value={`${percentageCompleted}%`}
+                        position="center"
+                        fill="white"
+                        fontSize={18}
+                        fontWeight="bold"
+                      />
+                    </Pie>
+                  </PieChart>
+                </Box>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed:  </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed: {contributedAmountFormatted} </Typography>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
@@ -311,8 +361,14 @@ export default function SingleObjective() {
               </Box>
             </Box>
 
+
             <Box display="flex" justifyContent="center" marginTop={2}>
-              <Tooltip title="Edit"><IconButton><Edit style={{ color: "#fff" }} /></IconButton></Tooltip>
+              <Link to="/login"><Tooltip title="Edit">
+                <IconButton>
+                  <Edit style={{ color: "#fff" }} />
+                </IconButton>
+              </Tooltip></Link>
+
               <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
             </Box>
           </Card>

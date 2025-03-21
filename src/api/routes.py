@@ -878,7 +878,7 @@ def get_objectives_by_user_id(user_id):
     group_membership = Group_to_user.query.filter(Group_to_user.user_id == user_id).all()
     
     if not group_membership:
-        return jsonify({"error": "User is not in any groups"}), 404
+        return jsonify({"msg": "User is not in any groups"}), 404
 
     group_ids = [membership.group_id for membership in group_membership]
 
@@ -962,25 +962,23 @@ def delete_objective(id):
 @api.route("/objective/update/<int:id>", methods=["PUT"])
 @jwt_required()
 def update_objective(id):
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
-    
+
     objective = Objectives.query.filter_by(id=id).first()
-    
     if not objective:
         return jsonify({"error": "Objective not found"}), 404
-    
-    data = request.get_json()
 
+    data = request.get_json()
     if "name" in data:
         objective.name = data["name"]
     if "target_amount" in data:
         objective.target_amount = data["target_amount"]
-    
+
     db.session.commit()
-    return jsonify({"msg" : "Objective was successfully updated"}), 200
+    return jsonify({"msg": "Objective was successfully updated"}), 200
 
 
 
