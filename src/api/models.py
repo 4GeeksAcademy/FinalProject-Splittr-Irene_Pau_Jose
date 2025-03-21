@@ -5,11 +5,11 @@ db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = "user"
-    user_id = db.Column(db.Integer,unique=True, primary_key=True)
+    user_id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(80), nullable=False)
     password = db.Column(db.String(20), nullable=False)
-    groups = db.relationship("Group_to_user", backref="user")
+    groups = db.relationship("Group_to_user", back_populates="user")
     expenses = db.relationship("Expenses", backref="user")
     payer = db.relationship('Payments', backref='payer', lazy='dynamic', primaryjoin="User.user_id == Payments.payer_id")
     receiver = db.relationship('Payments', backref='receiver', lazy='dynamic', primaryjoin="User.user_id == Payments.receiver_id")
@@ -18,11 +18,16 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.name}>'
 
+    def get_initial(self):
+        """Return the first letter of the user's name in uppercase."""
+        return self.name[0].upper() if self.name else "?"
+
     def serialize(self):
         return {
             "user_id": self.user_id,
             "name": self.name,
             "email": self.email,
+            "initial": self.get_initial(),  # Add initials here
             "groups": [group.serialize() for group in self.groups] if self.groups else [],
             "expenses": [expense.serialize() for expense in self.expenses] if self.expenses else [],
             "debts": [debt.serialize() for debt in self.debts] if self.debts else [],
@@ -34,22 +39,21 @@ class User(db.Model):
 
 class Group(db.Model):
     __tablename__ = "group"
-    group_id = db.Column(db.Integer,unique=True, primary_key=True)
+    group_id = db.Column(db.Integer, unique=True, primary_key=True)
     group_name = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime) 
     members = db.relationship("Group_to_user")
     total_amount = db.Column(db.Integer, nullable=False, default=0)
     expenses = db.Column(db.Integer, db.ForeignKey("expenses.expense_id"))
-    
+
     def __repr__(self):
         return f'<Group {self.group_name}>'
-
 
     def serialize(self):
         return {
             "group_id": self.group_id,
             "group_name": self.group_name,
-            "members": [members.serialize() for members in self.members] if self.members else [],
+            "members": [member.serialize() for member in self.members] if self.members else [],
             "created_at": self.created_at,
             "total_amount": self.total_amount,
             "expenses": self.expenses if self.expenses else None,
@@ -93,7 +97,10 @@ class Group_to_user(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     group_id = db.Column(db.Integer, db.ForeignKey("group.group_id"))
-    created_at = db.Column(db.DateTime) #no lo quiero tocar de momento, pero cambiar por joined at, no sé si influye en ningún otro modelo
+    created_at = db.Column(db.DateTime)  # Can be renamed later to "joined_at"
+
+    user = db.relationship("User", back_populates="groups")
+
     def __repr__(self):
         return f'<Group_to_user {self.id}>'
     
@@ -102,7 +109,8 @@ class Group_to_user(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "group_id": self.group_id,
-            "created_at": self.created_at 
+            "created_at": self.created_at,
+            "initial": self.user.get_initial() if self.user else "?", 
         }
     
 

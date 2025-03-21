@@ -184,6 +184,10 @@ export default function SingleGroup() {
     getInfoGroup(setSingleGroupInfo, groupid);
   }, [])
 
+  const participants = singleGroupInfo.members || [];
+
+  const visibleParticipants = participants.slice(0, 5);
+  const remainingCount = Math.max(0, participants.length - 5);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -289,11 +293,14 @@ export default function SingleGroup() {
                   </Link>
                 </div>
                 <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-
-                  <Typography>+4 more</Typography>
+                  {visibleParticipants.map((participant, index) => (
+                    <Avatar
+                      key={participant.id || index}
+                      style={{ backgroundColor: "#b19cd9", marginRight: 5 }}
+                    >
+                      {participant.initial || "?"}
+                    </Avatar>
+                  ))}
                 </Box>
               </Box>
             </Box>

@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const GroupCard = ({ group }) => {
   console.log(group);
 
-  const participants = group.participants || [];
+  const participants = group.members || [];
 
   const visibleParticipants = participants.slice(0, 3);
   const remainingCount = Math.max(0, participants.length - 3);
