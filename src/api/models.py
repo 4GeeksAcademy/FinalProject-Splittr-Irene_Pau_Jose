@@ -128,6 +128,34 @@ class Group_payments(db.Model):
             "amount": self.amount,
             "payed_at": self.payed_at
         }
+    
+
+class Group_debts(db.Model):
+    __tablename__ = "group_debts"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    debtor_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)  
+    creditor_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("group.group_id"), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    payed_at = db.Column(db.DateTime)
+    is_paid = db.Column(db.Boolean, default=False)  # Para indicar si se ha pagado o no
+
+    def serialize(self):
+        debtor = User.query.get(self.debtor_id)
+        creditor = User.query.get(self.creditor_id)
+        group = Group.query.get(self.group_id)
+
+        return {
+            "id": self.id,
+            "debtor_name": debtor.name if debtor else "Unknown",
+            "creditor_name": creditor.name if creditor else (group.group_name if group else "Unknown"), 
+            "group_name": group.group_name if group else None,
+            "amount": self.amount,
+            "is_paid": self.is_paid, 
+            "payed_at": self.payed_at
+        }
+
+
 
 class Payments(db.Model):
     __tablename__ = "payments"
@@ -189,8 +217,6 @@ class Debts(db.Model):
     payments = db.relationship("Payments", backref="debts")
     
     
-
-
     def __repr__(self):
         return f'<Debts {self.debt_id}>'
 
@@ -203,7 +229,6 @@ class Debts(db.Model):
             "is_paid": self.is_paid,
             "payed_at": self.payed_at,
 
-            
         }
     
 class Messages(db.Model):

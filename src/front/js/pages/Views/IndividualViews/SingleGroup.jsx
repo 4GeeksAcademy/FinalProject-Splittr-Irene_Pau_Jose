@@ -29,7 +29,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-import { getInfoGroup } from '../../../component/callToApi.js';
+import { getGroupDebts, getInfoGroup } from '../../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
@@ -144,13 +144,6 @@ function createData(id, date, name, amount) {
   return { id, date, name, amount };
 }
 
-const rows = [
-  createData(0, 'Elvis Presley', 312.44),
-  createData(1, 'Paul McCartney', 866.99),
-  createData(2, 'Tom Scholz', 100.81),
-  createData(3, 'Michael Jackson', 654.39),
-  createData(4, 'Bruce Springsteen', 212.79),
-];
 
 function preventDefault(event) {
   event.preventDefault();
@@ -170,6 +163,7 @@ export default function SingleGroup() {
   const { store, actions } = useContext(Context);
 
   const [singleGroupInfo, setSingleGroupInfo] = useState([]);
+  const [groupDebts, setGroupDebts] = useState([]);
   const { groupid } = useParams();
   console.log(singleGroupInfo);
 
@@ -181,8 +175,11 @@ export default function SingleGroup() {
 
   useEffect(() => {
     getInfoGroup(setSingleGroupInfo, groupid);
-  }, [])
-
+    getGroupDebts(setGroupDebts, groupid);
+  }, []);
+  
+  console.log(groupDebts);
+  
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -266,22 +263,23 @@ export default function SingleGroup() {
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>
                 <Table size="small" style={{ marginTop: '16px' }}>
-                  <TableHead >
-                    <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell align="right">Amount</TableCell>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Debtor</TableCell>
+                    <TableCell align="right">Amount</TableCell>
+                    <TableCell align="right">Creditor</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {groupDebts.map((debt) => (
+                    <TableRow key={debt.id}>
+                      <TableCell>{debt.debtor_name}</TableCell>
+                      <TableCell >{debt.amount}</TableCell>
+                      <TableCell>{debt.creditor_name}</TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell>{row.date}</TableCell>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell align="right">{row.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                  ))}
+                </TableBody>
+              </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
                     See more

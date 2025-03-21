@@ -32,6 +32,15 @@ group_payments = [
     {"id": 5, "receiver_id": 4, "payer_id": 5, "group_id": 5, "amount": 1000, "payed_at": "2024-05-10T20:15:00"}
 ]
 
+group_debts = [
+    {"id": 1, "debtor_id": 2, "creditor_id": 1, "group_id": 1, "amount": 50, "payed_at": None, "is_paid": False},
+    {"id": 2, "debtor_id": 3, "creditor_id": 2, "group_id": 2, "amount": 40, "payed_at": "2024-05-10T20:15:00", "is_paid": True},
+    {"id": 3, "debtor_id": 4, "creditor_id": 3, "group_id": 3, "amount": 50, "payed_at": None, "is_paid": False},
+    {"id": 4, "debtor_id": 5, "creditor_id": 4, "group_id": 4, "amount": 60, "payed_at": "2024-05-10T20:15:00", "is_paid": True},
+    {"id": 5, "debtor_id": 1, "creditor_id": 5, "group_id": 5, "amount": 170, "payed_at": None, "is_paid": False}
+]
+
+
 payments = [
     {"id": 6, "debt_id": 1, "payer_id": 2, "receiver_id": 1, "amount": 200, "payed_at": "2024-01-05T12:30:00"},
     {"id": 2, "debt_id": 2, "payer_id": 3, "receiver_id": 4, "amount": 50, "payed_at": "2024-02-15T14:10:00"},
