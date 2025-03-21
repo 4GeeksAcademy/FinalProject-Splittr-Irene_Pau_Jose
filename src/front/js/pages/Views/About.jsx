@@ -313,7 +313,7 @@ export default function About() {
                 <div className={classes.creatorCard}>
                   <Avatar className={classes.avatar}>IB</Avatar>
                   <Typography variant="h6" className={classes.creatorName}>
-                    Irene Batlle Molla
+                    Irene Batlle Mola
                   </Typography>
                   <Typography variant="body2" className={classes.creatorRole}>
                     Co-Founder & UX Designer
