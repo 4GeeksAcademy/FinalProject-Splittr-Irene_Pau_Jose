@@ -143,7 +143,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function EditObjective( ) {
+export default function EditObjective() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -163,6 +163,8 @@ export default function EditObjective( ) {
 
   const { store, actions } = useContext(Context);
   const { objectiveid } = useParams();
+
+  
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -237,12 +239,12 @@ export default function EditObjective( ) {
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
               <TextField
                 id="outlined-textarea"
-                label="Change name"
+                label="Change Name"
                 variant="outlined"
                 fullWidth
                 placeholder="Current name"
 
-              />
+              />{objectiveid.name}
               <Box sx={{ marginLeft: "40px" }}>
                 <Button>Change</Button>
               </Box>
@@ -250,7 +252,7 @@ export default function EditObjective( ) {
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
               <TextField
                 id="outlined-textarea"
-                label="Change amount"
+                label="Change Amount"
                 variant="outlined"
                 fullWidth
                 placeholder="Current amount"
@@ -261,8 +263,8 @@ export default function EditObjective( ) {
               
             </Box>            
             <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
-              <Button>Log out</Button>
-              <Button variant="outlined" color="secondary">Delete account</Button>
+              
+              <Button variant="outlined" color="secondary">Delete Objective</Button>
             </Box>
 
 
