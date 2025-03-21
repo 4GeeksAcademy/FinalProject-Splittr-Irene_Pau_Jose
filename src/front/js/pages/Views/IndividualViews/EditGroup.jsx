@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,29 +12,35 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { MainListItems } from '../../Dashboard/listitems.jsx';
-import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
-
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { Card, Avatar, Tooltip } from "@material-ui/core";
-import { Star, Mail, Edit, Close } from "@material-ui/icons";
-import { PieChart, Pie } from "recharts";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-
-import { getGroupDebts, getInfoGroup } from '../../../component/callToApi.js';
+import { MainListItems, SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import { useParams } from 'react-router-dom';
+
+import Deposits from '../../Dashboard/Deposits.jsx';
+import Orders from '../../Dashboard/Orders.jsx';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+
+import { Link as MuiLink } from "@material-ui/core";
+import { Home } from '../../Home.jsx';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import Icon from '@material-ui/core/Icon';
+import SendIcon from '@material-ui/icons/Save';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
-import { formatDate } from '../../../utilities/formatDate.js';
-
 
 function Copyright() {
   return (
@@ -128,29 +134,16 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4),
-    display: 'flex',
-    justifyContent: 'center',
-    width: 'auto',
-    marginTop: "40px",
+    paddingBottom: theme.spacing(4)
 
   },
   contactGrid: {
     display: 'flex',
-
+    flexWrap: 'wrap',
   },
 }));
 
-function createData(id, date, name, amount) {
-  return { id, date, name, amount };
-}
-
-
-function preventDefault(event) {
-  event.preventDefault();
-}
-
-export default function SingleGroup() {
+export default function EditGroup() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -160,40 +153,25 @@ export default function SingleGroup() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const [state, setState] = useState({
+    Language: 'English',
+  });
+
+  const handleChange = (event) => {
+    setState({ ...state, Language: event.target.value });
+  };
 
   const { store, actions } = useContext(Context);
-
-  const [singleGroupInfo, setSingleGroupInfo] = useState([]);
-  const [groupDebts, setGroupDebts] = useState([]);
   const { groupid } = useParams();
 
-  const price = singleGroupInfo.total_amount
-  const totalPriceEur = new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-
-  useEffect(() => {
-    getInfoGroup(setSingleGroupInfo, groupid);
-    getGroupDebts(setGroupDebts, groupid);
-  }, []);
-
-  console.log(singleGroupInfo);
-
-  const participants = singleGroupInfo.members || [];
-
-  const visibleParticipants = participants.slice(0, 5);
-  const remainingCount = Math.max(0, participants.length - 5);
-
-
-
+  
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-
+            {/* Show MenuIcon when the drawer is closed */}
             {!open && (
               <IconButton
                 edge="start"
@@ -206,7 +184,7 @@ export default function SingleGroup() {
               </IconButton>
             )}
 
-
+            {/* Show ChevronLeftIcon when the drawer is open */}
             {open && (
               <IconButton
                 edge="start"
@@ -239,87 +217,65 @@ export default function SingleGroup() {
         >
 
           <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
+          <List><MainListItems user={store.userInfo}/></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
+        <Box
+          sx={{
+            width: "50%",
+            padding: "0 16px",
+            marginTop: "80px",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
 
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
+          }}
+        >
+          <Box sx={{ marginBottom: "20px" }}>
+            <h3>Modify Group</h3>
 
 
-          <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
-            <div className="title" style={{ display: "flex", alignItems: "center" }}>
-              <Tooltip title="Favorite">
-                <IconButton>
-                  <Star style={{ color: "#fff" }} />
-                </IconButton>
-              </Tooltip>
-              <Typography variant="h6" style={{ marginLeft: 5 }}>{singleGroupInfo.group_name} </Typography>
-            </div>
-            <Box display="flex" justifyContent="space-around" gap={2}>
-              <Box width={120} alignContent="center" >
-                <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur} </Typography>
-                <PieChart width={120} height={120} style={{ marginTop: 50 }}>
-                  <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
-                </PieChart>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Remaining amount: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleGroupInfo.created_at)} </Typography>
-              </Box>
-              <Box display="block" justifyContent="center" alignItems="center" gap={3} >
-                <Typography gap={4}>Still to pay</Typography>
-                <Table size="small" style={{ marginTop: '16px' }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Debtor</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                      <TableCell align="right">Creditor</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {groupDebts.map((debt) => (
-                      <TableRow key={debt.id}>
-                        <TableCell>{debt.debtor_name}</TableCell>
-                        <TableCell >{debt.amount}</TableCell>
-                        <TableCell>{debt.creditor_name}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className={classes.seeMore} style={{ marginTop: '16px' }} >
-                  <Link color="primary" href="#" onClick={preventDefault} >
-                    See more
-                  </Link>
-                </div>
-                <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
-                  {visibleParticipants.map((participant, index) => (
-                    <Avatar
-                      key={participant.id || index}
-                      style={{ backgroundColor: "#b19cd9", marginRight: 5 }}
-                    >
-                      {participant.initial || "?"}
-                    </Avatar>
-                  ))}
-                </Box>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="outlined-textarea"
+                label="Change Name"
+                variant="outlined"
+                fullWidth
+                placeholder="Current name"
+
+              />{groupid.name}
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
               </Box>
             </Box>
-
-            <Box display="flex" justifyContent="center" marginTop={2}>
-              <Link href={`/group/update/${singleGroupInfo.group_id}`}>
-
-                <IconButton>
-                  <Edit style={{ color: "#fff" }} />
-                </IconButton>
-
-              </Link>
-
-              <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="outlined-textarea"
+                label="Change Amount"
+                variant="outlined"
+                fullWidth
+                placeholder="Current amount"
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+              
+            </Box>            
+            <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
+              
+              <Button variant="outlined" color="secondary">Delete Group</Button>
             </Box>
-          </Card>
 
-        </Container>
+
+
+          </Box>
+        </Box>
+
+
 
       </div>
     </ThemeProvider>
   );
-};
+}
+
