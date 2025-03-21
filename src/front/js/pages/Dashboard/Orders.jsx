@@ -10,6 +10,7 @@ import Title from "./Title.jsx";
 import { Context } from "../../store/appContext.js";
 import { useParams } from "react-router-dom";
 import { mapTransactions } from "../../component/callToApi.js";
+import { formatDate } from "../../utilities/formatDate.js";
 
 const useStyles = makeStyles((theme) => ({
   seeMore: {
@@ -28,7 +29,6 @@ export default function Orders() {
   });
 
   useEffect(() => {
-    console.log("Orders component mounted, attempting to fetch transactions");
     mapTransactions(setTransactions);
   }, []);
 
@@ -86,7 +86,7 @@ export default function Orders() {
         <TableBody>
           {sortedTransactions.map((tx) => (
             <TableRow key={tx.id}>
-              <TableCell>{tx.date.toLocaleDateString()}</TableCell>
+              <TableCell>{formatDate(tx.date)}</TableCell>
               <TableCell>{tx.type}</TableCell>
               <TableCell>{tx.from}</TableCell>
               <TableCell>{tx.to}</TableCell>

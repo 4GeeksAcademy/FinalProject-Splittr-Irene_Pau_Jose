@@ -33,6 +33,7 @@ import { getGroupDebts, getInfoGroup } from '../../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
+import { formatDate } from '../../../utilities/formatDate.js';
 
 
 function Copyright() {
@@ -179,6 +180,12 @@ export default function SingleGroup() {
   }, []);
   
   console.log(groupDebts);
+
+  const participants = singleGroupInfo.members || [];
+
+  const visibleParticipants = participants.slice(0, 5);
+  const remainingCount = Math.max(0, participants.length - 5);
+   
   
 
   return (
@@ -258,7 +265,7 @@ export default function SingleGroup() {
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Remaining amount: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {singleGroupInfo.created_at} </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleGroupInfo.created_at)} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>
@@ -286,11 +293,14 @@ export default function SingleGroup() {
                   </Link>
                 </div>
                 <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-
-                  <Typography>+4 more</Typography>
+                  {visibleParticipants.map((participant, index) => (
+                    <Avatar
+                      key={participant.id || index}
+                      style={{ backgroundColor: "#b19cd9", marginRight: 5 }}
+                    >
+                      {participant.initial || "?"}
+                    </Avatar>
+                  ))}
                 </Box>
               </Box>
             </Box>

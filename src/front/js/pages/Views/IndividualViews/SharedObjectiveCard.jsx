@@ -13,6 +13,11 @@ const SharedObjectiveCard = ({sharedObjective}) => {
       currency: "EUR",
   }).format(price);
 
+  const participants = sharedObjective.participants || [];
+  
+  const visibleParticipants = participants.slice(0, 3);
+  const remainingCount = Math.max(0, participants.length - 3);
+
   return (
     <>
     <Link to={`/singleobjective/${sharedObjective.id}`}>  
@@ -28,18 +33,19 @@ const SharedObjectiveCard = ({sharedObjective}) => {
       
       
       <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={1}>
-        <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5  }}>P</Avatar>
-        <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5  }}>P</Avatar>
-        <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5  }}>P</Avatar>
-     
-        <Typography>+4 more</Typography>
+          {visibleParticipants.map((participant, index) => (
+          <Avatar 
+            key={participant.id || index} 
+            style={{ backgroundColor: "#b19cd9", marginRight: 5 }}
+          >
+            {participant.initial || "?"}
+          </Avatar>
+        ))}
+        {remainingCount > 0 && (
+          <Typography>+{remainingCount} </Typography>
+        )}
       </Box>
       
-      <Box display="flex" justifyContent="space-around" marginTop={2}>
-        <Tooltip title="Favorite"><IconButton><Star style={{ color: "#fff" }} /></IconButton></Tooltip>
-        <Tooltip title="Edit"><IconButton><Edit style={{ color: "#fff" }} /></IconButton></Tooltip>
-        <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
-      </Box>
     </Card>
     </Link>
     </>

@@ -1044,46 +1044,24 @@ def get_objective_contributions(objective_id):
 @jwt_required()
 def get_user_transactions():
     current_user_id = get_jwt_identity()
-    print("Logged in user ID:", current_user_id)
+    user = User.query.get(current_user_id)
 
-    # Get all transactions
+    if user is None:
+        return jsonify({"msg": "You need to be logged in"}), 401
+
     sent_payments = Payments.query.filter_by(payer_id=current_user_id).all()
-    print(f"Sent Payments: {sent_payments}")
-    
     received_payments = Payments.query.filter_by(receiver_id=current_user_id).all()
-    print(f"Received Payments: {received_payments}")
-    
     group_payments = Group_payments.query.filter(
         (Group_payments.payer_id == current_user_id) | (Group_payments.receiver_id == current_user_id)
     ).all()
-    print(f"Group Payments: {group_payments}")
-    
     contributions = ObjectivesContributions.query.filter_by(user_id=current_user_id).all()
-    print(f"Objective Contributions: {contributions}")
-    
-    # Now serialize the data and check what's going on
-    try:
-        sent_serialized = [payment.serialize() for payment in sent_payments]
-        received_serialized = [payment.serialize() for payment in received_payments]
-        group_serialized = [gp.serialize() for gp in group_payments]
-        contributions_serialized = [contribution.serialize() for contribution in contributions]
-        
-        print("Serialized sent payments:", sent_serialized)
-        print("Serialized received payments:", received_serialized)
-        print("Serialized group payments:", group_serialized)
-        print("Serialized contributions:", contributions_serialized)
-        
-        response_data = {
-            "sent_payments": sent_serialized,
-            "received_payments": received_serialized,
-            "group_payments": group_serialized,
-            "objective_contributions": contributions_serialized
-        }
-        
-        return jsonify(response_data), 200
-    except Exception as e:
-        print("Error during serialization:", str(e))
-        return jsonify({"error": "Serialization error", "details": str(e)}), 500
+
+    return jsonify({
+        "sent_payments": [payment.serialize() for payment in sent_payments],
+        "received_payments": [payment.serialize() for payment in received_payments],
+        "group_payments": [gp.serialize() for gp in group_payments],
+        "objective_contributions": [contribution.serialize() for contribution in contributions]
+    }), 200
 
 
 # Routes to populate the database #

@@ -34,6 +34,7 @@ import { useParams } from 'react-router-dom';
 import { getInfoSharedObjective } from '../../../component/callToApi.js';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
+import { formatDate } from '../../../utilities/formatDate.js';
 
 
 function Copyright() {
@@ -184,6 +185,11 @@ export default function SingleObjective() {
     getInfoSharedObjective(setSingleObjectiveInfo, objectiveid)
   }, [])
 
+  const participants = singleObjectiveInfo.participants || [];
+  
+  const visibleParticipants = participants.slice(0, 5);
+  const remainingCount = Math.max(0, participants.length - 5);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -236,7 +242,7 @@ export default function SingleObjective() {
         >
 
           <Divider />
-          <List><MainListItems user={store.userInfo}  /></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
@@ -262,7 +268,7 @@ export default function SingleObjective() {
                 </PieChart>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed:  </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {singleObjectiveInfo.created_at} </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Recent Contributions</Typography>
@@ -290,11 +296,17 @@ export default function SingleObjective() {
                   </Link>
                 </div>
                 <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-                  <Avatar style={{ backgroundColor: "#b19cd9", marginRight: 5 }}>P</Avatar>
-
-                  <Typography>+4 more</Typography>
+                  {visibleParticipants.map((participant, index) => (
+                    <Avatar
+                      key={participant.id || index}
+                      style={{ backgroundColor: "#b19cd9", marginRight: 5 }}
+                    >
+                      {participant.initial || "?"}
+                    </Avatar>
+                  ))}
+                  {remainingCount > 0 && (
+                    <Typography>+{remainingCount} </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>

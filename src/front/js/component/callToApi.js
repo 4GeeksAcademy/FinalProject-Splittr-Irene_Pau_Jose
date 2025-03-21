@@ -228,7 +228,6 @@ export const mapTransactions = async (setTransactions) => {
             },
         });
         if (!response.ok) {
-            console.error("Response not OK:", response.status, response.statusText);
             throw new Error("Failed to fetch transactions");
         }
 
