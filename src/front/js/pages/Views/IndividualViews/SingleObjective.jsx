@@ -363,11 +363,14 @@ export default function SingleObjective() {
 
 
             <Box display="flex" justifyContent="center" marginTop={2}>
-              <Link to="/login"><Tooltip title="Edit">
-                <IconButton>
-                  <Edit style={{ color: "#fff" }} />
-                </IconButton>
-              </Tooltip></Link>
+              <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
+               
+                  <IconButton>
+                    <Edit style={{ color: "#fff" }} />
+                  </IconButton>
+                
+              </Link>
+
 
               <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
             </Box>

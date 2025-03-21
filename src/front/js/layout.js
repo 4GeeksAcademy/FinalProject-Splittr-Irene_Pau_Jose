@@ -63,7 +63,7 @@ const Layout = () => {
                         <Route element={<SingleGroup/>} path="/singlegroup/:groupid" />
                         <Route element={<SingleMessage/>} path="/message/conversation/:otheruserid" />
                         <Route element={<SingleObjective/>} path="/singleobjective/:objectiveid" />
-                        <Route element={<EditObjective/>} path="/objective/update" />
+                        <Route element={<EditObjective/>} path="/objective/update/:objectiveid" />
                     </Routes>
                     <Footer />
                 </ScrollToTop>
