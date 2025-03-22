@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -41,6 +41,8 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
+import { getInfoGroup } from '../../../component/callToApi.js';
+import { LibraryMusic } from '@material-ui/icons';
 
 function Copyright() {
   return (
@@ -153,17 +155,21 @@ export default function EditGroup() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  const [state, setState] = useState({
-    Language: 'English',
-  });
-
+ 
   const handleChange = (event) => {
-    setState({ ...state, Language: event.target.value });
+    setSingleGroup({...singleGroup, [event.target.name]: event.target.value})
   };
+
 
   const { store, actions } = useContext(Context);
   const { groupid } = useParams();
+  const[singleGroup, setSingleGroup]= useState({});
 
+  useEffect(()=>{
+
+    getInfoGroup(setSingleGroup, groupid)
+  },[])
+console.log(singleGroup);
   
   return (
     <ThemeProvider theme={darkTheme}>
@@ -231,7 +237,7 @@ export default function EditGroup() {
             flexDirection: "column",
 
           }}
-        >
+        > 
           <Box sx={{ marginBottom: "20px" }}>
             <h3>Modify Group</h3>
 
@@ -239,23 +245,26 @@ export default function EditGroup() {
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
               <TextField
                 id="outlined-textarea"
-                label="Change Name"
                 variant="outlined"
                 fullWidth
                 placeholder="Current name"
-
-              />{groupid.name}
+                value={singleGroup.group_name}
+                onChange={handleChange}
+                name='group_name'
+              />
               <Box sx={{ marginLeft: "40px" }}>
                 <Button>Change</Button>
               </Box>
             </Box>
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
+              <TextField 
                 id="outlined-textarea"
-                label="Change Amount"
+                value={singleGroup.total_amount}
                 variant="outlined"
                 fullWidth
-                placeholder="Current amount"
+                placeholder="Total amount"
+                onChange={handleChange}
+                name='total_amount'
               />
               <Box sx={{ marginLeft: "40px" }}>
                 <Button>Change</Button>

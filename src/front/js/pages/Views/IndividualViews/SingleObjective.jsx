@@ -283,11 +283,13 @@ export default function SingleObjective() {
 
           <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
             <div className="title" style={{ display: "flex", alignItems: "center" }}>
-              <Tooltip title="Favorite">
-                <IconButton>
-                  <Star style={{ color: "#fff" }} />
-                </IconButton>
-              </Tooltip>
+            <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
+               
+               <IconButton>
+                 <Edit style={{ color: "#fff" }} />
+               </IconButton>
+             
+           </Link>
               <Typography variant="h6" style={{ marginLeft: 5 }}> {singleObjectiveInfo.name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
@@ -359,20 +361,6 @@ export default function SingleObjective() {
                   )}
                 </Box>
               </Box>
-            </Box>
-
-
-            <Box display="flex" justifyContent="center" marginTop={2}>
-              <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
-               
-                  <IconButton>
-                    <Edit style={{ color: "#fff" }} />
-                  </IconButton>
-                
-              </Link>
-
-
-              <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
             </Box>
           </Card>
 
