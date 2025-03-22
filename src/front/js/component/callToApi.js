@@ -99,25 +99,25 @@ export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid
     
 }
 
-export const getObjectiveContributions = async (setContributions, objectiveId) => {
-    try {
-      const response = await fetch( urlBackend + "/objective/contribution/" + objectiveId, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-  
-      const data = await response.json();
-      setContributions(data);
-      console.log(data); 
-  
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  
 
+  
+export const getObjectiveContributions = async (setObjectiveContributions, objectiveId) => {
+    try {
+        const response = await fetch(urlBackend + "/objective/contribution/" + objectiveId, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await response.json();
+        setObjectiveContributions(data);
+        console.log(data);
+
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 export const mapContacts = async (setContacts, userid) => {
     try {

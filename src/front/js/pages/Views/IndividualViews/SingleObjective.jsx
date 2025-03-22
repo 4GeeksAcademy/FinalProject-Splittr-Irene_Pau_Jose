@@ -18,6 +18,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
+import { useMemo } from 'react';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Card, Avatar, Tooltip } from "@material-ui/core";
@@ -35,6 +36,7 @@ import { getInfoSharedObjective } from '../../../component/callToApi.js';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { formatDate } from '../../../utilities/formatDate.js';
+import { getObjectiveContributions } from '../../../component/callToApi.js';
 
 
 function Copyright() {
@@ -146,13 +148,7 @@ function createData(id, date, name, amount) {
   return { id, date, name, amount };
 }
 
-const rows = [
-  createData(0, 'Elvis Presley', 312.44),
-  createData(1, 'Paul McCartney', 866.99),
-  createData(2, 'Tom Scholz', 100.81),
-  createData(3, 'Michael Jackson', 654.39),
-  createData(4, 'Bruce Springsteen', 212.79),
-];
+
 
 function preventDefault(event) {
   event.preventDefault();
@@ -171,6 +167,7 @@ export default function SingleObjective() {
 
   const { store, actions } = useContext(Context);
   const [singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
+  const [objectiveContributions, setObjectiveContributions] = useState([]);
   const { objectiveid } = useParams();
   console.log(singleObjectiveInfo);
 
@@ -179,11 +176,31 @@ export default function SingleObjective() {
     style: "currency",
     currency: "EUR",
   }).format(price);
+  
+  const groupedContributions = useMemo(() => {
+    const userContributions = {};
 
+
+    objectiveContributions.forEach((contribution) => {
+      if (userContributions[contribution.user_name]) {
+        userContributions[contribution.user_name] += contribution.amount_contributed;
+      } else {
+        userContributions[contribution.user_name] = contribution.amount_contributed;
+      }
+    });
+
+    return Object.keys(userContributions).map((userName, totalAmount) => ({
+      user_name: userName,
+      total_contributed: userContributions[userName],
+    }));
+  }, [objectiveContributions]);
 
   useEffect(() => {
-    getInfoSharedObjective(setSingleObjectiveInfo, objectiveid)
-  }, [])
+    console.log("Objective ID:", objectiveid);
+    getObjectiveContributions(setObjectiveContributions, objectiveid);
+    getInfoSharedObjective(setSingleObjectiveInfo, objectiveid);  
+  }, [objectiveid]);
+  
 
   const participants = singleObjectiveInfo.participants || [];
   
@@ -267,7 +284,24 @@ export default function SingleObjective() {
                   <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
                 </PieChart>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Already Contributed:  </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:  </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:  </Typography>
+                <Table size="small" style={{ marginTop: '16px' }}>
+                  <TableHead >
+                    <TableRow>
+                      <TableCell>Name</TableCell>
+                      <TableCell align="right">Total amount</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                            {groupedContributions.map((contributions, index) => (
+                                <TableRow key={contributions.id || index}>
+                                    <TableCell>{contributions.user_name}</TableCell>
+                                    <TableCell align="right">{contributions.total_contributed}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                </Table>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
               </Box>
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
@@ -281,14 +315,14 @@ export default function SingleObjective() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell>{row.date}</TableCell>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell align="right">{row.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                            {objectiveContributions.map((contributions, index) => (
+                                <TableRow key={contributions.id || index}>
+                                    <TableCell>{formatDate(contributions.contributed_at)}</TableCell>
+                                    <TableCell>{contributions.user_name}</TableCell>
+                                    <TableCell align="right">{contributions.amount_contributed}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
                 </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
