@@ -22,7 +22,8 @@ import SingleObjective from "./pages/Views/IndividualViews/SingleObjective.jsx";
 import SingleContact from "./pages/Views/IndividualViews/SingleContact.jsx";
 import SingleGroup from "./pages/Views/IndividualViews/SingleGroup.jsx";
 import SingleMessage from "./pages/Views/IndividualViews/SingleMessage.jsx";
-
+import EditObjective from "./pages/Views/IndividualViews/EditObjective.jsx";
+import EditGroup from "./pages/Views/IndividualViews/EditGroup.jsx";
 
 
 
@@ -63,6 +64,8 @@ const Layout = () => {
                         <Route element={<SingleGroup/>} path="/singlegroup/:groupid" />
                         <Route element={<SingleMessage/>} path="/message/conversation/:otheruserid" />
                         <Route element={<SingleObjective/>} path="/singleobjective/:objectiveid" />
+                        <Route element={<EditObjective/>} path="/objective/update/:objectiveid" />
+                        <Route element={<EditGroup/>} path="/group/update/:groupid" />
                     </Routes>
                     <Footer />
                 </ScrollToTop>

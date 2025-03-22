@@ -21,9 +21,9 @@ import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import { useMemo } from 'react';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { Card, Avatar, Tooltip } from "@material-ui/core";
+import { Card, Avatar, Tooltip, Button } from "@material-ui/core";
 import { Star, Mail, Edit, Close } from "@material-ui/icons";
-import { PieChart, Pie } from "recharts";
+import { PieChart, Pie, Cell, Label } from "recharts";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -202,9 +202,38 @@ export default function SingleObjective() {
   }, [objectiveid]);
   
 
+  const totalAmount = singleObjectiveInfo.target_amount || 0;
+  const contributedAmount = singleObjectiveInfo.total_contributed || 0;
+  const remainingAmount = singleObjectiveInfo.remaining_amount || totalAmount;
+
+  const percentageCompleted =
+    totalAmount > 0 ? ((contributedAmount / totalAmount) * 100).toFixed(1) : 0;
+
+
+  const totalAmountFormatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(totalAmount);
+
+  const remainingAmountFormatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(remainingAmount);
+
+  const contributedAmountFormatted = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(contributedAmount);
+
+
+  const pieData = [
+    { name: "Completed", value: contributedAmount, fill: "#6a89cc" },
+    { name: "Remaining", value: remainingAmount, fill: "#2C2F33" },
+  ];
+
+
   const participants = singleObjectiveInfo.participants || [];
-  
-  const visibleParticipants = participants.slice(0, 5);
+  const visibleParticipants = participants.slice(0, 5); // Mostrar máximo 5 participantes
   const remainingCount = Math.max(0, participants.length - 5);
 
   return (
@@ -270,21 +299,43 @@ export default function SingleObjective() {
 
           <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
             <div className="title" style={{ display: "flex", alignItems: "center" }}>
-              <Tooltip title="Favorite">
-                <IconButton>
-                  <Star style={{ color: "#fff" }} />
-                </IconButton>
-              </Tooltip>
+            <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
+               
+               <IconButton>
+                 <Edit style={{ color: "#fff" }} />
+               </IconButton>
+             
+           </Link>
               <Typography variant="h6" style={{ marginLeft: 5 }}> {singleObjectiveInfo.name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
               <Box width={120} alignContent="center" >
                 <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur}</Typography>
-                <PieChart width={120} height={120} style={{ marginTop: 50 }}>
-                  <Pie data={[{ name: "Completed", value: 70, fill: "#6a89cc" }, { name: "Remaining", value: 30, fill: "#2C2F33" }]} dataKey="value" innerRadius={40} outerRadius={50} />
-                </PieChart>
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  <PieChart width={150} height={150}>
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      innerRadius={50}
+                      outerRadius={60}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                      <Label
+                        value={`${percentageCompleted}%`}
+                        position="center"
+                        fill="white"
+                        fontSize={18}
+                        fontWeight="bold"
+                      />
+                    </Pie>
+                  </PieChart>
+                </Box>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:  </Typography>
+                <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed: {contributedAmountFormatted} </Typography>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:  </Typography>
                 <Table size="small" style={{ marginTop: '16px' }}>
                   <TableHead >
@@ -343,11 +394,6 @@ export default function SingleObjective() {
                   )}
                 </Box>
               </Box>
-            </Box>
-
-            <Box display="flex" justifyContent="center" marginTop={2}>
-              <Tooltip title="Edit"><IconButton><Edit style={{ color: "#fff" }} /></IconButton></Tooltip>
-              <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
             </Box>
           </Card>
 

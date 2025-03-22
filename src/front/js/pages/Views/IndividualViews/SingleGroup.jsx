@@ -166,7 +166,6 @@ export default function SingleGroup() {
   const [singleGroupInfo, setSingleGroupInfo] = useState([]);
   const [groupDebts, setGroupDebts] = useState([]);
   const { groupid } = useParams();
-  console.log(singleGroupInfo);
 
   const price = singleGroupInfo.total_amount
   const totalPriceEur = new Intl.NumberFormat("de-DE", {
@@ -178,6 +177,8 @@ export default function SingleGroup() {
     getInfoGroup(setSingleGroupInfo, groupid);
     getGroupDebts(setGroupDebts, groupid);
   }, []);
+
+  console.log(singleGroupInfo);
 
   console.log(groupDebts);
 
@@ -270,30 +271,30 @@ export default function SingleGroup() {
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>
                 <Table size="small" style={{ marginTop: '16px' }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Debtor</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                      <TableCell align="right">Creditor</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {Array.isArray(groupDebts) ? (
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Debtor</TableCell>
+                        <TableCell align="right">Amount</TableCell>
+                        <TableCell align="right">Creditor</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Array.isArray(groupDebts) ? (
                       groupDebts.map((debt) => (
-                        <TableRow key={debt.id}>
-                          <TableCell>{debt.debtor_name}</TableCell>
-                          <TableCell>{debt.amount}</TableCell>
-                          <TableCell>{debt.creditor_name}</TableCell>
-                        </TableRow>
-                      ))
+                          <TableRow key={debt.id}>
+                            <TableCell>{debt.debtor_name}</TableCell>
+                            <TableCell>{debt.amount}</TableCell>
+                            <TableCell>{debt.creditor_name}</TableCell>
+                          </TableRow>
+                        ))
                     ) : (
                       <TableRow>
                         <TableCell colSpan={3}>There are no debts!</TableCell>
                       </TableRow>
                     )}
-                  </TableBody>
+                    </TableBody>
 
-                </Table>
+                  </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
                     See more
@@ -313,7 +314,14 @@ export default function SingleGroup() {
             </Box>
 
             <Box display="flex" justifyContent="center" marginTop={2}>
-              <Tooltip title="Edit"><IconButton><Edit style={{ color: "#fff" }} /></IconButton></Tooltip>
+              <Link href={`/group/update/${singleGroupInfo.group_id}`}>
+
+                <IconButton>
+                  <Edit style={{ color: "#fff" }} />
+                </IconButton>
+
+              </Link>
+
               <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
             </Box>
           </Card>

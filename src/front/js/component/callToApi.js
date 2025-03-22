@@ -117,7 +117,32 @@ export const getObjectiveContributions = async (setObjectiveContributions, objec
     } catch (error) {
         console.log(error);
     }
-};
+  };
+  
+
+  export const updateObjective = async (objectiveId, updatedData) => {
+    try {
+      const response = await fetch(urlBackend + "/objective/update/" + objectiveId, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update objective");
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error updating objective:", error);
+      throw error;
+    }
+  };
+
 
 export const mapContacts = async (setContacts, userid) => {
     try {

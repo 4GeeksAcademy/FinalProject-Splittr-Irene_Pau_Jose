@@ -152,7 +152,7 @@ export default function SharedObjectives() {
  const { store, actions } = useContext(Context);
   const [sharedObjectives, setSharedObjectives] = useState([]);
   const { userid } = useParams();
-  console.log(userid);
+
 
   useEffect(() => {
     mapSharedObjective(setSharedObjectives, userid)

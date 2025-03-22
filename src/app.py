@@ -10,7 +10,7 @@ from api.models import db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
-
+from datetime import timedelta
 
 
 from flask_jwt_extended import JWTManager
@@ -24,6 +24,7 @@ app.url_map.strict_slashes = False
 
 
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=12)
 jwt = JWTManager(app)
 
 # database condiguration

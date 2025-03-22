@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -18,22 +18,31 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { MainListItems } from '../Dashboard/listitems.jsx';
-import { SecondaryListItems } from '../Dashboard/listitems.jsx';
-import Chart from '../Dashboard/Chart.jsx';
-import Deposits from '../Dashboard/Deposits.jsx';
-import Orders from '../Dashboard/Orders.jsx';
+import { MainListItems, SecondaryListItems } from '../../Dashboard/listitems.jsx';
+import { useParams } from 'react-router-dom';
+
+import Deposits from '../../Dashboard/Deposits.jsx';
+import Orders from '../../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../Home.jsx';
-import GroupCard from './IndividualViews/GroupCard.jsx';
-import { mapGroups } from '../../component/callToApi.js';
-
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Home } from '../../Home.jsx';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import Icon from '@material-ui/core/Icon';
+import SendIcon from '@material-ui/icons/Save';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
-import { Context } from '../../store/appContext.js';
+import { Context } from '../../../store/appContext.js';
+import { getInfoGroup } from '../../../component/callToApi.js';
+import { LibraryMusic } from '@material-ui/icons';
 
 function Copyright() {
   return (
@@ -47,7 +56,6 @@ function Copyright() {
     </Typography>
   );
 }
-
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -133,11 +141,11 @@ const useStyles = makeStyles((theme) => ({
   },
   contactGrid: {
     display: 'flex',
-
+    flexWrap: 'wrap',
   },
 }));
 
-export default function Groups() {
+export default function EditGroup() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -147,29 +155,29 @@ export default function Groups() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+ 
+  const handleChange = (event) => {
+    setSingleGroup({...singleGroup, [event.target.name]: event.target.value})
+  };
+
 
   const { store, actions } = useContext(Context);
+  const { groupid } = useParams();
+  const[singleGroup, setSingleGroup]= useState({});
 
-  const [groups, setGroups] = useState([]);
+  useEffect(()=>{
 
-  const { userid } = useParams();
-  console.log(userid);
-
-
-  useEffect(() => {
-
-    mapGroups(setGroups, userid)
-
-  }, [])
-
-
-
+    getInfoGroup(setSingleGroup, groupid)
+  },[])
+console.log(singleGroup);
+  
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
+            {/* Show MenuIcon when the drawer is closed */}
             {!open && (
               <IconButton
                 edge="start"
@@ -182,7 +190,7 @@ export default function Groups() {
               </IconButton>
             )}
 
-
+            {/* Show ChevronLeftIcon when the drawer is open */}
             {open && (
               <IconButton
                 edge="start"
@@ -215,21 +223,65 @@ export default function Groups() {
         >
 
           <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
+          <List><MainListItems user={store.userInfo}/></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
+        <Box
+          sx={{
+            width: "50%",
+            padding: "0 16px",
+            marginTop: "80px",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
 
-            <Grid container spacing={3} justifyContent="center" >
-              {Array.isArray(groups) && groups.map((group, index) => (
-                <GroupCard key={group.id || index} group={group} />
-              ))}
-            </Grid>
-          </Container>
-        </main>
+          }}
+        > 
+          <Box sx={{ marginBottom: "20px" }}>
+            <h3>Modify Group</h3>
+
+
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField
+                id="outlined-textarea"
+                variant="outlined"
+                fullWidth
+                placeholder="Current name"
+                value={singleGroup.group_name}
+                onChange={handleChange}
+                name='group_name'
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+            </Box>
+            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+              <TextField 
+                id="outlined-textarea"
+                value={singleGroup.total_amount}
+                variant="outlined"
+                fullWidth
+                placeholder="Total amount"
+                onChange={handleChange}
+                name='total_amount'
+              />
+              <Box sx={{ marginLeft: "40px" }}>
+                <Button>Change</Button>
+              </Box>
+              
+            </Box>            
+            <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
+              
+              <Button variant="outlined" color="secondary">Delete Group</Button>
+            </Box>
+
+
+
+          </Box>
+        </Box>
+
+
 
       </div>
     </ThemeProvider>
