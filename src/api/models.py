@@ -280,6 +280,7 @@ class Objectives(db.Model):
     is_completed = db.Column(db.Boolean, nullable=False, default=False)
     
     group = db.relationship("Group", backref="objectives")
+    objective_contributions = db.relationship("ObjectivesContributions", back_populates="objective", lazy="dynamic")
 
     def serialize(self):
         total_contributed = db.session.query(
@@ -287,7 +288,7 @@ class Objectives(db.Model):
         ).filter_by(objective_id=self.id).scalar()
         
         remaining_amount = max(self.target_amount - total_contributed, 0)
-
+    
         return {
             "id": self.id,
             "group_id": self.group_id,
@@ -305,9 +306,19 @@ class Objectives(db.Model):
                     "initial": member.user.name[0] if member.user and member.user.name else None
                 }
                 for member in self.group.members
-            ] if self.group else []
+            ] if self.group else [], 
+            "contributions": [
+                {
+                    "id": contribution.id,
+                    "user_id": contribution.user_id,
+                    "amount_contributed": contribution.amount_contributed,
+                    "user_name": contribution.user.name,
+                    "contributed_at": contribution.contributed_at
+                }
+                for contribution in self.objective_contributions
+            ]
         }
-    
+        
 
 class ObjectivesContributions(db.Model):
     __tablename__ = "objective_contributions"
@@ -316,6 +327,9 @@ class ObjectivesContributions(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     amount_contributed = db.Column(db.Integer, nullable=False)
     contributed_at = db.Column(db.DateTime)
+
+    user = db.relationship("User", backref="user_contributions")
+    objective = db.relationship("Objectives", back_populates="objective_contributions")
 
     def serialize(self):
         user = User.query.get(self.user_id)

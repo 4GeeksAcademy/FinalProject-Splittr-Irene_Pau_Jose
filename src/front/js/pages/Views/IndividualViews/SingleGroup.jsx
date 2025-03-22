@@ -180,6 +180,8 @@ export default function SingleGroup() {
 
   console.log(singleGroupInfo);
 
+  console.log(groupDebts);
+
   const participants = singleGroupInfo.members || [];
 
   const visibleParticipants = participants.slice(0, 5);
@@ -269,23 +271,30 @@ export default function SingleGroup() {
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>
                 <Table size="small" style={{ marginTop: '16px' }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Debtor</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                      <TableCell align="right">Creditor</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {groupDebts.map((debt) => (
-                      <TableRow key={debt.id}>
-                        <TableCell>{debt.debtor_name}</TableCell>
-                        <TableCell >{debt.amount}</TableCell>
-                        <TableCell>{debt.creditor_name}</TableCell>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Debtor</TableCell>
+                        <TableCell align="right">Amount</TableCell>
+                        <TableCell align="right">Creditor</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHead>
+                    <TableBody>
+                      {Array.isArray(groupDebts) ? (
+                      groupDebts.map((debt) => (
+                          <TableRow key={debt.id}>
+                            <TableCell>{debt.debtor_name}</TableCell>
+                            <TableCell>{debt.amount}</TableCell>
+                            <TableCell>{debt.creditor_name}</TableCell>
+                          </TableRow>
+                        ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3}>There are no debts!</TableCell>
+                      </TableRow>
+                    )}
+                    </TableBody>
+
+                  </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
                     See more
