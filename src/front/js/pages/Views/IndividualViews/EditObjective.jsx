@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -41,6 +41,8 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
+import { getInfoSharedObjective } from '../../../component/callToApi.js'; 
+
 
 function Copyright() {
   return (
@@ -153,17 +155,19 @@ export default function EditObjective() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  const [state, setState] = useState({
-    Language: 'English',
-  });
-
+ 
   const handleChange = (event) => {
-    setState({ ...state, Language: event.target.value });
+    setSingleObjective({...singleObjective, [event.target.name]: event.target.value})
   };
-
   const { store, actions } = useContext(Context);
   const { objectiveid } = useParams();
+  const[singleObjective, setSingleObjective]= useState({});
 
+  useEffect(()=>{
+
+    getInfoSharedObjective(setSingleObjective, objectiveid)
+  },[])
+  console.log(singleObjective);
   
   return (
     <ThemeProvider theme={darkTheme}>
@@ -239,10 +243,12 @@ export default function EditObjective() {
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
               <TextField
                 id="outlined-textarea"
-                label="Change Name"
                 variant="outlined"
                 fullWidth
                 placeholder="Current name"
+                value={singleObjective.name}
+                onChange={handleChange}
+                name='name'
 
               />{objectiveid.name}
               <Box sx={{ marginLeft: "40px" }}>
@@ -252,10 +258,12 @@ export default function EditObjective() {
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
               <TextField
                 id="outlined-textarea"
-                label="Change Amount"
                 variant="outlined"
                 fullWidth
                 placeholder="Current amount"
+                value={singleObjective.target_amount}
+                onChange={handleChange}
+                name='target_amount'
               />
               <Box sx={{ marginLeft: "40px" }}>
                 <Button>Change</Button>

@@ -264,3 +264,40 @@ export const mapTransactions = async (setTransactions) => {
     }
 };
 
+
+export const submitFeedback = async (email, message) => {
+    try {
+        const response = await fetch(urlBackend+ "/feedback", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, message })
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error submitting feedback:", error);
+        return { error: "Something went wrong" };
+    }
+};
+
+export const updateUser = async (updatedData, token) => {
+    try {
+        const response = await fetch(urlBackend + "/user/update", {  
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` 
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error updating user:", error);
+        return { error: "Something went wrong" };
+    }
+};
