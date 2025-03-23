@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts;
+from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts, Feedback
 
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
@@ -108,17 +108,12 @@ def delete_user(user_id):
 
 
 #PUT /user_id --> funciona
-
-@api.route('/user/update/<int:user_id>', methods=['PUT'])
+@api.route('/user/update', methods=['PUT'])
 @jwt_required()
-def update_user(user_id):
+def update_user():
     current_user_id = get_jwt_identity()  
     user = User.query.get(current_user_id)  
 
-    if user is None:
-        return jsonify({"msg": "You need to be logged in"}), 401
-    
-    user = User.query.get(user_id)  
     if user is None:
         return jsonify({"msg": "User not found"}), 404  
 
@@ -126,15 +121,21 @@ def update_user(user_id):
     if not request_body:
         return jsonify({"msg": "No data provided"}), 400
 
+  
     if "name" in request_body:
         user.name = request_body["name"]
     if "email" in request_body:
         existing_user = User.query.filter_by(email=request_body["email"]).first()
-        if existing_user and existing_user.user_id != user_id:
+        if existing_user and existing_user.user_id != current_user_id:
             return jsonify({"msg": "Email already in use"}), 400
         user.email = request_body["email"]
     if "password" in request_body:
         user.password = request_body["password"]
+    if "birthday" in request_body: 
+        try:
+            user.birthday = datetime.strptime(request_body["birthday"], "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"msg": "Invalid date format. Use YYYY-MM-DD."}), 400
 
     db.session.commit()
 
@@ -1060,6 +1061,21 @@ def get_user_transactions():
         "group_payments": [gp.serialize() for gp in group_payments],
         "objective_contributions": [contribution.serialize() for contribution in contributions]
     }), 200
+
+
+@api.route("/feedback", methods=["POST"])
+def submit_feedback():
+    data = request.get_json()
+
+    if not data or "email" not in data or "message" not in data:
+        return jsonify({"error": "Missing email or message"}), 400
+
+    new_feedback = Feedback(email=data["email"], message=data["message"])
+    
+    db.session.add(new_feedback)
+    db.session.commit()
+
+    return jsonify({"msg": "Feedback submitted successfully"}), 201
 
 
 # Routes to populate the database #

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -18,30 +18,20 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { MainListItems } from '../Dashboard/listitems.jsx';
-import { SecondaryListItems } from '../Dashboard/listitems.jsx';
-import Chart from '../Dashboard/Chart.jsx';
-import Deposits from '../Dashboard/Deposits.jsx';
-import Orders from '../Dashboard/Orders.jsx';
+import { MainListItems, SecondaryListItems } from '../Dashboard/listitems.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
-import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
-import Icon from '@material-ui/core/Icon';
-import SendIcon from '@material-ui/icons/Save';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
-import { useContext } from 'react';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
 import { Context } from '../../store/appContext.js';
+import { updateUser } from '../../component/callToApi.js';
+import { useParams } from 'react-router-dom';
 
+// Copyright component
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -55,6 +45,7 @@ function Copyright() {
   );
 }
 
+// Dark theme configuration
 const darkTheme = createMuiTheme({
   palette: {
     type: 'dark',
@@ -71,20 +62,12 @@ const darkTheme = createMuiTheme({
   },
 });
 
-const drawerWidth = 240;
-
+// Styles
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
   toolbar: {
     paddingRight: 20,
     minHeight: 70,
-  },
-  toolbarIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -96,8 +79,8 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
   },
   appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: 240,
+    width: `calc(100% - 240px)`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -111,57 +94,63 @@ const useStyles = makeStyles((theme) => ({
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: drawerWidth,
+    width: 240,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-
-  },
-  drawerPaperClose: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
-  },
-  appBarSpacer: {
-    minHeight: theme.spacing(4),
   },
   container: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4)
-
-  },
-  contactGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    paddingBottom: theme.spacing(4),
   },
 }));
 
 export default function Settings() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  const [state, setState] = useState({
-    Language: 'English',
-  });
+  const [open, setOpen] = useState(true);
+  const [state, setState] = useState({ Language: 'English' });
 
-  const handleChange = (event) => {
-    setState({ ...state, Language: event.target.value });
-  };
-
+  // Added missing states to fix the error
   const { store, actions } = useContext(Context);
+  const [user, setUser] = useState(store.userInfo);
+  const [loading, setLoading] = useState(false); 
+  const [message, setMessage] = useState(""); 
+  const updatedData = { birthday: user.birthday };
+  
+  useEffect(() => {
+    const getUser = async () => {
+        const data = await actions.getUser();
+        if (data) setUser(data); 
+    };
+    getUser();
+}, []);
+
+  console.log(user);
+
+  const handleUpdateUser = async () => {
+    setLoading(true);
+    setMessage("");
+
+    const updatedData = {
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        birthday: user.birthday
+    };
+
+    const result = await updateUser(updatedData, store.token);  
+
+    if (result.error) {
+        setMessage("Failed to update user");
+    } else {
+        setMessage("User updated successfully!");
+        actions.getUser();  
+    }
+
+    setLoading(false);
+};
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -169,36 +158,12 @@ export default function Settings() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            {/* Show MenuIcon when the drawer is closed */}
-            {!open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                className={classes.menuButton}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
-
-            {/* Show ChevronLeftIcon when the drawer is open */}
-            {open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="close drawer"
-                onClick={handleDrawerClose}
-                className={classes.menuButton}
-              >
-                <ChevronLeftIcon />
-              </IconButton>
-            )}
-
+            <IconButton edge="start" color="inherit" aria-label="toggle drawer" onClick={() => setOpen(!open)} className={classes.menuButton}>
+              {open ? <ChevronLeftIcon /> : <MenuIcon />}
+            </IconButton>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, Pepito!
             </Typography>
-
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
@@ -206,135 +171,78 @@ export default function Settings() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
+        <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
           <Divider />
-          <List><MainListItems user={store.userInfo}/></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
-        <Box
-          sx={{
-            width: "50%",
-            padding: "0 16px",
-            marginTop: "80px",
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-
-          }}
-        >
-          <Box sx={{ marginBottom: "20px" }}>
-            <h3>Settings</h3>
-            <h5>User</h5>
 
 
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="outlined-textarea"
-                label="Change name"
-                variant="outlined"
-                fullWidth
-                placeholder="Current user"
+        <Box sx={{ width: "50%", padding: "0 16px", marginTop: "80px", margin: "0 auto", display: "flex", flexDirection: "column" }}>
+          <h3>Settings</h3>
+          <h5>User</h5>
 
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
-              </Box>
+          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+            <TextField
+              label="Change Name"
+              variant="outlined"
+              fullWidth
+              value={user?.name || ""}
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
+            />
+            <Box sx={{ marginLeft: "40px" }}>
+              <Button onClick={handleUpdateUser} disabled={loading}>
+                {loading ? "Updating..." : "Change"}
+              </Button>
             </Box>
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="outlined-textarea"
-                label="Change email"
-                variant="outlined"
-                fullWidth
-                placeholder="Current email"
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
-              </Box>
-            </Box>
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="outlined-textarea"
-                label="Change password"
-                variant="outlined"
-                type="password"
-                fullWidth
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
-              </Box>
-
-            </Box>
-
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="date"
-                label="Birthday"
-                type="date"
-                defaultValue="2017-05-24"
-                variant="outlined"
-                fullWidth
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
-              </Box>
-            </Box>
-
-
-            <h5>Preferences</h5>
-
-
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor="outlined-age-native-simple">Language</InputLabel>
-                <Select
-                  native
-                  value={state.Language}
-                  onChange={handleChange}
-                  label="Language"
-                  inputProps={{
-                    name: 'Language',
-                    id: 'outlined-age-native-simple',
-                  }}
-                >
-                  <option aria-label="None" value="" />
-                  <option value={10}>English</option>
-                  <option value={20}>Spanish</option>
-                  <option value={30}>French</option>
-                  <option value={40}>Italian</option>
-                  <option value={50}>German</option>
-                  <option value={60}>Portuguese</option>
-                </Select>
-              </FormControl>
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
-              </Box>
-            </Box>
-            <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
-              <Button>Log out</Button>
-              <Button variant="outlined" color="secondary">Delete account</Button>
-            </Box>
-
-
-
           </Box>
+
+          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+            <TextField label="Change email" variant="outlined" fullWidth value={user?.email || ""} onChange={(e) => setUser({ ...user, email: e.target.value })} />
+            <Box sx={{ marginLeft: "40px" }}>
+              <Button onClick={handleUpdateUser} disabled={loading}>
+                {loading ? "Updating..." : "Change"}
+              </Button>
+            </Box>
+          </Box>
+
+          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+            <TextField
+              label="Change Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              value={user?.password || ""}
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
+            />
+            <Box sx={{ marginLeft: "40px" }}>
+              <Button onClick={handleUpdateUser} disabled={loading}>
+                {loading ? "Updating..." : "Change"}
+              </Button>
+            </Box>
+          </Box>
+
+          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+            <TextField
+              label="Birthday"
+              type="date"
+              variant="outlined"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={user?.birthday || ""}
+              onChange={(e) => setUser({ ...user, birthday: e.target.value })}
+            />
+            <Box sx={{ marginLeft: "40px" }}>
+              <Button onClick={handleUpdateUser} disabled={loading}>
+                {loading ? "Updating..." : "Change"}
+              </Button>
+            </Box>
+          </Box>
+
+          {message && <Typography color={message.includes("Failed") ? "error" : "primary"}>{message}</Typography>}
         </Box>
-
-
-
       </div>
     </ThemeProvider>
   );
 }
-

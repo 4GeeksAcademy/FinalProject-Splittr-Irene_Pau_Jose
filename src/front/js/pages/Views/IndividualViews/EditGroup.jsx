@@ -169,7 +169,7 @@ export default function EditGroup() {
 
     getInfoGroup(setSingleGroup, groupid)
   },[])
-console.log(singleGroup);
+
   
   return (
     <ThemeProvider theme={darkTheme}>

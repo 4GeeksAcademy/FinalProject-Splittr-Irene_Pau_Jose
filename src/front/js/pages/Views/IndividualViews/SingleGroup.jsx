@@ -141,10 +141,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function createData(id, date, name, amount) {
-  return { id, date, name, amount };
-}
-
 
 function preventDefault(event) {
   event.preventDefault();
@@ -178,9 +174,6 @@ export default function SingleGroup() {
     getGroupDebts(setGroupDebts, groupid);
   }, []);
 
-  console.log(singleGroupInfo);
-
-  console.log(groupDebts);
 
   const participants = singleGroupInfo.members || [];
 
@@ -252,11 +245,12 @@ export default function SingleGroup() {
 
           <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
             <div className="title" style={{ display: "flex", alignItems: "center" }}>
-              <Tooltip title="Favorite">
+              <Link href={`/group/update/${singleGroupInfo.group_id}`}>
                 <IconButton>
-                  <Star style={{ color: "#fff" }} />
+                  <Edit style={{ color: "#fff" }} />
                 </IconButton>
-              </Tooltip>
+
+              </Link>
               <Typography variant="h6" style={{ marginLeft: 5 }}>{singleGroupInfo.group_name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
@@ -271,30 +265,30 @@ export default function SingleGroup() {
               <Box display="block" justifyContent="center" alignItems="center" gap={3} >
                 <Typography gap={4}>Still to pay</Typography>
                 <Table size="small" style={{ marginTop: '16px' }}>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Debtor</TableCell>
-                        <TableCell align="right">Amount</TableCell>
-                        <TableCell align="right">Creditor</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Array.isArray(groupDebts) ? (
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Debtor</TableCell>
+                      <TableCell align="right">Amount</TableCell>
+                      <TableCell align="right">Creditor</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {Array.isArray(groupDebts) ? (
                       groupDebts.map((debt) => (
-                          <TableRow key={debt.id}>
-                            <TableCell>{debt.debtor_name}</TableCell>
-                            <TableCell>{debt.amount}</TableCell>
-                            <TableCell>{debt.creditor_name}</TableCell>
-                          </TableRow>
-                        ))
+                        <TableRow key={debt.id}>
+                          <TableCell>{debt.debtor_name}</TableCell>
+                          <TableCell>{debt.amount}</TableCell>
+                          <TableCell>{debt.creditor_name}</TableCell>
+                        </TableRow>
+                      ))
                     ) : (
                       <TableRow>
                         <TableCell colSpan={3}>There are no debts!</TableCell>
                       </TableRow>
                     )}
-                    </TableBody>
+                  </TableBody>
 
-                  </Table>
+                </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
                     See more
@@ -313,17 +307,7 @@ export default function SingleGroup() {
               </Box>
             </Box>
 
-            <Box display="flex" justifyContent="center" marginTop={2}>
-              <Link href={`/group/update/${singleGroupInfo.group_id}`}>
 
-                <IconButton>
-                  <Edit style={{ color: "#fff" }} />
-                </IconButton>
-
-              </Link>
-
-              <Tooltip title="Delete"><IconButton><Close style={{ color: "#ff4d4d" }} /></IconButton></Tooltip>
-            </Box>
           </Card>
 
         </Container>

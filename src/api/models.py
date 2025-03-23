@@ -9,6 +9,7 @@ class User(db.Model):
     name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(80), nullable=False)
     password = db.Column(db.String(20), nullable=False)
+    birthday = db.Column(db.Date, nullable=True)  # Add this field
     groups = db.relationship("Group_to_user", back_populates="user")
     expenses = db.relationship("Expenses", backref="user")
     payer = db.relationship('Payments', backref='payer', lazy='dynamic', primaryjoin="User.user_id == Payments.payer_id")
@@ -27,14 +28,14 @@ class User(db.Model):
             "user_id": self.user_id,
             "name": self.name,
             "email": self.email,
-            "initial": self.get_initial(),  # Add initials here
+            "birthday": self.birthday.strftime('%Y-%m-%d') if self.birthday else None,  # Format for JSON
+            "initial": self.get_initial(),
             "groups": [group.serialize() for group in self.groups] if self.groups else [],
             "expenses": [expense.serialize() for expense in self.expenses] if self.expenses else [],
             "debts": [debt.serialize() for debt in self.debts] if self.debts else [],
             "payer": [payment.serialize() for payment in self.payer] if self.payer else [],
             "receiver": [payment.serialize() for payment in self.receiver] if self.receiver else []
         }
-
     
 
 class Group(db.Model):
@@ -343,3 +344,18 @@ class ObjectivesContributions(db.Model):
             "contributed_at": self.contributed_at
         }
     
+class Feedback(db.Model):
+    __tablename__ ="feedback"
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(80), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "message": self.message,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }

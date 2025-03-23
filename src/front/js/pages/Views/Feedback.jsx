@@ -37,6 +37,7 @@ import Icon from '@material-ui/core/Icon';
 import SaveIcon from '@material-ui/icons/Save';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
+import { submitFeedback } from '../../component/callToApi.js';
 
 function Copyright() {
   return (
@@ -149,8 +150,26 @@ export default function Feedback() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-
   const { store, actions } = useContext(Context);
+
+  const handleSendFeedback = async () => {
+    const email = document.getElementById("feedback-email").value;
+    const message = document.getElementById("feedback-message").value;
+
+    if (!email || !message) {
+      alert("Please fill in both fields.");
+      return;
+    }
+
+    const response = await submitFeedback(email, message);
+
+    if (response.msg) {
+      alert("Feedback sent successfully!");
+    } else {
+      alert("Error sending feedback.");
+    }
+  };
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -203,7 +222,7 @@ export default function Feedback() {
         >
 
           <Divider />
-          <List><MainListItems user={store.userInfo}/></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
@@ -219,8 +238,8 @@ export default function Feedback() {
           <Box sx={{ marginBottom: "20px" }}>
             <h3>We'd love to hear from you!</h3>
             <TextField
-              id="outlined-textarea"
-              label="Name"
+              id="feedback-email"
+              label="Email"
               variant="outlined"
               fullWidth
             />
@@ -228,7 +247,7 @@ export default function Feedback() {
 
           <Box sx={{ marginBottom: "20px" }}>
             <TextField
-              id="outlined-multiline"
+              id="feedback-message"
               label="Feedback"
               variant="outlined"
               multiline
@@ -240,10 +259,7 @@ export default function Feedback() {
           <Button
             variant="contained"
             color="primary"
-            sendIcon={<Icon>send</Icon>}
-            sx={{
-              width: "100%",
-            }}
+            onClick={handleSendFeedback}
           >
             Send
           </Button>
