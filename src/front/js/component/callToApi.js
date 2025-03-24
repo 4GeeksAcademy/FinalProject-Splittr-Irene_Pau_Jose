@@ -301,3 +301,21 @@ export const updateUser = async (updatedData, token) => {
         return { error: "Something went wrong" };
     }
 };
+
+export const signUpUser = async (name, email, password) => {
+    try {
+        const response = await fetch(`${urlBackend}/signup`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error signing up:", error);
+        return { error: "Something went wrong" };
+    }
+};
