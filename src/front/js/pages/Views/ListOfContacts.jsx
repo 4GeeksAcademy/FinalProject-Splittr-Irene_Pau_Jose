@@ -237,9 +237,6 @@ export default function ListOfContacts() {
               {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
                 <ContactCard key={contact.id} contact={contact} />
               ))}
-              {contacts && (!contacts.contacts || !Array.isArray(contacts.contacts)) && (
-                <div>No se encontraron contactos o la estructura es incorrecta.</div>
-              )}
               {!contacts && <div>Cargando contactos...</div>}
             </Grid>
           </Container>

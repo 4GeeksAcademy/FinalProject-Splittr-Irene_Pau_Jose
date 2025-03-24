@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -23,9 +23,7 @@ import { Card, CardContent } from '@material-ui/core';
 
 import { getInfoConversation } from '../../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
-import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
-import { useEffect } from 'react';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -81,6 +79,7 @@ const useStyles = makeStyles((theme) => ({
         overflowY: 'auto',
         padding: theme.spacing(2),
         gap: theme.spacing(1),
+
     },
     messageBubble: { padding: theme.spacing(1), borderRadius: '10px', marginBottom: theme.spacing(1) },
     sent: {
@@ -110,41 +109,59 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: '60%',
         border: '2px solid #ffffff',
     },
+    header: {
+        position: 'sticky',
+        top: 0,
+        backgroundColor: '#2C2F33',
+        zIndex: 2,
+        padding: '10px',
+    },
+
 }));
-export default function TextMessages() {
+export default function SingleMessage() {
     const classes = useStyles();
     const [open, setOpen] = React.useState(true);
-    const [messages, setMessages] = useState([
-        { text: "Hola, ¿cómo estás? Me debes 100 euros", sender: 'me' },
-        { text: "Perdón, mañana te hago el bizum", sender: 'other' },
-        { text: "De acuerd, no te preocupes, moroso", sender: 'me' },
-    ]);
-    const [newMessage, setNewMessage] = useState('');
-
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
 
-    const handleSendMessage = () => {
-        if (newMessage.trim()) {
-            setMessages([...messages, { text: newMessage, sender: 'me' }]);
-            setNewMessage('');
-        }
-    };
-
-    const { store, actions } = useContext(Context);
-
-    const [conversation, setConversation] = useState([]);
-
+    const { store } = useContext(Context);
     const { otheruserid } = useParams();
-    console.log(conversation);
+    const [conversation, setConversation] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const messagesEndRef = useRef(null);
 
+   // Safer approach that handles undefined values
+const otherUser = { name: "", initial: "" };
+
+if (conversation && conversation.length > 0 && otheruserid) {
+  const otherUserIdString = String(otheruserid);
+  
+  const relevantMessage = conversation.find(msg => {
+
+    const fromId = msg.from_user_id ? String(msg.from_user_id) : "";
+    const toId = msg.to_user_id ? String(msg.to_user_id) : "";
+    
+    return fromId === otherUserIdString || toId === otherUserIdString;
+  });
+  
+  if (relevantMessage) {
+    if (relevantMessage.from_user_id && String(relevantMessage.from_user_id) === otherUserIdString) {
+      otherUser.name = relevantMessage.from_user_name || "";
+      otherUser.initial = relevantMessage.from_user_initial || "";
+    } else {
+      otherUser.name = relevantMessage.to_user_name || "";
+      otherUser.initial = relevantMessage.to_user_initial || "";
+    }
+  }
+}
 
     useEffect(() => {
-
         getInfoConversation(setConversation, otheruserid)
-
     }, [])
 
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, [conversation]);
 
     return (
         <ThemeProvider theme={darkTheme}>
@@ -182,14 +199,14 @@ export default function TextMessages() {
                 <div className={classes.container}>
                     <Card className={classes.card} variant="outlined">
                         <CardContent className={classes.cardContent}>
-                            <Box display="flex" alignItems="center" marginBottom={2}>
-                                <Avatar className={classes.avatar}>{conversation?.[0]?.from_user_initial}</Avatar>
+                            <Box display="flex" className={classes.header} alignItems="center" marginBottom={2}>
+                                <Avatar className={classes.avatar}>{otherUser.initial}</Avatar>
                                 <Box ml={2}>
-                                    <Typography variant="h6">{conversation?.[0]?.from_user_name}</Typography>
+                                    <Typography variant="h6">{otherUser.name}</Typography>
                                 </Box>
                             </Box>
                             <div className={classes.messages}>
-                                {conversation && Array.isArray(conversation) && conversation.length > 0 ? (
+                                {conversation && conversation.length > 0 ? (
                                     conversation.map((message, index) => (
                                         <div
                                             key={index}
@@ -202,8 +219,9 @@ export default function TextMessages() {
                                         </div>
                                     ))
                                 ) : (
-                                    <Typography color="textSecondary"></Typography>
+                                    <Typography color="textSecondary">No hay mensajes aún</Typography>
                                 )}
+                                <div ref={messagesEndRef} />
                             </div>
                             <div className={classes.messageInput}>
                                 <TextField
@@ -215,7 +233,7 @@ export default function TextMessages() {
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                <IconButton onClick={handleSendMessage}>
+                                                <IconButton>
                                                     <SendIcon />
                                                 </IconButton>
                                             </InputAdornment>

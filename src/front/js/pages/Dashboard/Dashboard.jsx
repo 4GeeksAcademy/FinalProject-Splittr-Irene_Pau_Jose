@@ -129,6 +129,18 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexWrap: 'wrap',
   },
+  paper: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  content: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  }
 }));
 
 export default function Dashboard() {
@@ -144,7 +156,7 @@ export default function Dashboard() {
 
   const { store, actions } = useContext(Context);
   const [user, setUser] = useState(store.userInfo);
-  
+
   const [transactions, setTransactions] = useState([]);
   const { userid } = useParams();
 
@@ -230,8 +242,8 @@ export default function Dashboard() {
                 </Paper>
               </Grid>
 
-              <Grid item xs={12}>
-                <Paper className={classes.paper}>
+              <Grid item xs={12} style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                <Paper className={classes.paper} style={{ flexGrow: 1 }}>
                   <Orders />
                 </Paper>
               </Grid>
