@@ -41,6 +41,29 @@ export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
     }
 }
 
+export const updateGroup = async (groupId, updatedData) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(urlBackend + "/group/update/" + groupId, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(updatedData)
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to update group");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating group:", error);
+        throw error;
+    }
+};
+
 export const getGroupDebts = async (setGroupDebts, groupId) => {
     try {
       const response = await fetch(urlBackend+"/group/group_debts/"+groupId, {

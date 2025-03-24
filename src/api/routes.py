@@ -256,25 +256,21 @@ def update_group(group_id):
     user = User.query.get(current_user_id)  
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
-    
+
     request_data = request.get_json()
+    print("Received update request:", request_data)  # ✅ Debugging log
+
     group = Group.query.get(group_id)
     if not group:
         return jsonify({"msg": "Group not found"}), 404
 
     if "group_name" in request_data:
         group.group_name = request_data["group_name"]
-
-    if "members" in request_data:
-        # Borrar los miembros actuales del grupo
-        Group_to_user.query.filter_by(group_id=group_id).delete()
-
-        for user_id in request_data["members"]:
-            group_to_user = Group_to_user(user_id=user_id, group_id=group_id, created_at=datetime.utcnow())
-            db.session.add(group_to_user)
+    
+    if "total_amount" in request_data:
+        group.total_amount = request_data["total_amount"]
 
     db.session.commit()
-
     return jsonify(group.serialize()), 200
 
 @api.route('/group/group_debts/<int:group_id>', methods=['GET'])
