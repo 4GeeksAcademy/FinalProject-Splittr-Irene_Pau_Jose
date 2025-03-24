@@ -43,6 +43,7 @@ import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { getInfoGroup } from '../../../component/callToApi.js';
 import { LibraryMusic } from '@material-ui/icons';
+import { updateGroup } from '../../../component/callToApi.js';
 
 function Copyright() {
   return (
@@ -155,22 +156,46 @@ export default function EditGroup() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
- 
+
   const handleChange = (event) => {
-    setSingleGroup({...singleGroup, [event.target.name]: event.target.value})
+    setSingleGroup({ ...singleGroup, [event.target.name]: event.target.value })
   };
 
 
   const { store, actions } = useContext(Context);
   const { groupid } = useParams();
-  const[singleGroup, setSingleGroup]= useState({});
+  const [singleGroup, setSingleGroup] = useState({});
 
-  useEffect(()=>{
+  useEffect(() => {
 
     getInfoGroup(setSingleGroup, groupid)
-  },[])
+  }, [])
 
-  
+  const [members, setMembers] = useState([]);
+
+  const handleUpdateGroup = async (field) => {
+    try {
+      let updatedData = {};
+
+      switch (field) {
+        case 'group_name':
+          updatedData = { group_name: singleGroup.group_name };
+          break;
+        case 'total_amount':
+          updatedData = { total_amount: singleGroup.total_amount };
+          break;
+
+      }
+
+      await updateGroup(groupid, updatedData);
+      alert( "Group updated successfully!");
+    } catch (error) {
+      console.error("Error updating Group:", error);
+      alert("Error updating Group : ${error.message}");
+    }
+  };
+
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -223,7 +248,7 @@ export default function EditGroup() {
         >
 
           <Divider />
-          <List><MainListItems user={store.userInfo}/></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
@@ -237,47 +262,50 @@ export default function EditGroup() {
             flexDirection: "column",
 
           }}
-        > 
+        >
           <Box sx={{ marginBottom: "20px" }}>
             <h3>Modify Group</h3>
 
 
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="outlined-textarea"
-                variant="outlined"
-                fullWidth
-                placeholder="Current name"
-                value={singleGroup.group_name}
-                onChange={handleChange}
-                name='group_name'
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <TextField
+                  id="outlined-textarea"
+                  variant="outlined"
+                  fullWidth
+                  placeholder="Current name"
+                  value={singleGroup.group_name || ""}
+                  onChange={handleChange}
+                  name="group_name"
+                />
+                <Box sx={{ marginLeft: "40px" }}>
+                  <Button onClick={() => handleUpdateGroup("group_name")}>Change</Button>
+                </Box>
               </Box>
-            </Box>
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField 
-                id="outlined-textarea"
-                value={singleGroup.total_amount}
-                variant="outlined"
-                fullWidth
-                placeholder="Total amount"
-                onChange={handleChange}
-                name='total_amount'
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
+              <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+                <TextField
+                  id="outlined-textarea"
+                  variant="outlined"
+                  fullWidth
+                  placeholder="Current amount"
+                  value={singleGroup.total_amount || ""}
+                  onChange={handleChange}
+                  name="total_amount"
+                />
+                <Box sx={{ marginLeft: "40px" }}>
+                  <Button onClick={() => handleUpdateGroup("total_amount")}>Change</Button>
+                </Box>
+
               </Box>
-              
-            </Box>            
-            <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
-              
-              <Button variant="outlined" color="secondary">Delete Group</Button>
+              <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
+
+                <Button variant="outlined" color="secondary">Delete Objective</Button>
+              </Box>
+
+
+
             </Box>
-
-
-
           </Box>
         </Box>
 

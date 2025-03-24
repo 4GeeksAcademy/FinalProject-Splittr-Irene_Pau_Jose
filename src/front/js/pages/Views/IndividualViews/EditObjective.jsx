@@ -42,6 +42,7 @@ import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { getInfoSharedObjective } from '../../../component/callToApi.js'; 
+import { updateObjective } from '../../../component/callToApi.js';
 
 
 function Copyright() {
@@ -168,7 +169,15 @@ export default function EditObjective() {
     getInfoSharedObjective(setSingleObjective, objectiveid)
   },[])
   console.log(singleObjective);
-  
+  const handleUpdate = async (field) => {
+    try {
+      const updatedData = { [field]: singleObjective[field] };
+      await updateObjective(objectiveid, updatedData);
+      alert("Objective updated successfully!");
+    } catch (error) {
+      alert("Failed to update objective.");
+    }
+  };
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -252,7 +261,7 @@ export default function EditObjective() {
 
               />{objectiveid.name}
               <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
+              <Button onClick={() => handleUpdate("name")}>Change</Button>
               </Box>
             </Box>
             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
@@ -266,7 +275,7 @@ export default function EditObjective() {
                 name='target_amount'
               />
               <Box sx={{ marginLeft: "40px" }}>
-                <Button>Change</Button>
+                <Button onClick={() => handleUpdate("target_amount")}>Change</Button>
               </Box>
               
             </Box>            
