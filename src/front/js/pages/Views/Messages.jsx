@@ -148,14 +148,7 @@ const useStyles = makeStyles((theme) => {
     appBarSpacer: {
       minHeight: theme.spacing(4),
     },
-    container: {
-      paddingTop: theme.spacing(1),
-      paddingBottom: theme.spacing(4),
-    },
-    contactGrid: {
-      display: 'flex',
-
-    },
+   
     card: {
       display: 'flex',
       width: 500,
@@ -196,21 +189,24 @@ const useStyles = makeStyles((theme) => {
       marginRight: theme.spacing(1),
       ...responsiveInitial,
     },
+    content: {
+      flexGrow: 1,
+      overflow: 'auto',
+      width: '100%',
+    },
     container: {
       paddingTop: theme.spacing(1),
-      paddingBottom: theme.spacing(4),
-      display: 'flex',
-      justifyContent: 'center',
-
-
-
+      paddingBottom: theme.spacing(1),
+      width: '100%',
     },
     contactGrid: {
       display: 'flex',
-      justifyContent: 'center',
-
-
+      flexDirection: 'column',
+      width: '100%',
+      paddingBottom: theme.spacing(1),
+      
     },
+    
   };
 });
 
@@ -228,7 +224,7 @@ export default function Messages() {
 
   const { store, actions } = useContext(Context);
 
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState({});
   console.log(messages);
 
   const { userid } = useParams();
@@ -236,10 +232,8 @@ export default function Messages() {
 
 
   useEffect(() => {
-
-    mapMessages(setMessages, userid)
-
-  }, [])
+    mapMessages(setMessages, userid);
+}, [userid]);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -301,7 +295,7 @@ export default function Messages() {
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
 
-            <Grid container spacing={3} justifyContent="center" >
+            <Grid container spacing={3} justifyContent="center" className={classes.contactGrid} >
               {messages && Array.isArray(messages) && messages.length > 0 ? (
                 (() => {
                   const currentUser = store.userInfo;
@@ -313,13 +307,22 @@ export default function Messages() {
                   const filteredMessages = messages.filter(
                     message => message.from_user_id !== currentUserId
                   );
-
                   const uniqueUserIds = [...new Set(filteredMessages.map(message => message.from_user_id))];
-
+                  
                   return uniqueUserIds.map(uniqueUserId => {
-                    const firstMessageFromUser = filteredMessages.find(message => message.from_user_id === uniqueUserId);
-                    return <MessageCard key={uniqueUserId} message={firstMessageFromUser} />;
-                  });
+                    const latestMessageFromUser = filteredMessages
+                        .filter(message => message.from_user_id === uniqueUserId)
+                        .sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at))[0];
+                
+                    return (
+                        <MessageCard 
+                            key={uniqueUserId}
+                            message={latestMessageFromUser || {}}
+                            className={classes.contactGrid}
+                            
+                        />
+                    );
+                });
                 })()
               ) : (
                 <Typography variant="subtitle1" color="textSecondary"></Typography>
