@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -246,7 +246,7 @@ class Messages(db.Model):
     sent_to_user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     from_user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     message = db.Column(db.String(200))
-    sent_at = db.Column(db.DateTime)
+    sent_at = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
         return f'<Messages {self.id}>'

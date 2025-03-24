@@ -243,6 +243,24 @@ export const getInfoConversation= async (setConversation, otheruserid) => {
     }
 };
 
+export const sendMessage = async (sent_to_user_id, message, from_user_id) => {
+    try {
+      const response = await fetch(urlBackend + "/message/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem("token") 
+        },
+        body: JSON.stringify({ sent_to_user_id, message, from_user_id })
+      });
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      return { error: "Something went wrong" };
+    }
+  };
 
 export const mapTransactions = async (setTransactions) => {
     try {
@@ -304,7 +322,7 @@ export const updateUser = async (updatedData, token) => {
 
 export const signUpUser = async (name, email, password) => {
     try {
-        const response = await fetch(`${urlBackend}/signup`, {
+        const response = await fetch(urlBackend+"/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -319,3 +337,4 @@ export const signUpUser = async (name, email, password) => {
         return { error: "Something went wrong" };
     }
 };
+

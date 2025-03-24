@@ -791,6 +791,7 @@ def get_messages_by_user_id(user_id):
     sent_messages = Messages.query.filter_by(from_user_id=user_id).all()
 
     messages = received_messages + sent_messages
+    messages.sort(key=lambda msg: msg.sent_at if msg.sent_at is not None else datetime.min, reverse=True)
 
     if not messages:
         return jsonify({"error": "No messages found for this user"}), 404 
