@@ -130,7 +130,6 @@ export default function SingleMessage() {
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef(null);
 
-   // Safer approach that handles undefined values
 const otherUser = { name: "", initial: "" };
 
 if (conversation && conversation.length > 0 && otheruserid) {
