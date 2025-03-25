@@ -21,7 +21,7 @@ import { Box, TextField, InputAdornment } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { Card, CardContent } from '@material-ui/core';
 
-import { getInfoConversation, sendMessage } from '../../../component/callToApi.js';
+import { getInfoConversation, sendMessage, fetchUserInfo } from '../../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
 import { Context } from '../../../store/appContext.js';
 
@@ -129,9 +129,9 @@ export default function TextMessages() {
     const [conversation, setConversation] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef(null);
-
+    const [otherUser, setOtherUser] = useState({ name: "", initial: "" });
     // Fix for the other user determination
-    const otherUser = { name: "", initial: "" };
+
 
     if (conversation && conversation.length > 0 && otheruserid) {
         // First make sure we have a string version of the ID for comparison
@@ -202,6 +202,19 @@ export default function TextMessages() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }, [conversation]);
 
+    useEffect(() => {
+        const loadOtherUserInfo = async () => {
+            const userInfo = await fetchUserInfo(otheruserid);
+            if (userInfo) {
+                setOtherUser({
+                    name: userInfo.name || "",
+                    initial: userInfo.initial || ""
+                });
+            }
+        };
+
+        loadOtherUserInfo();
+    }, [otheruserid]);
     return (
         <ThemeProvider theme={darkTheme}>
             <div className={classes.root}>

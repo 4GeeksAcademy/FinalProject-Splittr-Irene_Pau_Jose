@@ -84,7 +84,14 @@ def get_user_by_id():
     return jsonify(user.serialize()), 200
 
 
-
+@api.route('/user/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user_by_its_id(user_id):
+    user = User.query.get(user_id)
+    
+    if user is None:
+        return jsonify({"error": "User not found"}), 404 
+    return jsonify(user.serialize()), 200
 
 
 #DELETE /user --> funciona !!
