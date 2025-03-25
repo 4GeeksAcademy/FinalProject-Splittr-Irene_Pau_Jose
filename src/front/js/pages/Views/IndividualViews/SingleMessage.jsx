@@ -134,64 +134,64 @@ export default function TextMessages() {
     const otherUser = { name: "", initial: "" };
 
     if (conversation && conversation.length > 0 && otheruserid) {
-      // First make sure we have a string version of the ID for comparison
-      const otherUserIdString = String(otheruserid);
-      
-      // Find a message where otheruserid matches either sender or recipient
-      const relevantMessage = conversation.find(msg => {
-        // Safely convert IDs to strings for comparison, handling potential undefined values
-        const fromId = msg.from_user_id ? String(msg.from_user_id) : "";
-        const toId = msg.to_user_id ? String(msg.to_user_id) : "";
-        
-        return fromId === otherUserIdString || toId === otherUserIdString;
-      });
-      
-      if (relevantMessage) {
-        if (relevantMessage.from_user_id && String(relevantMessage.from_user_id) === otherUserIdString) {
-          otherUser.name = relevantMessage.from_user_name || "";
-          otherUser.initial = relevantMessage.from_user_initial || "";
-        } else {
-          otherUser.name = relevantMessage.to_user_name || "";
-          otherUser.initial = relevantMessage.to_user_initial || "";
+        // First make sure we have a string version of the ID for comparison
+        const otherUserIdString = String(otheruserid);
+
+        // Find a message where otheruserid matches either sender or recipient
+        const relevantMessage = conversation.find(msg => {
+            // Safely convert IDs to strings for comparison, handling potential undefined values
+            const fromId = msg.from_user_id ? String(msg.from_user_id) : "";
+            const toId = msg.to_user_id ? String(msg.to_user_id) : "";
+
+            return fromId === otherUserIdString || toId === otherUserIdString;
+        });
+
+        if (relevantMessage) {
+            if (relevantMessage.from_user_id && String(relevantMessage.from_user_id) === otherUserIdString) {
+                otherUser.name = relevantMessage.from_user_name || "";
+                otherUser.initial = relevantMessage.from_user_initial || "";
+            } else {
+                otherUser.name = relevantMessage.to_user_name || "";
+                otherUser.initial = relevantMessage.to_user_initial || "";
+            }
         }
-      }
     }
 
     // Handle sending a message
     const handleSendMessage = async () => {
-      if (newMessage.trim() === '') return; // Don't send empty messages
-      
-      try {
-        const response = await sendMessage(
-          otheruserid, // This is the ID of the user you're sending to
-          newMessage, // The message content
-          store.userInfo.user_id // The current user's ID
-        );
-        
-        if (response.error) {
-          console.error("Failed to send message:", response.error);
-          return;
+        if (newMessage.trim() === '') return; // Don't send empty messages
+
+        try {
+            const response = await sendMessage(
+                otheruserid, // This is the ID of the user you're sending to
+                newMessage, // The message content
+                store.userInfo.user_id // The current user's ID
+            );
+
+            if (response.error) {
+                console.error("Failed to send message:", response.error);
+                return;
+            }
+
+            // If message sent successfully, update the local conversation state
+            const sentMessage = {
+                from_user_id: store.userInfo.user_id,
+                to_user_id: otheruserid,
+                message: newMessage,
+                from_user_name: store.userInfo.name,
+                from_user_initial: store.userInfo.name.charAt(0).toUpperCase(),
+                to_user_name: otherUser.name,
+                to_user_initial: otherUser.initial
+            };
+
+            setConversation([...conversation, sentMessage]);
+            setNewMessage(''); // Clear the input field
+
+            // Optionally refresh the conversation from the server
+            getInfoConversation(setConversation, otheruserid);
+        } catch (error) {
+            console.error("Error sending message:", error);
         }
-        
-        // If message sent successfully, update the local conversation state
-        const sentMessage = {
-          from_user_id: store.userInfo.user_id,
-          to_user_id: otheruserid,
-          message: newMessage,
-          from_user_name: store.userInfo.name,
-          from_user_initial: store.userInfo.name.charAt(0).toUpperCase(),
-          to_user_name: otherUser.name,
-          to_user_initial: otherUser.initial
-        };
-        
-        setConversation([...conversation, sentMessage]);
-        setNewMessage(''); // Clear the input field
-        
-        // Optionally refresh the conversation from the server
-        getInfoConversation(setConversation, otheruserid);
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
     };
 
     useEffect(() => {
@@ -258,7 +258,7 @@ export default function TextMessages() {
                                         </div>
                                     ))
                                 ) : (
-                                    <Typography color="textSecondary">No hay mensajes aún</Typography>
+                                    <Typography color="textSecondary">There are no messages still...</Typography>
                                 )}
                                 <div ref={messagesEndRef} />
                             </div>
@@ -266,7 +266,7 @@ export default function TextMessages() {
                                 <TextField
                                     fullWidth
                                     variant="outlined"
-                                    placeholder="Escribe un mensaje..."
+                                    placeholder="Write a message..."
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     onKeyPress={(e) => {
