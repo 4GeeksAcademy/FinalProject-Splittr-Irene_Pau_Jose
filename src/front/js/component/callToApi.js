@@ -379,3 +379,22 @@ export const signUpUser = async (name, email, password) => {
     }
 };
 
+
+export const fetchUserInfo = async (user_id) => {
+    try {
+        const response = await fetch(urlBackend + "/user/" + user_id, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch user info");
+        }
+        const data = await response.json();
+        return data; 
+    } catch (error) {
+        console.error("Error fetching user info:", error);
+        return null;
+    }
+};
