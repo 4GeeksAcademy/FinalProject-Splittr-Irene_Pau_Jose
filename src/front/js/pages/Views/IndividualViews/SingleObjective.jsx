@@ -350,6 +350,10 @@ export default function SingleObjective() {
                         <TableCell>{contributions.user_name}</TableCell>
                         <TableCell align="right">
                           {contributions.total_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                          {new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "EUR",
+                          }).format(contributions.total_contributed)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -374,6 +378,10 @@ export default function SingleObjective() {
                         <TableCell>{contributions.user_name}</TableCell>
                         <TableCell align="right">
                           {contributions.amount_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                          {new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "EUR",
+                          }).format(contributions.amount_contributed)}
                         </TableCell>
                       </TableRow>
                     ))}

@@ -41,6 +41,29 @@ export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
     }
 }
 
+export const updateGroup = async (groupId, updatedData) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(urlBackend + "/group/update/" + groupId, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(updatedData)
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to update group");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating group:", error);
+        throw error;
+    }
+};
+
 export const getGroupDebts = async (setGroupDebts, groupId) => {
     try {
       const response = await fetch(urlBackend+"/group/group_debts/"+groupId, {
@@ -243,6 +266,24 @@ export const getInfoConversation= async (setConversation, otheruserid) => {
     }
 };
 
+export const sendMessage = async (sent_to_user_id, message, from_user_id) => {
+    try {
+      const response = await fetch(urlBackend + "/message/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem("token") 
+        },
+        body: JSON.stringify({ sent_to_user_id, message, from_user_id })
+      });
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      return { error: "Something went wrong" };
+    }
+  };
 
 export const mapTransactions = async (setTransactions) => {
     try {
@@ -304,7 +345,7 @@ export const updateUser = async (updatedData, token) => {
 
 export const signUpUser = async (name, email, password) => {
     try {
-        const response = await fetch(`${urlBackend}/signup`, {
+        const response = await fetch(urlBackend+"/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -319,3 +360,4 @@ export const signUpUser = async (name, email, password) => {
         return { error: "Something went wrong" };
     }
 };
+
