@@ -169,10 +169,33 @@ export default function SingleContact() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            <IconButton color="inherit" onClick={open ? handleDrawerClose : handleDrawerOpen}>
-              {open ? <ChevronLeftIcon /> : <MenuIcon />}
-            </IconButton>
-            <Typography variant="h6" noWrap className={classes.title} style={{ color: darkTheme.palette.text.primary }}>
+            {/* Show MenuIcon when the drawer is closed */}
+            {!open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+
+            {/* Show ChevronLeftIcon when the drawer is open */}
+            {open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
+
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, Pepito!
             </Typography>
 
@@ -183,7 +206,14 @@ export default function SingleContact() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" open={open} classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }}>
+        <Drawer
+          variant="permanent"
+          classes={{
+            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+          }}
+          open={open}
+        >
+
           <Divider />
           <List><MainListItems user={store.userInfo} /></List>
           <Divider />

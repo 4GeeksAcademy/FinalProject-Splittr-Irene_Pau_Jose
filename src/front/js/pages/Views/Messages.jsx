@@ -26,10 +26,22 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import MessageCard from './IndividualViews/MessageCard.jsx';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
-import { mapMessages } from '../../component/callToApi.js';
+import { mapMessages, mapContacts  } from '../../component/callToApi.js';
+import AddIcon from '@material-ui/icons/Add';
+import Fab from '@material-ui/core/Fab';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
 
 
 function Copyright() {
@@ -206,6 +218,14 @@ const useStyles = makeStyles((theme) => {
       paddingBottom: theme.spacing(1),
       
     },
+    fabButton: {
+      position: 'fixed',
+      bottom: theme.spacing(3),
+      right: theme.spacing(3),
+      borderRadius: '50%', 
+      width: theme.spacing(7), 
+      height: theme.spacing(7),
+    },
     
   };
 });
@@ -226,14 +246,23 @@ export default function Messages() {
 
   const [messages, setMessages] = useState({});
   console.log(messages);
+  const [contacts, setContacts] = useState([]);
+  const [openContactDialog, setOpenContactDialog] = useState(false);
 
   const { userid } = useParams();
-
+  const navigate = useNavigate();
 
 
   useEffect(() => {
     mapMessages(setMessages, userid);
-}, [userid]);
+    mapContacts(setContacts, userid);
+  }, [userid]);
+
+  const handleStartConversation = (contactId) => {
+
+    navigate(`/message/conversation/${contactId}`);
+    setOpenContactDialog(false);
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -330,6 +359,47 @@ export default function Messages() {
             </Grid>
           </Container>
         </main>
+        <Fab 
+          color="primary" 
+          className={classes.fabButton} 
+          onClick={() => setOpenContactDialog(true)}
+        >
+          <AddIcon />
+        </Fab>
+
+        {/* Dialog to Select Contact */}
+        <Dialog 
+          open={openContactDialog} 
+          onClose={() => setOpenContactDialog(false)}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Start a Conversation</DialogTitle>
+          <DialogContent dividers>
+            <List>
+              {contacts && contacts.contacts && contacts.contacts.map((contact) => (
+                <ListItem 
+                  button 
+                  key={contact.contact_id}
+                  onClick={() => handleStartConversation(contact.contact_id)}
+                >
+                  <ListItemAvatar>
+                    <Avatar>{contact.contact_initial}</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText 
+                    primary={contact.contact_name}
+                    secondary={contact.contact_email}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenContactDialog(false)} color="primary">
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       </div>
     </ThemeProvider>
