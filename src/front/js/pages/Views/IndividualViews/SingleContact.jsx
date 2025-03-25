@@ -29,10 +29,11 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { getContactInfo } from '../../../component/callToApi.js';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { createMuiTheme } from '@material-ui/core/styles';
+import { deleteUserContact } from '../../../component/callToApi.js';
 
 
 const darkTheme = createMuiTheme({
@@ -42,14 +43,14 @@ const darkTheme = createMuiTheme({
     background: { default: '#23272A', paper: '#2C2F33' },
     text: { primary: '#ffffff', secondary: '#b9bbbe' },
   },
-    overrides: {
-      MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
-      MuiToolbar: { root: { color: '#ffffff' } },
-      MuiTypography: { root: { color: '#ffffff' } },
-      MuiIconButton: { root: { color: '#ffffff !important' } },
-      MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
-    },
+  overrides: {
+    MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
+    MuiToolbar: { root: { color: '#ffffff' } },
+    MuiTypography: { root: { color: '#ffffff' } },
+    MuiIconButton: { root: { color: '#ffffff !important' } },
+    MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
   },
+},
 );
 
 
@@ -89,25 +90,25 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   card: {
-    width: "30%", 
-    maxWidth: "500px", 
+    width: "30%",
+    maxWidth: "500px",
     padding: theme.spacing(0.5),
     marginTop: theme.spacing(4),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: theme.spacing(0.5), 
-    boxShadow: theme.shadows[2], 
-    borderRadius: theme.shape.borderRadius, 
-    maxHeight:"30%",
+    gap: theme.spacing(0.5),
+    boxShadow: theme.shadows[2],
+    borderRadius: theme.shape.borderRadius,
+    maxHeight: "30%",
   },
-  
-  
+
+
   avatar: {
     backgroundColor: deepPurple[500],
-    width: 120,
-    height: 120,
+    width: 60,
+    height: 60,
     fontSize: '3rem',
   },
 }));
@@ -117,22 +118,49 @@ export default function SingleContact() {
   const [open, setOpen] = useState(true);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-  const {store, actions} = useContext(Context); 
+  const { store, actions } = useContext(Context);
   const [contact, setContact] = useState([]);
   const { contactid } = useParams();
   console.log(contact)
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-      getContactInfo(setContact, contactid);
+    getContactInfo(setContact, contactid);
   }, []);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
   const handleDeleteClick = () => setOpenDeleteDialog(true);
   const handleCloseDeleteDialog = () => setOpenDeleteDialog(false);
-  const handleConfirmDelete = () => {
-    setOpenDeleteDialog(false);
-    // Código para eliminar contacto
+
+
+  const handleConfirmDelete = async () => {
+    try {
+      // Call the delete function with the contact ID
+      const response = await deleteUserContact(contactid);
+  
+      // Show a success message (you can replace this with a toast or snackbar)
+      alert(response.msg || "Contact deleted successfully");
+  
+      // Navigate to user contacts page
+      // Assuming the user's ID is stored in the context
+      const userId = store.userInfo?.user_id;
+      if (userId) {
+        navigate(`/user_contacts/user/${userId}`);
+      } else {
+        // Fallback navigation if user ID is not available
+        console.error("User ID not found");
+        alert("Could not navigate to contacts page");
+      }
+  
+    } catch (error) {
+      // Handle any errors during deletion
+      console.error("Error deleting contact:", error);
+      alert(error.message || "Failed to delete contact. Please try again.");
+    } finally {
+      // Close the delete dialog
+      setOpenDeleteDialog(false);
+    }
   };
 
   return (
@@ -145,8 +173,8 @@ export default function SingleContact() {
               {open ? <ChevronLeftIcon /> : <MenuIcon />}
             </IconButton>
             <Typography variant="h6" noWrap className={classes.title} style={{ color: darkTheme.palette.text.primary }}>
-  Welcome, Pepito!
-</Typography>
+              Welcome, Pepito!
+            </Typography>
 
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
@@ -157,7 +185,7 @@ export default function SingleContact() {
         </AppBar>
         <Drawer variant="permanent" open={open} classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }}>
           <Divider />
-          <List><MainListItems user={store.userInfo}/></List>
+          <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
