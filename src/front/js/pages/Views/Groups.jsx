@@ -150,7 +150,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CreateGroup() {
+export default function Groups() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
