@@ -183,6 +183,26 @@ export const mapContacts = async (setContacts, userid) => {
         console.log(error);
     }
 };
+
+export const addUserContactByEmail = async (contactEmail) => {
+    try {
+        const response = await fetch(urlBackend+"/user_contacts", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ contact_email: contactEmail })
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error adding contact:", error);
+    }
+};
+
+
     
 export const getContactInfo = async (setSingleContactInfo, contactId) => {
     try {
@@ -202,28 +222,26 @@ export const getContactInfo = async (setSingleContactInfo, contactId) => {
 
 
 
-export const deleteContact = async (userId, contactId, isActive) => {
+export const deleteUserContact = async (contactId) => {
     try {
         const response = await fetch(`${urlBackend}/user_contacts/${contactId}`, {
-            method: "PUT",
+            method: "DELETE",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ is_active: isActive }), 
+                "Content-Type": "application/json"
+            }
         });
 
         if (!response.ok) {
+            // If the response is not OK (status is not in 200-299 range)
             const errorData = await response.json();
-            throw new Error(errorData.msg || "An error occurred");
+            throw new Error(errorData.msg || "Failed to delete contact");
         }
 
         const data = await response.json();
-        console.log(data.msg); 
-        return data; 
-
+        return data;
     } catch (error) {
-        console.error("Error updating contact status:", error);
+        console.error("Error deleting contact:", error);
         throw error;
     }
 };

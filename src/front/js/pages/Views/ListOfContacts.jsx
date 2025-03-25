@@ -31,15 +31,16 @@ import { Home } from '../Home.jsx';
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
-import AddIcon from '@material-ui/icons/Add'; 
-import Fab from '@material-ui/core/Fab'; 
-import Dialog from '@material-ui/core/Dialog'; 
+import AddIcon from '@material-ui/icons/Add';
+import Fab from '@material-ui/core/Fab';
+import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import { mapContacts } from '../../component/callToApi.js';
+import { mapContacts, addUserContactByEmail } from '../../component/callToApi.js';
+
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -172,22 +173,47 @@ export default function ListOfContacts() {
 
   useEffect(() => {
     let isMounted = true;
-  
-    mapContacts(setContacts, userid).then(() => {
-      if (isMounted) {
-      }
-    });
-  
+    const fetchContacts = async () => {
+      await mapContacts(setContacts, userid);
+    };
+
+    if (isMounted) {
+      fetchContacts();
+    }
+
     return () => {
       isMounted = false;
     };
-  }, [userid]);
-  
+  }, []);
 
-  const handleAddContact = () => {
-    // lógica para añadir contacto
+
+  const handleAddContact = async () => {
     console.log('Adding contact with email:', email);
-    setOpenAddDialog(false);
+  
+    try {
+      const response = await addUserContactByEmail(email);
+      console.log("Response from API:", response);
+  
+      if (response.msg === "Contact added successfully") {
+        await mapContacts(setContacts, userid);
+        
+        alert("The contact was successfully added to your contact list!");
+        setEmail(""); 
+        setOpenAddDialog(false);
+      } else if (response.msg === "Contact not found") {
+        alert("This user does not exist in SPLTTR.");
+      } else if (response.msg === "User is already a contact") {
+        alert("This contact is already in your list of contacts.");
+      } else if (response.msg === "A user cannot add themselves as a contact") {
+        alert("You cannot add yourself as a contact.");
+      } else {
+        // Handle other potential error messages
+        alert(response.msg || "There was a problem adding this contact.");
+      }
+    } catch (error) {
+      console.error("There was a problem adding this contact:", error);
+      alert("There was a problem adding this contact. Try again.");
+    }
   };
 
   return (

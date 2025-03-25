@@ -83,18 +83,12 @@ const ContactCard = ({ contact }) => {
                         <Typography variant="h6" style={{ fontSize: '1rem' }}>{contact.contact_name}</Typography>
                     </div>
                     <div>
-                        <IconButton className={classes.iconButton}>
-                            <StarIcon fontSize="small" />
-                        </IconButton>
+                        
                         <IconButton className={classes.iconButton}>
                             <MailIcon fontSize="small" />
                         </IconButton>
-                        <IconButton className={classes.iconButton}>
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton className={classes.iconButton} onClick={handleDeleteClick}>
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
+                        
+                
                     </div>
                     <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
                         <DialogTitle>Delete contact</DialogTitle>

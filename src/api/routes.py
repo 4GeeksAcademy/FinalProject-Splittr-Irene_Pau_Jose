@@ -317,38 +317,37 @@ def get_user_contacts(user_id):
 @api.route('/user_contacts', methods=['POST'])
 @jwt_required()
 def add_contact():
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
-
+    
     request_data = request.get_json()
-
-    if "user_id" not in request_data or "contact_id" not in request_data:
-        return jsonify({"msg": "Both user_id and contact_id are required"}), 400
-
-    user_id = request_data["user_id"]
-    contact_id = request_data["contact_id"]
-
-    if user_id == contact_id:
+    
+    if "contact_email" not in request_data:
+        return jsonify({"msg": "contact_email is required"}), 400
+    
+    contact_email = request_data["contact_email"]
+    
+    # Check if the contact email is the same as the current user's email
+    if contact_email.lower() == user.email.lower():
         return jsonify({"msg": "A user cannot add themselves as a contact"}), 400
-
-    user = User.query.get(user_id)
-    contact = User.query.get(contact_id)
-
-    if not user:
-        return jsonify({"msg": "User not found"}), 404
+    
+    contact = User.query.filter_by(email=contact_email).first()
+    
     if not contact:
         return jsonify({"msg": "Contact not found"}), 404
-
-    existing_entry = User_Contacts.query.filter_by(user_id=user_id, contact_id=contact_id).first()
+    
+    existing_entry = User_Contacts.query.filter_by(user_id=current_user_id, contact_id=contact.user_id).first()
+    
     if existing_entry:
         return jsonify({"msg": "User is already a contact"}), 400
-
-    new_contact = User_Contacts(user_id=user_id, contact_id=contact_id, created_at=datetime.utcnow())
+    
+    new_contact = User_Contacts(user_id=current_user_id, contact_id=contact.user_id, created_at=datetime.utcnow())
     db.session.add(new_contact)
     db.session.commit()
-
+    
     return jsonify({"msg": "Contact added successfully"}), 201
 
 
