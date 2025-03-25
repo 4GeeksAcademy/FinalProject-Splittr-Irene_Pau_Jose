@@ -29,11 +29,16 @@ import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 import GroupCard from './IndividualViews/GroupCard.jsx';
 import { mapGroups } from '../../component/callToApi.js';
+import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add'; 
+import Fab from '@material-ui/core/Fab'; 
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
+import { useNavigate } from 'react-router-dom';
+
 
 function Copyright() {
   return (
@@ -135,6 +140,14 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
 
   },
+  fabButton: {
+    position: 'fixed',
+    bottom: theme.spacing(3),
+    right: theme.spacing(3),
+    borderRadius: '50%', 
+    width: theme.spacing(7), 
+    height: theme.spacing(7),
+  },
 }));
 
 export default function Groups() {
@@ -147,6 +160,7 @@ export default function Groups() {
     setOpen(false);
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const navigate = useNavigate();
 
   const { store, actions } = useContext(Context);
 
@@ -231,6 +245,13 @@ export default function Groups() {
           </Container>
         </main>
 
+        <Fab   variant="contained" className={classes.fabButton}
+  color="primary" 
+  onClick={() => navigate(`/group/create/${userid}`)} 
+  style={{ marginTop: '10px' }}
+>
+  <AddIcon />
+        </Fab>
       </div>
     </ThemeProvider>
   );

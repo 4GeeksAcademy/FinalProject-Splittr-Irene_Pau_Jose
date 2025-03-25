@@ -349,6 +349,7 @@ export default function SingleObjective() {
                       <TableRow key={contributions.id || index}>
                         <TableCell>{contributions.user_name}</TableCell>
                         <TableCell align="right">
+                          {contributions.total_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
                           {new Intl.NumberFormat("de-DE", {
                             style: "currency",
                             currency: "EUR",
@@ -376,6 +377,7 @@ export default function SingleObjective() {
                         <TableCell>{formatDate(contributions.contributed_at)}</TableCell>
                         <TableCell>{contributions.user_name}</TableCell>
                         <TableCell align="right">
+                          {contributions.amount_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
                           {new Intl.NumberFormat("de-DE", {
                             style: "currency",
                             currency: "EUR",
