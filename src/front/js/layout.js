@@ -24,6 +24,8 @@ import SingleGroup from "./pages/Views/IndividualViews/SingleGroup.jsx";
 import SingleMessage from "./pages/Views/IndividualViews/SingleMessage.jsx";
 import EditObjective from "./pages/Views/IndividualViews/EditObjective.jsx";
 import EditGroup from "./pages/Views/IndividualViews/EditGroup.jsx";
+import CreateGroup from "./pages/Views/CreateGroup.jsx";
+import CreateObjective from "./pages/Views/CreateObjective.jsx";
 
 
 
@@ -66,6 +68,9 @@ const Layout = () => {
                         <Route element={<SingleObjective/>} path="/singleobjective/:objectiveid" />
                         <Route element={<EditObjective/>} path="/objective/update/:objectiveid" />
                         <Route element={<EditGroup/>} path="/group/update/:groupid" />
+                        <Route element={<CreateGroup/>} path="/group/create/:userid" />
+                        <Route element={<CreateObjective/>} path="/objective/create/:userid" />
+
                     </Routes>
                     <Footer />
                 </ScrollToTop>

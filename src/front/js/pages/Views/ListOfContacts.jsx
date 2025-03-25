@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -28,26 +28,18 @@ import ContactCard from './IndividualViews/ContactCard.jsx';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 
-import { useEffect, useState } from 'react';
-import { mapContacts } from '../../component/callToApi.js';
-
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
-
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+import AddIcon from '@material-ui/icons/Add'; 
+import Fab from '@material-ui/core/Fab'; 
+import Dialog from '@material-ui/core/Dialog'; 
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import { mapContacts } from '../../component/callToApi.js';
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -78,7 +70,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -111,7 +102,6 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     top: 30,
-
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -128,17 +118,11 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4)
-
+    paddingBottom: theme.spacing(4),
   },
   content: {
     flexGrow: 1,
     overflow: 'auto',
-    width: '100%',
-  },
-  container: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4),
     width: '100%',
   },
   contactGrid: {
@@ -147,8 +131,12 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     padding: theme.spacing(1),
   },
+  fabButton: {
+    position: 'fixed',
+    bottom: theme.spacing(3),
+    right: theme.spacing(3),
+  },
 }));
-
 
 export default function ListOfContacts() {
   const classes = useStyles();
@@ -164,15 +152,30 @@ export default function ListOfContacts() {
   const { store, actions } = useContext(Context);
 
   const [contacts, setContacts] = useState([]);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [email, setEmail] = useState('');
 
   const { userid } = useParams();
 
-
   useEffect(() => {
-    mapContacts(setContacts, userid);
-  }, []);
+    let isMounted = true;
+  
+    mapContacts(setContacts, userid).then(() => {
+      if (isMounted) {
+      }
+    });
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [userid]);
+  
 
-
+  const handleAddContact = () => {
+    // lógica para añadir contacto
+    console.log('Adding contact with email:', email);
+    setOpenAddDialog(false);
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -180,28 +183,14 @@ export default function ListOfContacts() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-
             {!open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                className={classes.menuButton}
-              >
+              <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} className={classes.menuButton}>
                 <MenuIcon />
               </IconButton>
             )}
 
-
             {open && (
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="close drawer"
-                onClick={handleDrawerClose}
-                className={classes.menuButton}
-              >
+              <IconButton edge="start" color="inherit" aria-label="close drawer" onClick={handleDrawerClose} className={classes.menuButton}>
                 <ChevronLeftIcon />
               </IconButton>
             )}
@@ -217,18 +206,15 @@ export default function ListOfContacts() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
+        <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
           <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
+          <List>
+            <MainListItems user={store.userInfo} />
+          </List>
           <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
+          <List>
+            <SecondaryListItems user={store.userInfo} />
+          </List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
@@ -241,8 +227,38 @@ export default function ListOfContacts() {
             </Grid>
           </Container>
         </main>
+
+
+        <Fab color="primary" className={classes.fabButton} onClick={() => setOpenAddDialog(true)}>
+          <AddIcon />
+        </Fab>
+
+
+        <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+          <DialogTitle>Add Contact</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              variant="outlined"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenAddDialog(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleAddContact} color="primary">
+              Add
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </ThemeProvider>
   );
 }
-

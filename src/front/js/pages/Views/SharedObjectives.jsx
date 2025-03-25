@@ -24,12 +24,15 @@ import Chart from '../Dashboard/Chart.jsx';
 import Deposits from '../Dashboard/Deposits.jsx';
 import Orders from '../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import AddIcon from '@material-ui/icons/Add';
+import Fab from '@material-ui/core/Fab';
 
 
 
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
+import { useNavigate } from 'react-router-dom';
 
 
 import SharedObjectiveCard from './IndividualViews/SharedObjectiveCard.jsx';
@@ -135,6 +138,11 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
 
   },
+  fabButton: {
+    position: 'fixed',
+    bottom: theme.spacing(3),
+    right: theme.spacing(3),
+  },
 }));
 
 
@@ -149,9 +157,10 @@ export default function SharedObjectives() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
- const { store, actions } = useContext(Context);
+  const { store, actions } = useContext(Context);
   const [sharedObjectives, setSharedObjectives] = useState([]);
   const { userid } = useParams();
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -220,12 +229,19 @@ export default function SharedObjectives() {
           <Container maxWidth="lg" className={classes.container}>
 
             <Grid container spacing={3} className={classes.contactGrid}>
-            {Array.isArray(sharedObjectives) && sharedObjectives.map((sharedObjective, index) => (
-  <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective} />
-))}
+              {Array.isArray(sharedObjectives) && sharedObjectives.map((sharedObjective, index) => (
+                <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective} />
+              ))}
             </Grid>
           </Container>
         </main>
+        <Fab   variant="contained" className={classes.fabButton}
+  color="primary" 
+  onClick={() => navigate(`/objective/create/${userid}`)} 
+  style={{ marginTop: '10px' }}
+>
+  <AddIcon />
+        </Fab>
       </div>
     </ThemeProvider>
   );

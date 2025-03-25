@@ -89,12 +89,21 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   card: {
-    width: "40%",
-    maxWidth: "700px",
+    width: "30%", 
+    maxWidth: "500px", 
+    padding: theme.spacing(0.5),
+    marginTop: theme.spacing(4),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing(0.5), 
+    boxShadow: theme.shadows[2], 
+    borderRadius: theme.shape.borderRadius, 
+    maxHeight:"30%",
   },
+  
+  
   avatar: {
     backgroundColor: deepPurple[500],
     width: 120,
@@ -155,7 +164,7 @@ export default function SingleContact() {
         <div className={classes.container}>
           {contact ? (
             <Card className={classes.card} variant="outlined">
-              <CardContent>
+              <CardContent style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <Avatar className={classes.avatar}>
                   {contact.contact_initial}
                 </Avatar>

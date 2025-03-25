@@ -176,7 +176,7 @@ export default function SingleObjective() {
     style: "currency",
     currency: "EUR",
   }).format(price);
-  
+
   const groupedContributions = useMemo(() => {
     const userContributions = {};
 
@@ -198,9 +198,9 @@ export default function SingleObjective() {
   useEffect(() => {
     console.log("Objective ID:", objectiveid);
     getObjectiveContributions(setObjectiveContributions, objectiveid);
-    getInfoSharedObjective(setSingleObjectiveInfo, objectiveid);  
+    getInfoSharedObjective(setSingleObjectiveInfo, objectiveid);
   }, [objectiveid]);
-  
+
 
   const totalAmount = singleObjectiveInfo.target_amount || 0;
   const contributedAmount = singleObjectiveInfo.total_contributed || 0;
@@ -299,13 +299,13 @@ export default function SingleObjective() {
 
           <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
             <div className="title" style={{ display: "flex", alignItems: "center" }}>
-            <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
-               
-               <IconButton>
-                 <Edit style={{ color: "#fff" }} />
-               </IconButton>
-             
-           </Link>
+              <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
+
+                <IconButton>
+                  <Edit style={{ color: "#fff" }} />
+                </IconButton>
+
+              </Link>
               <Typography variant="h6" style={{ marginLeft: 5 }}> {singleObjectiveInfo.name} </Typography>
             </div>
             <Box display="flex" justifyContent="space-around" gap={2}>
@@ -345,13 +345,15 @@ export default function SingleObjective() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                            {groupedContributions.map((contributions, index) => (
-                                <TableRow key={contributions.id || index}>
-                                    <TableCell>{contributions.user_name}</TableCell>
-                                    <TableCell align="right">{contributions.total_contributed}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                    {groupedContributions.map((contributions, index) => (
+                      <TableRow key={contributions.id || index}>
+                        <TableCell>{contributions.user_name}</TableCell>
+                        <TableCell align="right">
+                          {contributions.total_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </Table>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
               </Box>
@@ -366,14 +368,16 @@ export default function SingleObjective() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                            {objectiveContributions.map((contributions, index) => (
-                                <TableRow key={contributions.id || index}>
-                                    <TableCell>{formatDate(contributions.contributed_at)}</TableCell>
-                                    <TableCell>{contributions.user_name}</TableCell>
-                                    <TableCell align="right">{contributions.amount_contributed}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                    {objectiveContributions.map((contributions, index) => (
+                      <TableRow key={contributions.id || index}>
+                        <TableCell>{formatDate(contributions.contributed_at)}</TableCell>
+                        <TableCell>{contributions.user_name}</TableCell>
+                        <TableCell align="right">
+                          {contributions.amount_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </Table>
                 <div className={classes.seeMore} style={{ marginTop: '16px' }} >
                   <Link color="primary" href="#" onClick={preventDefault} >
