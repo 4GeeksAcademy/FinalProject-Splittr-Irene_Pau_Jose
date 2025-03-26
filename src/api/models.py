@@ -98,7 +98,7 @@ class Group_to_user(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     group_id = db.Column(db.Integer, db.ForeignKey("group.group_id"))
-    created_at = db.Column(db.DateTime)  # Can be renamed later to "joined_at"
+    created_at = db.Column(db.DateTime) 
 
     user = db.relationship("User", back_populates="groups")
 
@@ -111,8 +111,10 @@ class Group_to_user(db.Model):
             "user_id": self.user_id,
             "group_id": self.group_id,
             "created_at": self.created_at,
-            "initial": self.user.get_initial() if self.user else "?", 
+            "initial": self.user.get_initial() if self.user else "?",
+            "user_name": self.user.name if self.user else "Unknown"  
         }
+
     
 
 class Group_payments(db.Model):
