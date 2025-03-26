@@ -20,7 +20,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems, SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import { useParams } from 'react-router-dom';
-
+import AddContactCard from './AddContactCard.jsx';
 import Deposits from '../../Dashboard/Deposits.jsx';
 import Orders from '../../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -44,6 +44,7 @@ import { Context } from '../../../store/appContext.js';
 import { getInfoGroup } from '../../../component/callToApi.js';
 import { LibraryMusic } from '@material-ui/icons';
 import { updateGroup } from '../../../component/callToApi.js';
+import { mapContacts } from '../../../component/callToApi.js';
 
 function Copyright() {
   return (
@@ -165,11 +166,26 @@ export default function EditGroup() {
   const { store, actions } = useContext(Context);
   const { groupid } = useParams();
   const [singleGroup, setSingleGroup] = useState({});
+  const [contacts, setContacts] = useState({ contacts: [] });
+  const { userid } = useParams();
 
   useEffect(() => {
 
     getInfoGroup(setSingleGroup, groupid)
   }, [])
+
+  useEffect(() => {
+    let isMounted = true;
+
+    mapContacts(setContacts, userid).then(() => {
+      if (isMounted) {
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userid]);
 
   const [members, setMembers] = useState([]);
 
@@ -188,12 +204,22 @@ export default function EditGroup() {
       }
 
       await updateGroup(groupid, updatedData);
-      alert( "Group updated successfully!");
+      alert("Group updated successfully!");
     } catch (error) {
       console.error("Error updating Group:", error);
       alert("Error updating Group : ${error.message}");
     }
   };
+
+  const [groupMembers, setGroupMembers] = useState([]);
+
+  useEffect(() => {
+    getInfoGroup(setSingleGroup, groupid).then(groupData => {
+      if (groupData && groupData.members) {
+        setGroupMembers(groupData.members);
+      }
+    });
+  }, [groupid]);
 
 
   return (
@@ -298,9 +324,32 @@ export default function EditGroup() {
                 </Box>
 
               </Box>
+              <Typography variant="h6" className={classes.addMembersTitle}>
+                            Add members
+                        </Typography>
+                        <Grid container spacing={2} className={classes.contactGrid}>
+                            {!contacts.contacts ? (
+                                <Typography>Loading contacts...</Typography>
+                            ) : contacts.contacts.length === 0 ? (
+                                <Typography>No contacts found</Typography>
+                            ) : (
+                                contacts.contacts
+                                    .filter(contact => {
+                                        return !groupMembers.some(member => member.contact_id === contact.id); // Ajusta 'contact.id'
+                                    })
+                                    .map((contact) => (
+                                        <Grid item xs={12} sm={6} md={4} key={contact.id}>
+                                            <AddContactCard
+                                                contact={contact}
+
+                                            />
+                                        </Grid>
+                                    ))
+                            )}
+                        </Grid>
               <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
 
-                <Button variant="outlined" color="secondary">Delete Objective</Button>
+                <Button variant="outlined" color="secondary">Delete Group</Button>
               </Box>
 
 
