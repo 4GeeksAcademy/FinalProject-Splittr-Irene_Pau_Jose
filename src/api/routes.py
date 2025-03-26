@@ -1018,7 +1018,8 @@ def objective_contribution():
     if objective.is_completed:
         return jsonify({"error": "Objective is already completed"}), 400
 
-    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=data["user"], objective_id=data["objective"])
+    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=data["user"],objective_id=data["objective"],contributed_at=db.func.now())
+
 
     db.session.add(contribution)
     db.session.commit()

@@ -29,6 +29,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import TableContainer from '@material-ui/core/TableContainer';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -37,7 +38,7 @@ import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { formatDate } from '../../../utilities/formatDate.js';
 import { getObjectiveContributions } from '../../../component/callToApi.js';
-
+import FloatingMenuObjective from '../../../component/FloatingMenuObjective.jsx';
 
 function Copyright() {
   return (
@@ -142,6 +143,11 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
 
   },
+  scrollableTable: {
+    maxHeight: '200px', 
+    overflowY: 'auto', 
+ 
+  },
 }));
 
 function createData(id, date, name, amount) {
@@ -155,6 +161,10 @@ function preventDefault(event) {
 }
 
 export default function SingleObjective() {
+  
+  
+
+  
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -166,10 +176,12 @@ export default function SingleObjective() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const { store, actions } = useContext(Context);
+
   const [singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
   const [objectiveContributions, setObjectiveContributions] = useState([]);
   const { objectiveid } = useParams();
-  console.log(singleObjectiveInfo);
+ console.log(objectiveid);
+ 
 
   const price = singleObjectiveInfo.target_amount
   const totalPriceEur = new Intl.NumberFormat("de-DE", {
@@ -189,14 +201,16 @@ export default function SingleObjective() {
       }
     });
 
-    return Object.keys(userContributions).map((userName, totalAmount) => ({
+    return Object.keys(userContributions)
+    .map((userName) => ({
       user_name: userName,
       total_contributed: userContributions[userName],
-    }));
+    }))
+    .sort((a, b) => b.total_contributed - a.total_contributed);
   }, [objectiveContributions]);
 
   useEffect(() => {
-    console.log("Objective ID:", objectiveid);
+  
     getObjectiveContributions(setObjectiveContributions, objectiveid);
     getInfoSharedObjective(setSingleObjectiveInfo, objectiveid);
   }, [objectiveid]);
@@ -208,6 +222,7 @@ export default function SingleObjective() {
 
   const percentageCompleted =
     totalAmount > 0 ? ((contributedAmount / totalAmount) * 100).toFixed(1) : 0;
+
 
 
   const totalAmountFormatted = new Intl.NumberFormat("de-DE", {
@@ -236,6 +251,46 @@ export default function SingleObjective() {
   const visibleParticipants = participants.slice(0, 5); // Mostrar máximo 5 participantes
   const remainingCount = Math.max(0, participants.length - 5);
 
+  const sortedContributions = useMemo(() => 
+    [...objectiveContributions].sort((a, b) => new Date(b.contributed_at) - new Date(a.contributed_at)), [objectiveContributions]
+  );
+
+  const [showAllContributions, setShowAllContributions] = useState(false);
+  const visibleContributions = showAllContributions ? groupedContributions : groupedContributions.slice(0, 4);
+
+  const [currentPage, setCurrentPage] = useState(0);
+const recentContributionsPerPage = 4;
+const totalPages = Math.ceil(sortedContributions.length / recentContributionsPerPage);
+
+const handleNextPage = () => {
+  setCurrentPage((prev) => (prev + 1 < totalPages ? prev + 1 : 0));
+};
+
+const handlePrevPage = () => {
+  setCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : totalPages - 1));
+};
+
+const paginatedContributions = sortedContributions.slice(
+  currentPage * recentContributionsPerPage,
+  (currentPage + 1) * recentContributionsPerPage
+);
+
+const [groupedCurrentPage, setGroupedCurrentPage] = useState(0);
+const contributionsPerPage = 4; 
+const groupedTotalPages = Math.ceil(groupedContributions.length / contributionsPerPage);
+
+const handleNextGroupedPage = () => {
+  setGroupedCurrentPage((prev) => (prev + 1 < groupedTotalPages ? prev + 1 : 0));
+};
+
+const handlePrevGroupedPage = () => {
+  setGroupedCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : groupedTotalPages - 1));
+};
+
+const paginatedGroupedContributions = groupedContributions.slice(
+  groupedCurrentPage * contributionsPerPage,
+  (groupedCurrentPage + 1) * contributionsPerPage
+);
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -294,7 +349,7 @@ export default function SingleObjective() {
         </Drawer>
 
         <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
+        <Container maxWidth="lg" className={classes.container} style={{ overflow: 'visible' }}>
 
 
           <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
@@ -336,62 +391,70 @@ export default function SingleObjective() {
                 </Box>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
                 <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed: {contributedAmountFormatted} </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:  </Typography>
-                <Table size="small" style={{ marginTop: '16px' }}>
-                  <TableHead >
-                    <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell align="right">Total amount</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {groupedContributions.map((contributions, index) => (
-                      <TableRow key={contributions.id || index}>
-                        <TableCell>{contributions.user_name}</TableCell>
-                        <TableCell align="right">
-                          {contributions.total_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                          {new Intl.NumberFormat("de-DE", {
-                            style: "currency",
-                            currency: "EUR",
-                          }).format(contributions.total_contributed)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+               
                 <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
               </Box>
-              <Box display="block" justifyContent="center" alignItems="center" gap={3} >
-                <Typography gap={4}>Recent Contributions</Typography>
-                <Table size="small" style={{ marginTop: '16px' }}>
-                  <TableHead >
-                    <TableRow>
-                      <TableCell>Date</TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {objectiveContributions.map((contributions, index) => (
-                      <TableRow key={contributions.id || index}>
-                        <TableCell>{formatDate(contributions.contributed_at)}</TableCell>
-                        <TableCell>{contributions.user_name}</TableCell>
-                        <TableCell align="right">
-                          {contributions.amount_contributed.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                          {new Intl.NumberFormat("de-DE", {
-                            style: "currency",
-                            currency: "EUR",
-                          }).format(contributions.amount_contributed)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className={classes.seeMore} style={{ marginTop: '16px' }} >
-                  <Link color="primary" href="#" onClick={preventDefault} >
-                    See more contributions
-                  </Link>
-                </div>
+              <Box display="block" justifyContent="center" alignItems="center"  >
+              <Typography gap={2}>Recent Contributions</Typography>
+    <TableContainer>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Date</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell align="right">Amount</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {paginatedContributions.map((contribution, index) => (
+            <TableRow key={index}>
+              <TableCell>{formatDate(contribution.contributed_at)}</TableCell>
+              <TableCell>{contribution.user_name}</TableCell>
+              <TableCell align="right">
+                {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(contribution.amount_contributed)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+    <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
+      <Button onClick={handlePrevPage} variant="outlined" style={{ marginRight: 10 }}>Previous</Button>
+      <Typography>{currentPage + 1} / {totalPages}</Typography>
+      <Button onClick={handleNextPage} variant="outlined" style={{ marginLeft: 10 }}>Next</Button>
+    </Box>
+    <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:</Typography>
+
+<Table size="small" style={{ marginTop: '16px' }}>
+  <TableHead>
+    <TableRow>
+      <TableCell>Name</TableCell>
+      <TableCell align="right">Total amount</TableCell>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    {paginatedGroupedContributions.map((contribution, index) => (
+      <TableRow key={contribution.id || index}>
+        <TableCell>{contribution.user_name}</TableCell>
+        <TableCell align="right">
+          {new Intl.NumberFormat("de-DE", {
+            style: "currency",
+            currency: "EUR",
+          }).format(contribution.total_contributed)}
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+{groupedContributions.length > contributionsPerPage && (
+  <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
+    <Button onClick={handlePrevGroupedPage} variant="outlined" style={{ marginRight: 10 }}>Previous</Button>
+    <Typography>{groupedCurrentPage + 1} / {groupedTotalPages}</Typography>
+    <Button onClick={handleNextGroupedPage} variant="outlined" style={{ marginLeft: 10 }}>Next</Button>
+  </Box>
+)}
+
                 <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
                   {visibleParticipants.map((participant, index) => (
                     <Avatar
@@ -408,7 +471,7 @@ export default function SingleObjective() {
               </Box>
             </Box>
           </Card>
-
+<FloatingMenuObjective objectiveid={objectiveid} />
         </Container>
 
       </div>
