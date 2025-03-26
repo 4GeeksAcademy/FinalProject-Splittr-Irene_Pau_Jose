@@ -474,3 +474,48 @@ export const fetchUserInfo = async (user_id) => {
         return null;
     }
 };
+
+
+export const makeObjectiveContribution = async (objectiveId, amount) => {
+    const user_id = sessionStorage.getItem("user_id")
+    
+    try {
+        const response = await fetch(`${urlBackend}/objective/contribution`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                objective: objectiveId,
+                amount: parseFloat(amount),
+                user: user_id
+            })
+        });
+
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error("Invalid JSON response from server");
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to make contribution');
+        }
+        window.location.reload();
+        return {
+            success: true,
+            message: data.msg
+
+        };
+
+    } catch (error) {
+        console.error('Contribution Error:', error);
+        return {
+            success: false,
+            message: error.message
+        };
+    }
+
+};

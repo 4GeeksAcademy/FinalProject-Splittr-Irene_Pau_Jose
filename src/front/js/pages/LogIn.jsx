@@ -101,7 +101,9 @@ const handleSubmit = async (e) =>{
         }
         const responseData = await response.json()
         localStorage.setItem("token", responseData.token)
+        sessionStorage.setItem("user_id", responseData.user_id)
         navigate("/dashboard")
+
 
     } catch (error) {
         console.log(error);

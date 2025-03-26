@@ -161,6 +161,7 @@ export default function SharedObjectives() {
   const [sharedObjectives, setSharedObjectives] = useState([]);
   const { userid } = useParams();
   const navigate = useNavigate();
+console.log(userid);
 
 
   useEffect(() => {
@@ -168,6 +169,7 @@ export default function SharedObjectives() {
 
   }, [])
 
+ 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -230,7 +232,7 @@ export default function SharedObjectives() {
 
             <Grid container spacing={3} className={classes.contactGrid}>
               {Array.isArray(sharedObjectives) && sharedObjectives.map((sharedObjective, index) => (
-                <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective} />
+                <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective}  />
               ))}
             </Grid>
           </Container>

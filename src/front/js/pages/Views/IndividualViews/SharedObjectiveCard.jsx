@@ -1,13 +1,14 @@
 import React from "react";
 import { Card, Typography, Avatar, Box } from "@material-ui/core";
 import { PieChart, Pie, Cell, Label } from "recharts";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+
 
 const SharedObjectiveCard = ({ sharedObjective }) => {
   const totalAmount = sharedObjective.target_amount;
   const contributedAmount = sharedObjective.total_contributed || 0;
   const remainingAmount = sharedObjective.remaining_amount || totalAmount;
-
+  const { objectiveid } = useParams();
   const percentageCompleted = totalAmount > 0 ? ((contributedAmount / totalAmount) * 100).toFixed(1) : 0;
 
   const totalAmountFormatted = new Intl.NumberFormat("de-DE", {
@@ -28,6 +29,7 @@ const SharedObjectiveCard = ({ sharedObjective }) => {
   const participants = sharedObjective.participants || [];
   const visibleParticipants = participants.slice(0, 3);
   const remainingCount = Math.max(0, participants.length - 3);
+
 
   return (
     <Link to={`/singleobjective/${sharedObjective.id}`}>  

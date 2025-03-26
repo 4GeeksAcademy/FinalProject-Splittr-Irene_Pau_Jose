@@ -327,7 +327,7 @@ class ObjectivesContributions(db.Model):
     objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     amount_contributed = db.Column(db.Integer, nullable=False)
-    contributed_at = db.Column(db.DateTime)
+    contributed_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
 
     user = db.relationship("User", backref="user_contributions")
     objective = db.relationship("Objectives", back_populates="objective_contributions")
