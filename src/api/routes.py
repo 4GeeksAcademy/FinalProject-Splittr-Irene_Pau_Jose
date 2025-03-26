@@ -293,7 +293,7 @@ def get_group_debts(group_id):
     debts = Group_debts.query.filter_by(group_id=group_id).all()
     
     if not debts:
-        return jsonify({"error": "No debts found for this group"}), 404
+        return jsonify({"msg": "No debts found for this group"}), 203
 
     debt_list = [debt.serialize() for debt in debts]
 

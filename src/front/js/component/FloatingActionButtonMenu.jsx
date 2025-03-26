@@ -1,16 +1,39 @@
-import React, { useState } from 'react';
-import { Fab, Menu, MenuItem, Backdrop } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { 
+  Fab, 
+  Menu, 
+  MenuItem, 
+  Backdrop, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  List, 
+  ListItem, 
+  ListItemAvatar, 
+  ListItemText, 
+  Avatar, 
+  Button, 
+  DialogActions 
+} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import PaymentIcon from '@material-ui/icons/Payment';
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import AssignmentIcon from '@material-ui/icons/Assignment';
+import ChatIcon from '@material-ui/icons/Chat';
+import { Link, useNavigate } from "react-router-dom";
+import { useContext } from 'react';
+import { Context } from '../store/appContext';
+import { mapContacts } from './callToApi';
 
 const useStyles = makeStyles((theme) => ({
   fab: {
     position: 'fixed',
     bottom: theme.spacing(3),
     right: theme.spacing(3),
+    borderRadius: '50%', 
+    width: theme.spacing(7), 
+    height: theme.spacing(7),
   },
   menuItem: {
     display: 'flex',
@@ -22,12 +45,28 @@ const useStyles = makeStyles((theme) => ({
     zIndex: theme.zIndex.drawer + 1,
     color: '#fff',
   },
+  menuLink: {
+    textDecoration: 'none',
+    color: 'inherit',
+  }
 }));
 
 export default function FloatingActionButtonMenu() {
   const classes = useStyles();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openContactDialog, setOpenContactDialog] = useState(false);
+  const [contacts, setContacts] = useState([]);
   const open = Boolean(anchorEl);
+
+  const { store } = useContext(Context);
+  const userid = store.userInfo?.user_id;
+
+  useEffect(() => {
+    if (openContactDialog) {
+      mapContacts(setContacts, userid);
+    }
+  }, [openContactDialog, userid]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -35,6 +74,11 @@ export default function FloatingActionButtonMenu() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleStartConversation = (contactId) => {
+    navigate(`/message/conversation/${contactId}`);
+    setOpenContactDialog(false);
   };
 
   const actions = [
@@ -46,17 +90,23 @@ export default function FloatingActionButtonMenu() {
         handleClose();
       }
     },
-    { 
-      icon: <GroupAddIcon />, 
-      name: 'Create Group',
+    {
+      icon: <ChatIcon />,
+      name: 'Start Chat',
       onClick: () => {
-        // Add your create group logic
+        // Open contacts dialog
+        setOpenContactDialog(true);
         handleClose();
       }
     },
     { 
+      icon: <GroupAddIcon />, 
+      name: <Link to={`/group/create/${userid}`} className={classes.menuLink}>Create Group</Link> ,
+     
+    },
+    { 
       icon: <AssignmentIcon />, 
-      name: 'Create Objective',
+      name: <Link to={`/objective/create/${userid}`} className={classes.menuLink}>Create Objective</Link>,
       onClick: () => {
         // Add your create objective logic
         handleClose();
@@ -93,7 +143,7 @@ export default function FloatingActionButtonMenu() {
             className={classes.menuItem}
           >
             {action.icon}
-            {action.name}
+            {typeof action.name === 'string' ? action.name : action.name}
           </MenuItem>
         ))}
       </Menu>
@@ -102,6 +152,40 @@ export default function FloatingActionButtonMenu() {
         onClick={handleClose} 
         className={classes.backdrop}
       />
+
+      {/* Dialog to Select Contact */}
+      <Dialog 
+        open={openContactDialog} 
+        onClose={() => setOpenContactDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Start a Conversation</DialogTitle>
+        <DialogContent dividers>
+          <List>
+            {contacts && contacts.contacts && contacts.contacts.map((contact) => (
+              <ListItem 
+                button 
+                key={contact.contact_id}
+                onClick={() => handleStartConversation(contact.contact_id)}
+              >
+                <ListItemAvatar>
+                  <Avatar>{contact.contact_initial}</Avatar>
+                </ListItemAvatar>
+                <ListItemText 
+                  primary={contact.contact_name}
+                  secondary={contact.contact_email}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenContactDialog(false)} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
