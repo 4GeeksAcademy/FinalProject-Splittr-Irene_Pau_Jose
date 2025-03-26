@@ -24,22 +24,54 @@ export const mapGroups = async (setGroups, userid) => {
 
 
 export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
-
     try {
         const response = await fetch(urlBackend+"/group/"+ groupid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
-            }, 
-        })
-        const data = await response.json()
-        setSingleGroupInfo(data)
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error en getInfoGroup:", errorData);
+            throw new Error(`Error al obtener información del grupo: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setSingleGroupInfo(data);
         console.log(data);
-        
+        return data; 
+
     } catch (error) {
-        console.log(error);
+        console.error("Error en getInfoGroup:", error);
+        throw error; 
     }
 }
+
+export const getGroupMembers = async (groupId) => {
+    try {
+        const response = await fetch(urlBackend+"/group/"+ groupId, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error fetching group members:", errorData);
+            throw new Error(`Error fetching group members: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error in getGroupMembers:", error);
+        throw error;
+    }
+};
 
 export const updateGroup = async (groupId, updatedData) => {
     try {
@@ -63,6 +95,37 @@ export const updateGroup = async (groupId, updatedData) => {
         throw error;
     }
 };
+
+export const removeUserFromGroup = async (userId, groupId) => {
+    try {
+      console.log("Sending remove user request:", { userId, groupId }); 
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(urlBackend + "/group_user/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          user_id: userId,   
+          group_id: groupId  
+        }) 
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error details:", errorText);
+        throw new Error(`Failed to remove user from group: ${errorText}`);
+      }
+  
+      return await response.json(); 
+    } catch (error) {
+      console.error("Error removing user from group:", error);
+      throw error;
+    }
+  };
+
 
 export const createGroup = async (groupName, groupMembers) => {
     console.log('Creating group with:', {

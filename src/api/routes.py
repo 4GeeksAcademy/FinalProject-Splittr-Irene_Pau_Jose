@@ -170,16 +170,15 @@ def get_groups():
 @api.route('/group/<int:group_id>', methods=['GET'])
 @jwt_required()
 def get_group_by_id(group_id):
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
 
     group = Group.query.get(group_id)
     if group is None:
-        return jsonify({"error": "Group not found"}), 404 
+        return jsonify({"error": "Group not found"}), 404
     return jsonify(group.serialize())
-
 
 @api.route('/group/user/<int:user_id>', methods=['GET'])
 @jwt_required()

@@ -45,6 +45,9 @@ import { getInfoGroup } from '../../../component/callToApi.js';
 import { LibraryMusic } from '@material-ui/icons';
 import { updateGroup } from '../../../component/callToApi.js';
 import { mapContacts } from '../../../component/callToApi.js';
+import { getGroupMembers } from '../../../component/callToApi.js';
+import MemberCard from './MemberCard.jsx';
+
 
 function Copyright() {
   return (
@@ -174,18 +177,38 @@ export default function EditGroup() {
     getInfoGroup(setSingleGroup, groupid)
   }, [])
 
+  //useEffect(() => {
+  //  let isMounted = true;
+
+  //  mapContacts(setContacts, userid).then(() => {
+  //    if (isMounted) {
+  //    }
+  //  });
+
+  //  return () => {
+  //    isMounted = false;
+  //  };
+  //}, [userid]);
+
   useEffect(() => {
-    let isMounted = true;
-
-    mapContacts(setContacts, userid).then(() => {
-      if (isMounted) {
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [userid]);
+    if (!groupid) return;
+    getInfoGroup(setSingleGroup, groupid)
+      .then(groupData => {
+        if (groupData && Array.isArray(groupData.members)) {
+          setGroupMembers(groupData.members);
+        } else if (groupData) {
+          console.error("Error: La propiedad 'members' no es un array:", groupData);
+          setGroupMembers([]);
+        } else {
+          console.error("Error: No se pudo obtener la información del grupo o no hay datos.");
+          setGroupMembers([]);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching group info:", error);
+        setGroupMembers([]);
+      });
+  }, [groupid]);
 
   const [members, setMembers] = useState([]);
 
@@ -208,6 +231,24 @@ export default function EditGroup() {
     } catch (error) {
       console.error("Error updating Group:", error);
       alert("Error updating Group : ${error.message}");
+    }
+  };
+
+  const handleMemberRemoved = () => {
+
+    if (groupid) {
+      getInfoGroup(setSingleGroup, groupid)
+        .then(groupData => {
+          if (groupData && Array.isArray(groupData.members)) {
+            setGroupMembers(groupData.members);
+          } else {
+            setGroupMembers([]);
+            console.error("Error al actualizar la lista de miembros después de la eliminación.");
+          }
+        })
+        .catch(error => {
+          console.error("Error al obtener la información del grupo después de la eliminación:", error);
+        });
     }
   };
 
@@ -324,42 +365,53 @@ export default function EditGroup() {
                 </Box>
 
               </Box>
+              <Box sx={{ marginTop: "20px" }}>
+            <h3>Members</h3>
+            {groupMembers.length === 0 ? (
+              <Typography>No members in this group yet.</Typography>
+            ) : (
+              <Grid container spacing={2}>
+                {groupMembers.map((member) => (
+                  <Grid item xs={12} sm={6} md={4} key={member.id}>
+                    <MemberCard
+                      member={member}
+                      groupId={groupid}
+                      onMemberRemoved={handleMemberRemoved}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
               <Typography variant="h6" className={classes.addMembersTitle}>
-                            Add members
-                        </Typography>
-                        <Grid container spacing={2} className={classes.contactGrid}>
-                            {!contacts.contacts ? (
-                                <Typography>Loading contacts...</Typography>
-                            ) : contacts.contacts.length === 0 ? (
-                                <Typography>No contacts found</Typography>
-                            ) : (
-                                contacts.contacts
-                                    .filter(contact => {
-                                        return !groupMembers.some(member => member.contact_id === contact.id); // Ajusta 'contact.id'
-                                    })
-                                    .map((contact) => (
-                                        <Grid item xs={12} sm={6} md={4} key={contact.id}>
-                                            <AddContactCard
-                                                contact={contact}
+                Add members
+              </Typography>
+              <Grid container spacing={2} className={classes.contactGrid}>
+                {!contacts.contacts ? (
+                  <Typography>Loading contacts...</Typography>
+                ) : contacts.contacts.length === 0 ? (
+                  <Typography>No contacts found</Typography>
+                ) : (
+                  contacts.contacts
+                    .filter(contact => {
+                      return !groupMembers.some(member => member.contact_id === contact.id);
+                    })
+                    .map((contact) => (
+                      <Grid item xs={12} sm={6} md={4} key={contact.id}>
+                        <AddContactCard
+                          contact={contact}
 
-                                            />
-                                        </Grid>
-                                    ))
-                            )}
-                        </Grid>
+                        />
+                      </Grid>
+                    ))
+                )}
+              </Grid>
               <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
-
                 <Button variant="outlined" color="secondary">Delete Group</Button>
               </Box>
-
-
-
             </Box>
           </Box>
         </Box>
-
-
-
       </div>
     </ThemeProvider>
   );
