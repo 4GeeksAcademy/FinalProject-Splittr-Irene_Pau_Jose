@@ -205,8 +205,8 @@ def get_group_by_user_id(user_id):
 @api.route('/group/create', methods=['POST'])
 @jwt_required()
 def create_group():
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
 
@@ -218,16 +218,19 @@ def create_group():
         group_name=request_data["group_name"],
         created_at=datetime.utcnow()
     )
-    
+
     db.session.add(new_group)
     db.session.commit()
+
+    group_to_user_creator = Group_to_user(user_id=current_user_id, group_id=new_group.group_id, created_at=datetime.utcnow())
+    db.session.add(group_to_user_creator)
 
     if "members" in request_data:
         for user_id in request_data["members"]:
             group_to_user = Group_to_user(user_id=user_id, group_id=new_group.group_id, created_at=datetime.utcnow())
             db.session.add(group_to_user)
-        
-        db.session.commit()
+
+    db.session.commit()
 
     return jsonify(new_group.serialize()), 201
 
@@ -934,7 +937,7 @@ def create_objective():
     if existing_objective:
         return jsonify({"error": "Objective is already registered"}), 400
 
-    new_objective = Objectives(name=data["name"], target_amount=data["amount"])
+    new_objective = Objectives(name=data["name"], target_amount=data["target_amount"])
 
     db.session.add(new_objective)
     db.session.commit()

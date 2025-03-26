@@ -64,6 +64,44 @@ export const updateGroup = async (groupId, updatedData) => {
     }
 };
 
+export const createGroup = async (groupName, groupMembers) => {
+    console.log('Creating group with:', {
+        group_name: groupName, 
+        members: groupMembers, 
+    });
+
+    try {
+        const response = await fetch(`${urlBackend}/group/create`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                group_name: groupName, 
+                members: groupMembers,  
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('Error response from API:', data);
+            throw new Error(data.error || "Failed to create group");
+        }
+
+        console.log("Group created successfully:", data);
+        return data;
+
+    } catch (error) {
+        console.error("Error creating group:", error.message);
+        throw new Error(error.message || "An unexpected error occurred");
+    }
+};
+
+
+
+
 export const getGroupDebts = async (setGroupDebts, groupId) => {
     try {
       const response = await fetch(urlBackend+"/group/group_debts/"+groupId, {
@@ -165,6 +203,44 @@ export const getObjectiveContributions = async (setObjectiveContributions, objec
       throw error;
     }
   };
+
+
+  export const createObjective = async (objectiveName, objectiveTargetAmount, objectiveMembers) => {
+    console.log('Creating objective with:', {
+        objectiveName,
+        objectiveTargetAmount,
+        objectiveMembers,
+    });
+
+    try {
+        const response = await fetch(urlBackend + "/objective/create", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name: objectiveName,
+                target_amount: objectiveTargetAmount,
+                members: objectiveMembers,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to create objective");
+        }
+
+        const data = await response.json();
+        console.log("Objective created:", data);
+        return data;
+    } catch (error) {
+        console.error("Error creating objective:", error);
+        throw error;
+    }
+};
+
+
 
 
 export const mapContacts = async (setContacts, userid) => {

@@ -43,6 +43,7 @@ import Button from '@material-ui/core/Button';
 import { mapContacts } from '../../component/callToApi.js';
 import AddContactCard from './IndividualViews/AddContactCard.jsx';
 import { useNavigate } from 'react-router-dom';
+import { createGroup } from '../../component/callToApi.js';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -144,8 +145,8 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: 'bold',
         color: '#ffffff',
         marginBottom: theme.spacing(2),
-      },
-      createGroupButton: {
+    },
+    createGroupButton: {
         marginLeft: theme.spacing(2),
         '&:hover': {
         },
@@ -162,10 +163,49 @@ export default function CreateGroup() {
         setOpen(false);
     };
 
-    const handleCreateGroup = () => {
-        // Logic to handle form submission for creating a group
-        console.log('Creating group...');
+    const handleAddMemberToGroup = (contact) => {
+        setSelectedMembers((prev) => {
+            const isAlreadySelected = prev.some(member => member.contact_id === contact.contact_id);
+            return isAlreadySelected
+                ? prev.filter(member => member.contact_id !== contact.contact_id)
+                : [...prev, { id: contact.id, contact_id: contact.contact_id, contact_name: contact.contact_name }]; // Incluye las propiedades necesarias
+        });
     };
+
+    const handleCreateGroup = async () => {
+        if (!values.groupName) {
+            alert("Please fill in the group name");
+            return;
+        }
+
+        let groupMembers = selectedMembers.map((member) => member.contact_id);
+
+        const currentUser = store.userInfo;
+        let userId = null;
+        if (currentUser && typeof currentUser.id !== 'undefined') {
+            userId = currentUser.id;
+            console.log("Creator ID to send:", userId);
+        } else {
+            console.warn("User information not available to send creator ID.");
+        }
+
+        console.log("Final Group Members to send:", groupMembers);
+
+        try {
+            const response = await createGroup(values.groupName, groupMembers, userId);
+            alert("Group created successfully!")
+            setValues({ groupName: '' });
+            setSelectedMembers([]);
+
+        } catch (error) {
+
+        }
+    };
+
+    
+
+
+
 
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -174,10 +214,20 @@ export default function CreateGroup() {
     const [contacts, setContacts] = useState([]);
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [email, setEmail] = useState('');
+    const [groupName, setGroupName] = useState('');
+    const [selectedMembers, setSelectedMembers] = useState([]);
+    const [values, setValues] = useState({ groupName: '' });  
 
     const { userid } = useParams();
     console.log("User ID:", userid);
 
+    const handleGroupNameChange = (event) => {
+        setGroupName(event.target.value);
+    };
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setValues((prevValues) => ({ ...prevValues, [name]: value }));
+    };
 
     useEffect(() => {
         let isMounted = true;
@@ -237,35 +287,45 @@ export default function CreateGroup() {
                     <Container maxWidth="lg" className={classes.container}>
                         <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
                             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-                                <TextField
-                                    label="Group name"
-                                    variant="outlined"
-                                    fullWidth
-                                    InputProps={{
-                                        style: { width: '100%' }
-                                    }}
-                                />
-                                                           <Button
-                                className={classes.createGroupButton}
-                                onClick={handleCreateGroup}
-                            >
-                                Create Group
-                            </Button>
+                            <TextField
+                    label="Group name"
+                    variant="outlined"
+                    name="groupName"  
+                    value={values.groupName} 
+                    onChange={handleInputChange} 
+                    fullWidth
+                />
+                                <Button
+                                    className={classes.createGroupButton}
+                                    onClick={handleCreateGroup}
+                                >
+                                    Create Group
+                                </Button>
                             </Box>
 
 
-                        </Box>             <Typography variant="h6" className={classes.addMembersTitle}>
-                            Add Members
+                        </Box>
+                        <Typography variant="h6" className={classes.addMembersTitle}>
+                            Add members
                         </Typography>
-                        <Grid container spacing={2} className={classes.contactGrid} >
-                            {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
-                                <AddContactCard
-                                    key={contact.id}
-                                    contact={contact}
-                                    style={{ height: '100px', width: '100%' }}
-                                />
-                            ))}
-                            {!contacts && <div>Loading contacts...</div>}
+                        <Grid container spacing={2} className={classes.contactGrid}>
+                            {!contacts.contacts ? (
+                                <Typography>Loading contacts...</Typography>
+                            ) : contacts.contacts.length === 0 ? (
+                                <Typography>No contacts found</Typography>
+                            ) : (
+                                contacts.contacts.map((contact) => (
+                                    <Grid item xs={12} sm={6} md={4} key={contact.id}>
+                                        <AddContactCard
+                                            contact={contact}
+                                            onAddContact={handleAddMemberToGroup}
+                                            isSelected={selectedMembers.some(
+                                                member => member.id === contact.id
+                                            )}
+                                        />
+                                    </Grid>
+                                ))
+                            )}
                         </Grid>
                     </Container>
                 </main>

@@ -32,6 +32,9 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import { Chip } from '@material-ui/core';
+
+
 
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
@@ -47,6 +50,7 @@ import Button from '@material-ui/core/Button';
 import { mapContacts } from '../../component/callToApi.js';
 import AddContactCard from './IndividualViews/AddContactCard.jsx';
 import { useNavigate } from 'react-router-dom';
+import { createObjective } from '../../component/callToApi.js';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -166,39 +170,88 @@ export default function CreateObjective() {
         setOpen(false);
     };
 
-    const handleCreateObjective = () => {
-        // Logic to handle form submission for creating a group
-        console.log('Creating objective...');
+
+
+    const handleAddMemberToObjective = (contact) => {
+        const isAlreadySelected = selectedMembers.some(
+            (selectedMember) => selectedMember.id === contact.id
+        );
+
+        if (!isAlreadySelected) {
+            setSelectedMembers([...selectedMembers, contact]);
+        } else {
+            setSelectedMembers(
+                selectedMembers.filter((selectedMember) => selectedMember.id !== contact.id)
+            );
+        }
     };
+
+    const handleCreateObjective = async () => {
+        if (!values.objectiveName || !values.objectiveTargetAmount) {
+            alert("Please fill in all the fields");
+            return;
+        }
+    
+        try {
+ 
+            const userId = store.userInfo.id; 
+    
+            const objectiveMembersWithCreator = [...selectedMembers, { id: userId }];
+    
+            const response = await createObjective(
+                values.objectiveName,
+                values.objectiveTargetAmount,
+                objectiveMembersWithCreator
+            );
+    
+            if (response.error) {
+                alert(response.error);
+            } else {
+                alert("Objective created successfully!");
+                setValues({ objectiveName: '', objectiveTargetAmount: '' });
+                setSelectedMembers([]); // Limpiar miembros seleccionados
+            }
+        } catch (error) {
+            console.error("Error creating objective:", error);
+            alert("An error occurred while creating the objective.");
+        }
+    };
+    
+    
+
 
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
     const { store, actions } = useContext(Context);
-    const [values, setValues] = useState({ amount: '' });
-
-
+    const [values, setValues] = useState({ objectiveName: '', objectiveTargetAmount: '' });
     const [contacts, setContacts] = useState([]);
+
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [email, setEmail] = useState('');
+    const [selectedMembers, setSelectedMembers] = useState([]);
 
     const { userid } = useParams();
     console.log("User ID:", userid);
 
 
-    useEffect(() => {
-        let isMounted = true;
 
-        mapContacts(setContacts, userid).then(() => {
-            if (isMounted) {
-            }
-        });
 
-        return () => {
-            isMounted = false;
-        };
-    }, [userid]);
-
+        useEffect(() => {
+            let isMounted = true;
+            
+            mapContacts(setContacts, userid);
     
+            return () => {
+                isMounted = false;
+            };
+        }, [userid]);
+
+
+    useEffect(() => {
+        console.log("Current Contacts State:", contacts);
+    }, [contacts]);
+
+
 
     return (
         <ThemeProvider theme={darkTheme}>
@@ -244,49 +297,75 @@ export default function CreateObjective() {
                     <div className={classes.appBarSpacer} />
                     <Container maxWidth="lg" className={classes.container}>
                         <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-                        <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-    <TextField
-        label="Objective name"
-        variant="outlined"
-        fullWidth
-        style={{ flex: 2 }}
-    />
-
-<FormControl fullWidth className={classes.margin} variant="outlined" style={{ flex: 1 }}>
-    <InputLabel htmlFor="outlined-adornment-amount">Target amount</InputLabel>
-    <OutlinedInput
-        id="outlined-adornment-amount"
-        value={values.amount}
-        onChange={(e) => setValues({ ...values, amount: e.target.value })}
-        endAdornment={<InputAdornment position="end">€</InputAdornment>} 
-    />
-</FormControl>
-
-
-
-    <Button
-        className={classes.createObjectiveButton}
-        onClick={handleCreateObjective}
-    >
-        Create objective
-    </Button>
-</Box>
-
-
-
-                        </Box>             <Typography variant="h6" className={classes.addMembersTitle}>
-                            Add Members
-                        </Typography>
-                        <Grid container spacing={2} className={classes.contactGrid} >
-                            {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
-                                <AddContactCard
-                                    key={contact.id}
-                                    contact={contact}
-                                    style={{ height: '100px', width: '100%' }}
+                            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                                <TextField
+                                    label="Objective name"
+                                    variant="outlined"
+                                    fullWidth
+                                    style={{ flex: 2 }}
+                                    value={values.objectiveName}
+                                    onChange={(e) => setValues({ ...values, objectiveName: e.target.value })}
                                 />
-                            ))}
-                            {!contacts && <div>Loading contacts...</div>}
+
+                                <FormControl fullWidth className={classes.margin} variant="outlined" style={{ flex: 1 }}>
+                                    <InputLabel htmlFor="outlined-adornment-amount">Target amount</InputLabel>
+                                    <OutlinedInput
+                                        id="outlined-adornment-amount"
+                                        value={values.objectiveTargetAmount}
+                                        onChange={(e) => setValues({ ...values, objectiveTargetAmount: e.target.value })}
+                                        endAdornment={<InputAdornment position="end">€</InputAdornment>}
+                                    />
+                                </FormControl>
+
+
+
+                                <Button
+                                    className={classes.createObjectiveButton}
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleCreateObjective}
+                                >
+                                    Create Objective
+                                </Button>
+                            </Box>
+                        </Box>
+            <Typography variant="h6" className={classes.addMembersTitle}>
+                Add members
+            </Typography>
+            <Grid container spacing={2} className={classes.contactGrid}>
+                {!contacts.contacts ? (
+                    <Typography>Loading contacts...</Typography>
+                ) : contacts.contacts.length === 0 ? (
+                    <Typography>No contacts found</Typography>
+                ) : (
+                    contacts.contacts.map((contact) => (
+                        <Grid item xs={12} sm={6} md={4} key={contact.id}>
+                            <AddContactCard
+                                contact={contact}
+                                onAddContact={handleAddMemberToObjective}
+                                isSelected={selectedMembers.some(
+                                    member => member.id === contact.id
+                                )}
+                            />
                         </Grid>
+                    ))
+                )}
+            </Grid>
+                        {selectedMembers.length > 0 && (
+                            <Box sx={{ marginTop: "20px" }}>
+                                <Typography variant="h6">Selected Members:</Typography>
+                                {selectedMembers.map((member) => (
+                                    <Chip
+                                        key={member.id}
+                                        label={member.name}
+                                        onDelete={() => handleAddMemberToObjective(member)}
+                                        color="primary"
+                                        variant="outlined"
+                                        style={{ margin: "5px" }}
+                                    />
+                                ))}
+                            </Box>
+                        )}
                     </Container>
                 </main>
             </div>
