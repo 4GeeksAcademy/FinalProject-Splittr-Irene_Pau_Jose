@@ -30,6 +30,8 @@ import { Context } from '../../store/appContext.js';
 import { useParams } from 'react-router-dom';
 import { mapTransactions } from '../../component/callToApi.js';
 
+import FloatingActionButtonMenu from '../../component/FloatingActionButtonMenu.jsx';
+
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -253,6 +255,7 @@ export default function Dashboard() {
             </Box>
           </Container>
         </main>
+        <FloatingActionButtonMenu/>
       </div>
     </ThemeProvider>
   );
