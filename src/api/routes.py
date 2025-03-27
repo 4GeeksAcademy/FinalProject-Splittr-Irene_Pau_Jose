@@ -1002,11 +1002,16 @@ def objective_contribution():
         return jsonify({"error": "Objective not found"}), 404
 
     # Ensure the user is part of the objective
-    membership = Objective_to_user.query.filter_by(user_id=current_user_id, objective_id=data["objective"]).first()
+    membership = Objective_to_user.query.filter_by(
+        user_id=current_user_id, 
+        objective_id=data["objective"]
+    ).first()
     if not membership:
         return jsonify({"error": "You cannot contribute to this objective"}), 403
 
-    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objective_id=data["objective"]).scalar() or 0
+    total_contributed = db.session.query(
+        db.func.sum(ObjectivesContributions.amount_contributed)
+    ).filter_by(objective_id=data["objective"]).scalar() or 0
 
     if total_contributed + data["amount"] > objective.target_amount:
         return jsonify({"error": "Contribution exceeds target amount"}), 400
@@ -1014,12 +1019,21 @@ def objective_contribution():
     if objective.is_completed:
         return jsonify({"error": "Objective is already completed"}), 400
 
-    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=current_user_id, objective_id=data["objective"], contributed_at=db.func.now())
+    # Create the contribution with explicit timestamp like in Payments
+    contribution = ObjectivesContributions(
+        amount_contributed=data["amount"],
+        user_id=current_user_id,
+        objective_id=data["objective"],
+        contributed_at=datetime.utcnow()  # Explicitly set like in Payments
+    )
 
     db.session.add(contribution)
     db.session.commit()
 
-    return jsonify({"msg": "Contribution was successfully added"}), 201
+    return jsonify({
+        "msg": "Contribution was successfully added",
+        "contribution": contribution.serialize()  # Will now include properly formatted datetime
+    }), 201
 
 
 @api.route("/objective/contribution/<int:objective_id>", methods=["GET"])
@@ -1053,13 +1067,17 @@ def get_user_transactions():
     group_payments = Group_payments.query.filter(
         (Group_payments.payer_id == current_user_id) | (Group_payments.receiver_id == current_user_id)
     ).all()
-    contributions = ObjectivesContributions.query.filter_by(user_id=current_user_id).all()
+
+    user_contributions = ObjectivesContributions.query.filter_by(user_id=current_user_id).all()
+
+    user_objectives = Objectives.query.join(Objective_to_user).filter(Objective_to_user.user_id == current_user_id).all()
 
     return jsonify({
         "sent_payments": [payment.serialize() for payment in sent_payments],
         "received_payments": [payment.serialize() for payment in received_payments],
         "group_payments": [gp.serialize() for gp in group_payments],
-        "objective_contributions": [contribution.serialize() for contribution in contributions]
+        "user_contributions": [contribution.serialize() for contribution in user_contributions],
+        "user_objectives": [objective.serialize() for objective in user_objectives]
     }), 200
 
 

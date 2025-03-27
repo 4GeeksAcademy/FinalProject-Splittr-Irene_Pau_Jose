@@ -244,7 +244,7 @@ export default function Feedback() {
         >
           <Box sx={{ marginBottom: "20px" }}>
             <h3>We'd love to hear from you!</h3>
-            <TextField id="feedback-email" label="Change email" variant="outlined" fullWidth value={user?.email || ""} onChange={(e) => setUser({ ...user, email: e.target.value })} />
+            <TextField id="feedback-email" label="Email" variant="outlined" fullWidth value={user?.email || ""} onChange={(e) => setUser({ ...user, email: e.target.value })} />
           </Box>
 
           <Box sx={{ marginBottom: "20px" }}>
