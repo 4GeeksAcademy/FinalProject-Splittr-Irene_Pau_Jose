@@ -272,19 +272,19 @@ useEffect(() => {
     }
   }, [groupid]);
 
-useEffect(() => {
+  useEffect(() => {
     console.log("allContacts antes del filtrado:", allContacts);
     console.log("groupMembers antes del filtrado:", groupMembers);
 
-    if (allContacts.length > 0 && groupMembers.length > 0) {
-      const filteredNonMembers = allContacts.filter(contact => {
+    if (allContacts.contacts && allContacts.contacts.length > 0 && groupMembers.length > 0) {
+      const filteredNonMembers = allContacts.contacts.filter(contact => {
         console.log("Comparando contacto:", contact, "con miembros:", groupMembers);
         return !groupMembers.some(member => member.id === contact.id);
       });
       console.log("nonGroupMembers después del filtrado:", filteredNonMembers);
       setNonGroupMembers(filteredNonMembers);
     } else {
-      console.log("No se realiza el filtrado porque allContacts o groupMembers están vacíos.");
+      console.log("No se realiza el filtrado porque allContacts.contacts o groupMembers están vacíos.");
       setNonGroupMembers([]);
     }
   }, [allContacts, groupMembers]);

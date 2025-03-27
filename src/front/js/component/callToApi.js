@@ -141,7 +141,7 @@ export const addContactToGroup = async (userId, groupId) => {
         console.log("Sending add user to group request:", { userId, groupId });
 
         const token = localStorage.getItem("token");
-        const response = await fetch(urlBackend + "/group_user", {
+        const response = await fetch(urlBackend + "/group_user/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
