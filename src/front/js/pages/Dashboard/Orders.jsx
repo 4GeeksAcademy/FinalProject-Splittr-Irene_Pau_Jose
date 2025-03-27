@@ -44,12 +44,12 @@ export default function Orders() {
     }
   };
 
-  console.log("Current transactions state:", transactions);
+  ("Current transactions state:", transactions);
 
   const allTransactions = [
     ...(transactions.group_payments || []).map((tx) => {
       const parsedDate = parseDate(tx.payed_at);
-      console.log("Group Payment Date:", tx.payed_at, parsedDate);
+      ("Group Payment Date:", tx.payed_at, parsedDate);
       return {
         id: `group_${tx.id}`,
         date: parsedDate,
@@ -61,7 +61,7 @@ export default function Orders() {
     }),
     ...(transactions.objective_contributions || []).map((tx) => {
       const parsedDate = parseDate(tx.contributed_at);
-      console.log("Objective Contribution Date:", tx.contributed_at, parsedDate);
+      ("Objective Contribution Date:", tx.contributed_at, parsedDate);
       return {
         id: `objective_${tx.id}`,
         date: parsedDate,
@@ -73,7 +73,7 @@ export default function Orders() {
     }),
     ...(transactions.received_payments || []).map((tx) => {
       const parsedDate = parseDate(tx.payed_at);
-      console.log("Received Payment Date:", tx.payed_at, parsedDate);
+      ("Received Payment Date:", tx.payed_at, parsedDate);
       return {
         id: `received_${tx.id}`,
         date: parsedDate,
@@ -85,7 +85,7 @@ export default function Orders() {
     }),
     ...(transactions.sent_payments || []).map((tx) => {
       const parsedDate = parseDate(tx.payed_at);
-      console.log("Sent Payment Date:", tx.payed_at, parsedDate);
+      ("Sent Payment Date:", tx.payed_at, parsedDate);
       return {
         id: `sent_${tx.id}`,
         date: parsedDate,
@@ -107,8 +107,8 @@ export default function Orders() {
   });
 
   // Debug transformed data
-  console.log("Formatted transactions:", allTransactions);
-  console.log("Sorted transactions:", sortedTransactions);
+  ("Formatted transactions:", allTransactions);
+  ("Sorted transactions:", sortedTransactions);
 
   return (
     <React.Fragment>

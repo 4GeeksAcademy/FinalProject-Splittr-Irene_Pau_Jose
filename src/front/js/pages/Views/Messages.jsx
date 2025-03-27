@@ -244,26 +244,45 @@ export default function Messages() {
 
   const { store, actions } = useContext(Context);
 
-  const [messages, setMessages] = useState({});
-  console.log(messages);
+  const [messages, setMessages] = useState([]); // Initialize as empty array
   const [contacts, setContacts] = useState([]);
   const [openContactDialog, setOpenContactDialog] = useState(false);
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [error, setError] = useState(null); // Add error state
 
   const { userid } = useParams();
   const navigate = useNavigate();
 
-
   useEffect(() => {
-    mapMessages(setMessages, userid);
-    mapContacts(setContacts, userid);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch messages and contacts in parallel
+        const [messagesData, contactsData] = await Promise.all([
+          mapMessages(setMessages, userid),
+          mapContacts(setContacts, userid)
+        ]);
+        
+        // Additional processing if needed
+      } catch (err) {
+        console.error("Error in fetching data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [userid]);
 
   const handleStartConversation = (contactId) => {
-
     navigate(`/message/conversation/${contactId}`);
     setOpenContactDialog(false);
   };
 
+ 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>

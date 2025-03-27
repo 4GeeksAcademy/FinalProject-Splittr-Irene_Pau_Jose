@@ -118,6 +118,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
 }));
+
+
 export default function TextMessages() {
     const classes = useStyles();
     const [open, setOpen] = React.useState(true);
@@ -130,115 +132,101 @@ export default function TextMessages() {
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef(null);
     const [otherUser, setOtherUser] = useState({ name: "", initial: "" });
-    // Fix for the other user determination
-
-
-    if (conversation && conversation.length > 0 && otheruserid) {
-        // First make sure we have a string version of the ID for comparison
-        const otherUserIdString = String(otheruserid);
-
-        // Find a message where otheruserid matches either sender or recipient
-        const relevantMessage = conversation.find(msg => {
-            // Safely convert IDs to strings for comparison, handling potential undefined values
-            const fromId = msg.from_user_id ? String(msg.from_user_id) : "";
-            const toId = msg.to_user_id ? String(msg.to_user_id) : "";
-
-            return fromId === otherUserIdString || toId === otherUserIdString;
-        });
-
-        if (relevantMessage) {
-            if (relevantMessage.from_user_id && String(relevantMessage.from_user_id) === otherUserIdString) {
-                otherUser.name = relevantMessage.from_user_name || "";
-                otherUser.initial = relevantMessage.from_user_initial || "";
-            } else {
-                otherUser.name = relevantMessage.to_user_name || "";
-                otherUser.initial = relevantMessage.to_user_initial || "";
-            }
-        }
-    }
-
-    // Handle sending a message
-    const handleSendMessage = async () => {
-        if (newMessage.trim() === '') return; // Don't send empty messages
-
-        try {
-            const response = await sendMessage(
-                otheruserid, // This is the ID of the user you're sending to
-                newMessage, // The message content
-                store.userInfo.user_id // The current user's ID
-            );
-
-            if (response.error) {
-                console.error("Failed to send message:", response.error);
-                return;
-            }
-
-            // If message sent successfully, update the local conversation state
-            const sentMessage = {
-                from_user_id: store.userInfo.user_id,
-                to_user_id: otheruserid,
-                message: newMessage,
-                from_user_name: store.userInfo.name,
-                from_user_initial: store.userInfo.name.charAt(0).toUpperCase(),
-                to_user_name: otherUser.name,
-                to_user_initial: otherUser.initial
-            };
-
-            setConversation([...conversation, sentMessage]);
-            setNewMessage(''); // Clear the input field
-
-            // Optionally refresh the conversation from the server
-            getInfoConversation(setConversation, otheruserid);
-        } catch (error) {
-            console.error("Error sending message:", error);
-        }
-    };
+    const [isSending, setIsSending] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
-        getInfoConversation(setConversation, otheruserid);
+        // Get current user ID from sessionStorage
+        const userId = sessionStorage.getItem("user_id");
+        if (userId) {
+            setCurrentUserId(parseInt(userId));
+        }
     }, []);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        if (currentUserId && otheruserid) {
+            getInfoConversation(setConversation, otheruserid, currentUserId);
+        }
+    }, [otheruserid, currentUserId]);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversation]);
 
     useEffect(() => {
         const loadOtherUserInfo = async () => {
-            const userInfo = await fetchUserInfo(otheruserid);
-            if (userInfo) {
-                setOtherUser({
-                    name: userInfo.name || "",
-                    initial: userInfo.initial || ""
-                });
+            try {
+                const userInfo = await fetchUserInfo(otheruserid);
+                if (userInfo) {
+                    setOtherUser({
+                        name: userInfo.name || "",
+                        initial: (userInfo.name?.charAt(0)?.toUpperCase() || "")
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to fetch user info:", error);
             }
         };
 
-        loadOtherUserInfo();
+        if (otheruserid) {
+            loadOtherUserInfo();
+        }
     }, [otheruserid]);
+
+    const handleSendMessage = async () => {
+        if (!newMessage.trim() || isSending || !currentUserId) return;
+        
+        setIsSending(true);
+        try {
+            const result = await sendMessage(otheruserid, newMessage);
+            
+            if (result.success) {
+                // Optimistically update the UI
+                const optimisticMessage = {
+                    id: Date.now(), // temporary ID
+                    conversation_id: result.conversation_id,
+                    from_user_id: currentUserId,
+                    sent_to_user_id: parseInt(otheruserid),
+                    message: newMessage,
+                    sent_at: new Date().toISOString(),
+                    from_user_name: store.userInfo?.name || "You",
+                    from_user_initial: (store.userInfo?.name?.charAt(0) || "Y").toUpperCase(),
+                    sent_to_user_name: otherUser.name,
+                    sent_to_user_initial: otherUser.initial
+                };
+
+                setConversation(prev => [...prev, optimisticMessage]);
+                setNewMessage('');
+                
+                // Refresh conversation data from server
+                if (currentUserId) {
+                    await getInfoConversation(setConversation, otheruserid, currentUserId);
+                }
+            } else {
+                console.error("Failed to send message:", result.error);
+                // Optionally show error to user
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    };
+
     return (
         <ThemeProvider theme={darkTheme}>
             <div className={classes.root}>
                 <CssBaseline />
                 <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
                     <Toolbar className={classes.toolbar}>
-                        {!open && (
-                            <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} className={classes.menuButton}>
-                                <MenuIcon />
-                            </IconButton>
-                        )}
-                        {open && (
-                            <IconButton edge="start" color="inherit" aria-label="close drawer" onClick={handleDrawerClose} className={classes.menuButton}>
-                                <ChevronLeftIcon />
-                            </IconButton>
-                        )}
-                        <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                            Welcome, Pepito!
-                        </Typography>
-                        <IconButton color="inherit">
-                            <Badge badgeContent={4} color="secondary">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton>
+                        {/* ... (keep your existing AppBar code) ... */}
                     </Toolbar>
                 </AppBar>
                 <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
@@ -258,20 +246,20 @@ export default function TextMessages() {
                                 </Box>
                             </Box>
                             <div className={classes.messages}>
-                                {conversation && conversation.length > 0 ? (
-                                    conversation.map((message, index) => (
+                                {conversation.length > 0 ? (
+                                    conversation.map((message) => (
                                         <div
-                                            key={index}
+                                            key={message.id}
                                             className={clsx(
                                                 classes.messageBubble,
-                                                message.from_user_id === store.userInfo?.user_id ? classes.sent : classes.received
+                                                message.from_user_id === currentUserId ? classes.sent : classes.received
                                             )}
                                         >
                                             <Typography>{message.message}</Typography>
                                         </div>
                                     ))
                                 ) : (
-                                    <Typography color="textSecondary">There are no messages still...</Typography>
+                                    <Typography color="textSecondary">No messages yet...</Typography>
                                 )}
                                 <div ref={messagesEndRef} />
                             </div>
@@ -282,16 +270,15 @@ export default function TextMessages() {
                                     placeholder="Write a message..."
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleSendMessage();
-                                        }
-                                    }}
+                                    onKeyPress={handleKeyPress}
+                                    disabled={isSending}
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                <IconButton onClick={handleSendMessage}>
+                                                <IconButton 
+                                                    onClick={handleSendMessage}
+                                                    disabled={!newMessage.trim() || isSending}
+                                                >
                                                     <SendIcon />
                                                 </IconButton>
                                             </InputAdornment>

@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts, Feedback, Objective_to_user
+from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts, Feedback, Objective_to_user, Conversation, User_to_Conversation
 
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
 from datetime import datetime
-from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts, group_debts, objective_to_user;
+from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, objectives, objectives_contributions, user_contacts, group_debts, objective_to_user, messages, conversations, user_to_conversation;
 
 
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -768,8 +768,7 @@ def delete_debt(debt_id):
 
 
 
-#No funciona
-@api.route("/message/<int:sent_to_user_id>", methods=["GET"])
+@api.route('/message/user', methods=['GET'])
 @jwt_required()
 def get_messages_by_id(sent_to_user_id):
     current_user_id = get_jwt_identity() 
@@ -777,10 +776,16 @@ def get_messages_by_id(sent_to_user_id):
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
     
-    messages = Messages.query.filter_by(sent_to_user_id=sent_to_user_id).all()
+    # Find or create a conversation between these two users
+    conversation = Conversation.query.filter(
+        Conversation.participants.any(user_id=current_user_id),
+        Conversation.participants.any(user_id=sent_to_user_id)
+    ).first()
     
-    if not messages:
-        return jsonify({"error": "No messages found"}), 404
+    if not conversation:
+        return jsonify({"error": "No conversation found"}), 404
+    
+    messages = Messages.query.filter_by(conversation_id=conversation.id).all()
     
     user_messages = [message.serialize() for message in messages]
 
@@ -790,25 +795,48 @@ def get_messages_by_id(sent_to_user_id):
 @api.route('/message/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_messages_by_user_id(user_id):
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
     
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
 
-    received_messages = Messages.query.filter_by(sent_to_user_id=user_id).all()
+    # Get all conversations where current user is a participant
+    user_conversations = db.session.query(Conversation).join(
+        User_to_Conversation,
+        User_to_Conversation.conversation_id == Conversation.id
+    ).filter(
+        User_to_Conversation.user_id == current_user_id
+    ).all()
 
-    sent_messages = Messages.query.filter_by(from_user_id=user_id).all()
+    if not user_conversations:
+        return jsonify({"error": "No conversations found"}), 404
 
-    messages = received_messages + sent_messages
-    messages.sort(key=lambda msg: msg.sent_at if msg.sent_at is not None else datetime.min, reverse=True)
+    # Get all messages from these conversations with participant info
+    messages = []
+    for conv in user_conversations:
+        conv_messages = db.session.query(
+            Messages,
+            User.name.label('from_user_name'),
+            User.name.label('to_user_name')
+        ).join(
+            User, Messages.from_user_id == User.user_id
+        ).filter(
+            Messages.conversation_id == conv.id
+        ).order_by(
+            Messages.sent_at.desc()
+        ).all()
 
-    if not messages:
-        return jsonify({"error": "No messages found for this user"}), 404 
+        for msg, from_name, to_name in conv_messages:
+            serialized = msg.serialize()
+            serialized['from_user_name'] = from_name
+            serialized['to_user_name'] = to_name
+            messages.append(serialized)
 
-    messages.sort(key=lambda msg: msg.sent_at, reverse=True)
+    # Sort all messages by date (newest first)
+    messages.sort(key=lambda x: x['sent_at'], reverse=True)
 
-    return jsonify([message.serialize() for message in messages]), 200
+    return jsonify(messages), 200
 
 
 @api.route('/message/conversation/<int:other_user_id>', methods=['GET'])
@@ -820,20 +848,20 @@ def get_conversation(other_user_id):
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
     
-    messages = Messages.query.filter(
-        ((Messages.sent_to_user_id == current_user_id) & (Messages.from_user_id == other_user_id)) |
-        ((Messages.sent_to_user_id == other_user_id) & (Messages.from_user_id == current_user_id))
-    ).order_by(Messages.sent_at).all()
+    # Find or create a conversation between these two users
+    conversation = Conversation.query.filter(
+        Conversation.participants.any(user_id=current_user_id),
+        Conversation.participants.any(user_id=other_user_id)
+    ).first()
+    
+    if not conversation:
+        return jsonify({"error": "No conversation found between these users"}), 404
 
-    if not messages:
-        return jsonify({"error": "No messages found between these users"}), 404
+    messages = Messages.query.filter_by(conversation_id=conversation.id).order_by(Messages.sent_at).all()
 
     return jsonify([message.serialize() for message in messages]), 200
 
 
-
-
-#No funciona
 @api.route("/message/send", methods=["POST"])
 @jwt_required()
 def send_message():
@@ -844,22 +872,76 @@ def send_message():
     
     data = request.get_json()
 
-    if "sent_to_user_id" not in data or "message" not in data or "from_user_id" not in data:
+    # Validate required fields
+    required_fields = ["sent_to_user_id", "message"]
+    if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
+    # Validate message content
+    if not isinstance(data["message"], str) or len(data["message"].strip()) == 0:
+        return jsonify({"error": "Message cannot be empty"}), 400
+
+    # Check recipient exists
     to_user = User.query.get(data["sent_to_user_id"])
-    from_user = User.query.get(data["from_user_id"])
+    if not to_user:
+        return jsonify({"error": "Recipient user not found"}), 404
 
-    if not to_user or not from_user:
-        return jsonify({"error": "User not found"}), 404
+    # Prevent sending to self
+    if current_user_id == data["sent_to_user_id"]:
+        return jsonify({"error": "Cannot send message to yourself"}), 400
 
-    new_message = Messages(sent_to_user_id=data["sent_to_user_id"], message=data["message"], from_user_id=data["from_user_id"])
+    # Find existing conversation between these users
+    conversation = find_or_create_conversation(current_user_id, data["sent_to_user_id"])
+
+    # Create and save the message
+    new_message = Messages(
+        conversation_id=conversation.id,
+        sent_to_user_id=data["sent_to_user_id"], 
+        message=data["message"].strip(), 
+        from_user_id=current_user_id
+    )
 
     db.session.add(new_message)
     db.session.commit()
 
-    return jsonify({"msg": "Message was successfully sent"}), 201
+    return jsonify({
+        "msg": "Message sent successfully", 
+        "message": new_message.serialize(),
+        "conversation_id": conversation.id
+    }), 201
 
+
+def find_or_create_conversation(user1_id, user2_id):
+    """Helper function to find or create a conversation between two users"""
+    # Check for existing conversation
+    existing = db.session.query(Conversation).join(
+        User_to_Conversation,
+        User_to_Conversation.conversation_id == Conversation.id
+    ).filter(
+        User_to_Conversation.user_id.in_([user1_id, user2_id])
+    ).group_by(
+        Conversation.id
+    ).having(
+        db.func.count(User_to_Conversation.user_id.distinct()) == 2
+    ).first()
+
+    if existing:
+        return existing
+
+    # Create new conversation if none exists
+    new_conversation = Conversation()
+    db.session.add(new_conversation)
+    db.session.flush()  # To get the ID
+    
+    # Add participants
+    participant1 = User_to_Conversation(user_id=user1_id, conversation_id=new_conversation.id)
+    participant2 = User_to_Conversation(user_id=user2_id, conversation_id=new_conversation.id)
+    
+    db.session.add(participant1)
+    db.session.add(participant2)
+    db.session.commit()
+
+    return new_conversation
 
 
 
@@ -1188,14 +1270,14 @@ def debts_populate():
     db.session.commit()
     return jsonify("Debts have been created")
 
-@api.route("/messagespopulate", methods=["GET"])
-def messages_populate():
-    for message in messages:
-        new_message = Messages( from_user_id=message["from_user_id"],  message=message["message"], sent_at=message["sent_at"], sent_to_user_id=message["sent_to_user_id"])
-        #
-        db.session.add(new_message)
-    db.session.commit()
-    return jsonify("Messages have been created")
+# @api.route("/messagespopulate", methods=["GET"])
+# def messages_populate():
+#     for message in messages:
+#         new_message = Messages( from_user_id=message["from_user_id"],  message=message["message"], sent_at=message["sent_at"], sent_to_user_id=message["sent_to_user_id"])
+#         #
+#         db.session.add(new_message)
+#     db.session.commit()
+#     return jsonify("Messages have been created")
 
 @api.route("/objectivespopulate", methods=["GET"])
 def objectives_populate():
@@ -1273,3 +1355,45 @@ def objectives_contributions_populate():
     db.session.commit()
     return jsonify("Objectives Contributions have been created")
 
+
+@api.route("/conversationspopulate", methods=["GET"])
+def conversations_populate():
+    for conversation in conversations:
+        new_conversation = Conversation(
+            id=conversation["id"],
+            created_at=datetime.fromisoformat(conversation["created_at"])
+        )
+        db.session.add(new_conversation)
+    db.session.commit()
+    return jsonify({"message": "Conversations data has been successfully populated"}), 200
+
+
+@api.route("/usertoconversationpopulate", methods=["GET"])
+def user_to_conversation_populate():
+    for participant in user_to_conversation:
+        new_participant = User_to_Conversation(
+            id=participant["id"],
+            user_id=participant["user_id"],
+            conversation_id=participant["conversation_id"],
+            joined_at=datetime.fromisoformat(participant["joined_at"]),
+            is_active=participant["is_active"]
+        )
+        db.session.add(new_participant)
+    db.session.commit()
+    return jsonify({"message": "User_to_Conversation data has been successfully populated"}), 200
+
+
+@api.route("/messagespopulate", methods=["GET"])
+def messages_populate():
+    for message in messages:
+        new_message = Messages(
+            id=message["id"],
+            conversation_id=message["conversation_id"],
+            from_user_id=message["from_user_id"],
+            sent_to_user_id=message["sent_to_user_id"],
+            message=message["message"],
+            sent_at=datetime.fromisoformat(message["sent_at"])
+        )
+        db.session.add(new_message)
+    db.session.commit()
+    return jsonify({"message": "Messages data has been successfully populated"}), 200
