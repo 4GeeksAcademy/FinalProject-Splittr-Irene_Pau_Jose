@@ -276,25 +276,24 @@ class Messages(db.Model):
 class Objectives(db.Model):
     __tablename__ = "objectives"
     id = db.Column(db.Integer, unique=True, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey("group.group_id"))
     name = db.Column(db.String(20), nullable=False)
     target_amount = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=db.func.now())
     is_completed = db.Column(db.Boolean, nullable=False, default=False)
-    
-    group = db.relationship("Group", backref="objectives")
-    objective_contributions = db.relationship("ObjectivesContributions", back_populates="objective", lazy="dynamic")
+
+    # Define relationships
+    objective_to_users = db.relationship("Objective_to_user", back_populates="objective", cascade="all, delete-orphan")
+    objective_contributions = db.relationship("ObjectivesContributions", back_populates="objective", lazy="dynamic", cascade="all, delete-orphan")
 
     def serialize(self):
         total_contributed = db.session.query(
             db.func.coalesce(db.func.sum(ObjectivesContributions.amount_contributed), 0)
         ).filter_by(objective_id=self.id).scalar()
-        
+
         remaining_amount = max(self.target_amount - total_contributed, 0)
-    
+
         return {
             "id": self.id,
-            "group_id": self.group_id,
             "name": self.name,
             "target_amount": self.target_amount,
             "total_contributed": total_contributed,
@@ -303,13 +302,13 @@ class Objectives(db.Model):
             "is_completed": self.is_completed,
             "participants": [
                 {
-                    "id": member.user.user_id,
-                    "name": member.user.name if member.user else "Unknown",
-                    "email": member.user.email if member.user else "Unknown",
-                    "initial": member.user.name[0] if member.user and member.user.name else None
+                    "id": obj_user.user.user_id,
+                    "name": obj_user.user.name,
+                    "email": obj_user.user.email,
+                    "initial": obj_user.user.get_initial()
                 }
-                for member in self.group.members
-            ] if self.group else [], 
+                for obj_user in self.objective_to_users
+            ],
             "contributions": [
                 {
                     "id": contribution.id,
@@ -320,14 +319,33 @@ class Objectives(db.Model):
                 }
                 for contribution in self.objective_contributions
             ]
+        }       
+
+class Objective_to_user(db.Model):
+    __tablename__ = "objective_to_user"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    objective = db.relationship("Objectives", back_populates="objective_to_users")
+    user = db.relationship("User", backref="objective_memberships")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "objective_id": self.objective_id,
+            "user_id": self.user_id,
+            "user_name": self.user.name,
+            "created_at": self.created_at
         }
-        
+
 
 class ObjectivesContributions(db.Model):
     __tablename__ = "objective_contributions"
     id = db.Column(db.Integer, unique=True, primary_key=True)
-    objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
+    objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
     amount_contributed = db.Column(db.Integer, nullable=False)
     contributed_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
 
@@ -335,17 +353,16 @@ class ObjectivesContributions(db.Model):
     objective = db.relationship("Objectives", back_populates="objective_contributions")
 
     def serialize(self):
-        user = User.query.get(self.user_id)
-        objective = Objectives.query.get(self.objective_id)
-
         return {
             "id": self.id,
-            "user_name": user.name if user else "Unknown",
-            "objective_name": objective.name if objective else "Unknown",
+            "user_name": self.user.name if self.user else "Unknown",
+            "objective_name": self.objective.name if self.objective else "Unknown",
             "amount_contributed": self.amount_contributed,
             "contributed_at": self.contributed_at
         }
-    
+
+
+
 class Feedback(db.Model):
     __tablename__ ="feedback"
     

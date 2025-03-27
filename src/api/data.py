@@ -102,3 +102,22 @@ user_contacts = [
     { "user_id": 3, "contact_id": 5, "created_at": "2024-03-16T08:45:00"},
     { "user_id": 4, "contact_id": 1, "created_at": "2024-05-06T10:00:00"}
 ]
+
+objective_to_user = [
+    # Objective 1: "Trip to Japan" (Group 1: Travel Buddies)
+    {"id": 1, "objective_id": 1, "user_id": 1, "created_at": "2024-01-01T12:10:00"},
+    {"id": 2, "objective_id": 1, "user_id": 2, "created_at": "2024-01-02T13:15:00"},
+
+    # Objective 2: "New Apartment" (Group 2: Roommates)
+    {"id": 3, "objective_id": 2, "user_id": 3, "created_at": "2024-02-11T14:30:00"},
+
+    # Objective 3: "Fitness Challenge" (Group 3: Gym Squad)
+    {"id": 4, "objective_id": 3, "user_id": 4, "created_at": "2024-03-16T08:45:00"},
+
+    # Objective 4: "Gaming Setup" (Group 4: Gaming Friends)
+    {"id": 5, "objective_id": 4, "user_id": 5, "created_at": "2024-04-20T14:45:00"},
+
+    # Objective 5: "Startup Fund" (Group 5: Startup Team)
+    {"id": 6, "objective_id": 5, "user_id": 1, "created_at": "2024-05-05T17:20:00"},
+    {"id": 7, "objective_id": 5, "user_id": 5, "created_at": "2024-05-06T10:00:00"}
+]
