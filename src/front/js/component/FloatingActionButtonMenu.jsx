@@ -56,6 +56,7 @@ export default function FloatingActionButtonMenu() {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [openContactDialog, setOpenContactDialog] = useState(false);
+  const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const [contacts, setContacts] = useState([]);
   const open = Boolean(anchorEl);
 
@@ -63,10 +64,10 @@ export default function FloatingActionButtonMenu() {
   const userid = store.userInfo?.user_id;
 
   useEffect(() => {
-    if (openContactDialog) {
+    if (openContactDialog || openPaymentDialog) {
       mapContacts(setContacts, userid);
     }
-  }, [openContactDialog, userid]);
+  }, [openContactDialog, openPaymentDialog, userid]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -81,12 +82,17 @@ export default function FloatingActionButtonMenu() {
     setOpenContactDialog(false);
   };
 
+  const handleMakePayment = (contactId) => {
+    navigate(`/payment/user/${contactId}`);
+    setOpenPaymentDialog(false);
+  };
+
   const actions = [
     { 
       icon: <PaymentIcon />, 
       name: 'Make Payment',
       onClick: () => {
-        // Add your make payment logic
+        setOpenPaymentDialog(true);
         handleClose();
       }
     },
@@ -94,7 +100,6 @@ export default function FloatingActionButtonMenu() {
       icon: <ChatIcon />,
       name: 'Start Chat',
       onClick: () => {
-        // Open contacts dialog
         setOpenContactDialog(true);
         handleClose();
       }
@@ -102,13 +107,11 @@ export default function FloatingActionButtonMenu() {
     { 
       icon: <GroupAddIcon />, 
       name: <Link to={`/group/create/${userid}`} className={classes.menuLink}>Create Group</Link> ,
-     
     },
     { 
       icon: <AssignmentIcon />, 
       name: <Link to={`/objective/create/${userid}`} className={classes.menuLink}>Create Objective</Link>,
       onClick: () => {
-        // Add your create objective logic
         handleClose();
       }
     },
@@ -136,14 +139,14 @@ export default function FloatingActionButtonMenu() {
           horizontal: 'center',
         }}
       >
-        {actions.map((action) => (
+        {actions.map((action, index) => (
           <MenuItem 
-            key={action.name} 
+            key={index} 
             onClick={action.onClick} 
             className={classes.menuItem}
           >
             {action.icon}
-            {typeof action.name === 'string' ? action.name : action.name}
+            {action.name}
           </MenuItem>
         ))}
       </Menu>
@@ -153,7 +156,7 @@ export default function FloatingActionButtonMenu() {
         className={classes.backdrop}
       />
 
-      {/* Dialog to Select Contact */}
+      {/* Dialog to Select Contact for Chat */}
       <Dialog 
         open={openContactDialog} 
         onClose={() => setOpenContactDialog(false)}
@@ -163,7 +166,7 @@ export default function FloatingActionButtonMenu() {
         <DialogTitle>Start a Conversation</DialogTitle>
         <DialogContent dividers>
           <List>
-            {contacts && contacts.contacts && contacts.contacts.map((contact) => (
+            {contacts?.contacts?.map((contact) => (
               <ListItem 
                 button 
                 key={contact.contact_id}
@@ -182,6 +185,40 @@ export default function FloatingActionButtonMenu() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenContactDialog(false)} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog to Select Contact for Payment */}
+      <Dialog 
+        open={openPaymentDialog} 
+        onClose={() => setOpenPaymentDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Make a Payment</DialogTitle>
+        <DialogContent dividers>
+          <List>
+            {contacts?.contacts?.map((contact) => (
+              <ListItem 
+                button 
+                key={contact.contact_id}
+                onClick={() => handleMakePayment(contact.contact_id)}
+              >
+                <ListItemAvatar>
+                  <Avatar>{contact.contact_initial}</Avatar>
+                </ListItemAvatar>
+                <ListItemText 
+                  primary={contact.contact_name}
+                  secondary={contact.contact_email}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenPaymentDialog(false)} color="primary">
             Cancel
           </Button>
         </DialogActions>

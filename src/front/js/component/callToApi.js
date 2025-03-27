@@ -235,14 +235,18 @@ export const getObjectiveContributions = async (setObjectiveContributions, objec
         });
 
         const data = await response.json();
-        setObjectiveContributions(data);
-        console.log(data);
+
+        const contributions = Array.isArray(data) ? data : [];
+        
+        setObjectiveContributions(contributions);
+        console.log(contributions);
 
     } catch (error) {
         console.log(error);
+
+        setObjectiveContributions([]);
     }
-  };
-  
+};
 
   export const updateObjective = async (objectiveId, updatedData) => {
     try {
@@ -344,22 +348,39 @@ export const addUserContactByEmail = async (contactEmail) => {
 
     
 export const getContactInfo = async (setSingleContactInfo, contactId) => {
+    // Add a check to ensure contactId is valid
+    if (!contactId) {
+        console.error("No contact ID provided");
+        return;
+    }
+
     try {
-        const response = await fetch(urlBackend + "/singlecontact/"+ contactId, {
+        const response = await fetch(`${urlBackend}/singlecontact/${contactId}`, {
+            method: 'GET', // Explicitly specify GET method
             headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json"
+                'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type': 'application/json'
             }
         });
+
+        if (!response.ok) {
+            // Handle non-200 responses
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        setSingleContactInfo(data);
-            console.log(data);
+        
+        // Additional check to ensure data is valid
+        if (data) {
+            setSingleContactInfo(data);
+            console.log("Contact data:", data);
+        } else {
+            console.error("No contact data received");
+        }
     } catch (error) {
-        console.log(error);
+        console.error("Error fetching contact info:", error);
     }
 };
-
-
 
 export const deleteUserContact = async (contactId) => {
     try {
@@ -543,7 +564,29 @@ export const makeObjectiveContribution = async (objectiveId, amount) => {
     const user_id = sessionStorage.getItem("user_id")
     
     try {
-        const response = await fetch(`${urlBackend}/objective/contribution`, {
+        const parsedAmount = parseFloat(amount);
+  
+        const response = await fetch(`${urlBackend}/objective/${objectiveId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const objectiveData = await response.json();
+        const remainingAmount = objectiveData.remaining_amount || 0;
+
+        if (parsedAmount > remainingAmount) {
+            alert(`Your contribution of €${parsedAmount.toFixed(2)} exceeds the remaining amount of €${remainingAmount.toFixed(2)}. 
+Please reduce your contribution.`);
+            return {
+                success: false,
+                message: "Contribution exceeds remaining amount"
+            };
+        }
+
+        const contributionResponse = await fetch(`${urlBackend}/objective/contribution`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem("token")}`,
@@ -551,26 +594,24 @@ export const makeObjectiveContribution = async (objectiveId, amount) => {
             },
             body: JSON.stringify({
                 objective: objectiveId,
-                amount: parseFloat(amount),
+                amount: parsedAmount,
                 user: user_id
             })
         });
 
-        let data;
-        try {
-            data = await response.json();
-        } catch {
-            throw new Error("Invalid JSON response from server");
-        }
+        const contributionData = await contributionResponse.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || 'Failed to make contribution');
+        if (!contributionResponse.ok) {
+            return {
+                success: false,
+                message: contributionData.error || 'Failed to make contribution'
+            };
         }
+        
         window.location.reload();
         return {
             success: true,
-            message: data.msg
-
+            message: contributionData.msg
         };
 
     } catch (error) {
@@ -580,5 +621,40 @@ export const makeObjectiveContribution = async (objectiveId, amount) => {
             message: error.message
         };
     }
+};
 
+
+export const createPayment = async (amount, user_id, contactid, debt_id = null) => {
+    try {
+        const payload = {
+            amount: parseFloat(amount),
+            payer_id: user_id,
+            receiver_id: contactid
+        };
+
+        // Add debt_id to payload if provided
+        if (debt_id) {
+            payload.debt_id = debt_id;
+        }
+
+        const response = await fetch(`${urlBackend}/payment/create`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Payment creation failed');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error creating payment:', error);
+        throw error;
+    }
 };

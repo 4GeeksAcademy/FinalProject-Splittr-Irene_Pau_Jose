@@ -26,7 +26,7 @@ import EditObjective from "./pages/Views/IndividualViews/EditObjective.jsx";
 import EditGroup from "./pages/Views/IndividualViews/EditGroup.jsx";
 import CreateGroup from "./pages/Views/CreateGroup.jsx";
 import CreateObjective from "./pages/Views/CreateObjective.jsx";
-
+import MakePayment from "./pages/Views/MakePayment.jsx";
 
 
 import { Navbar } from "./component/navbar";
@@ -70,6 +70,8 @@ const Layout = () => {
                         <Route element={<EditGroup/>} path="/group/update/:groupid" />
                         <Route element={<CreateGroup/>} path="/group/create/:userid" />
                         <Route element={<CreateObjective/>} path="/objective/create/:userid" />
+                        <Route element={<MakePayment/>} path="/payment/user/:contactid" />
+
 
                     </Routes>
                     <Footer />

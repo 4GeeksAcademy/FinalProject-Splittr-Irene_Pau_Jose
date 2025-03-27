@@ -192,8 +192,7 @@ export default function SingleObjective() {
   const groupedContributions = useMemo(() => {
     const userContributions = {};
 
-
-    objectiveContributions.forEach((contribution) => {
+    (objectiveContributions || []).forEach((contribution) => {
       if (userContributions[contribution.user_name]) {
         userContributions[contribution.user_name] += contribution.amount_contributed;
       } else {
@@ -207,7 +206,7 @@ export default function SingleObjective() {
       total_contributed: userContributions[userName],
     }))
     .sort((a, b) => b.total_contributed - a.total_contributed);
-  }, [objectiveContributions]);
+}, [objectiveContributions]);
 
   useEffect(() => {
   

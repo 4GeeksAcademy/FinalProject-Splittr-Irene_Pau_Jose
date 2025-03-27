@@ -551,13 +551,19 @@ def create_payment():
     if "amount" not in data or "payer_id" not in data or "receiver_id" not in data:
         return jsonify({"error": "Missing required fields"}), 400
 
-
-    new_payment = Payments(amount=data["amount"], payer_id=data["payer_id"], receiver_id=data["receiver_id"] )
+    # Create payment with current timestamp
+    new_payment = Payments(
+        amount=data["amount"], 
+        payer_id=data["payer_id"], 
+        receiver_id=data["receiver_id"],
+        payed_at=datetime.utcnow(),  # Set the payed_at timestamp
+        debt_id=data.get("debt_id")  # Optional: include debt_id if provided
+    )
 
     db.session.add(new_payment)
     db.session.commit()
 
-    return jsonify({"msg": "Paymnent was successfully done"}), 201
+    return jsonify({"msg": "Payment was successfully done", "payment": new_payment.serialize()}), 201
 
 #Funciona
 @api.route("/expense", methods=["GET"])
