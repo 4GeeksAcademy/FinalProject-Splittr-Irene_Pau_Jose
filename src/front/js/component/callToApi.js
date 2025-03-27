@@ -465,6 +465,7 @@ export const sendMessage = async (sent_to_user_id, message, from_user_id) => {
     }
 };
 
+
 export const mapTransactions = async (callback) => {
     try {
         const response = await fetch(urlBackend + "/transaction/user/", {
@@ -477,7 +478,7 @@ export const mapTransactions = async (callback) => {
         if (!response.ok) throw new Error("Failed to fetch transactions");
 
         const data = await response.json();
-        console.log("Full API response:", data); // Debug
+        console.log("Full API response:", data); // Debug: Inspect the raw API response
 
         callback({
             sent_payments: data.sent_payments?.map((p) => ({
@@ -519,6 +520,9 @@ export const mapTransactions = async (callback) => {
         });
     }
 };
+
+
+
 
 export const submitFeedback = async (email, message) => {
     try {

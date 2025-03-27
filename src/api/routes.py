@@ -1024,7 +1024,7 @@ def objective_contribution():
         amount_contributed=data["amount"],
         user_id=current_user_id,
         objective_id=data["objective"],
-        contributed_at=datetime.utcnow()  # Explicitly set like in Payments
+
     )
 
     db.session.add(contribution)

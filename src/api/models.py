@@ -175,7 +175,7 @@ class Payments(db.Model):
     payer_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     receiver_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     amount = db.Column(db.Integer, nullable=False)
-    payed_at = db.Column(db.DateTime)
+    payed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def serialize(self):
         payer = User.query.get(self.payer_id)
@@ -187,7 +187,7 @@ class Payments(db.Model):
             "payer_name": payer.name if payer else "Unknown",
             "receiver_name": receiver.name if receiver else "Unknown",
             "amount": self.amount,
-            "payed_at": self.payed_at
+            "payed_at": self.payed_at.isoformat() if self.payed_at else None 
         }
     
 class Expenses(db.Model):
