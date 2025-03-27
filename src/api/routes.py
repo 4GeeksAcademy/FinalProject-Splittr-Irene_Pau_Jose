@@ -180,6 +180,8 @@ def get_group_by_id(group_id):
         return jsonify({"error": "Group not found"}), 404
     return jsonify(group.serialize())
 
+
+
 @api.route('/group/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_group_by_user_id(user_id):
