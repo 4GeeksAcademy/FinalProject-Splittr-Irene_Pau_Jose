@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -30,14 +30,10 @@ import { Home } from '../Home.jsx';
 
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
-import Icon from '@material-ui/core/Icon';
-import SaveIcon from '@material-ui/icons/Save';
-import { useContext } from 'react';
+
 import { Context } from '../../store/appContext.js';
 import { submitFeedback } from '../../component/callToApi.js';
+
 
 function Copyright() {
   return (
@@ -143,6 +139,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Feedback() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -151,6 +148,16 @@ export default function Feedback() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const { store, actions } = useContext(Context);
+  const [user, setUser] = useState(store.userInfo);
+  const updatedData = { email: user.email};
+  
+    useEffect(() => {
+      const getUser = async () => {
+          const data = await actions.getUser();
+          if (data) setUser(data); 
+      };
+      getUser();
+  }, []);
 
   const handleSendFeedback = async () => {
     const email = document.getElementById("feedback-email").value;
@@ -237,12 +244,7 @@ export default function Feedback() {
         >
           <Box sx={{ marginBottom: "20px" }}>
             <h3>We'd love to hear from you!</h3>
-            <TextField
-              id="feedback-email"
-              label="Email"
-              variant="outlined"
-              fullWidth
-            />
+            <TextField id="feedback-email" label="Change email" variant="outlined" fullWidth value={user?.email || ""} onChange={(e) => setUser({ ...user, email: e.target.value })} />
           </Box>
 
           <Box sx={{ marginBottom: "20px" }}>
