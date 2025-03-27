@@ -278,7 +278,7 @@ class Objectives(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     target_amount = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.now())
+    created_at = db.Column(db.DateTime)
     is_completed = db.Column(db.Boolean, nullable=False, default=False)
 
     # Define relationships
@@ -326,7 +326,7 @@ class Objective_to_user(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.now())
+    created_at = db.Column(db.DateTime)
 
     objective = db.relationship("Objectives", back_populates="objective_to_users")
     user = db.relationship("User", backref="objective_memberships")
@@ -347,7 +347,7 @@ class ObjectivesContributions(db.Model):
     objective_id = db.Column(db.Integer, db.ForeignKey("objectives.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
     amount_contributed = db.Column(db.Integer, nullable=False)
-    contributed_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    contributed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)  # Changed to match Payments
 
     user = db.relationship("User", backref="user_contributions")
     objective = db.relationship("Objectives", back_populates="objective_contributions")
@@ -358,10 +358,8 @@ class ObjectivesContributions(db.Model):
             "user_name": self.user.name if self.user else "Unknown",
             "objective_name": self.objective.name if self.objective else "Unknown",
             "amount_contributed": self.amount_contributed,
-            "contributed_at": self.contributed_at
+            "contributed_at": self.contributed_at.isoformat() if self.contributed_at else None  # Match Payments format
         }
-
-
 
 class Feedback(db.Model):
     __tablename__ ="feedback"

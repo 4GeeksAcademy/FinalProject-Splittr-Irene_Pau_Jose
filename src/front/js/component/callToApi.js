@@ -4,7 +4,7 @@ const urlBackend = process.env.BACKEND_URL
 export const mapGroups = async (setGroups, userid) => {
 
     try {
-        const response = await fetch(urlBackend+"/group/user/" + userid, {
+        const response = await fetch(urlBackend + "/group/user/" + userid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
@@ -15,17 +15,17 @@ export const mapGroups = async (setGroups, userid) => {
 
     } catch (error) {
         console.log(error);
-        
+
     }
-    
+
 }
 
 //Global groups fetch
 
 
-export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
+export const getInfoGroup = async (setSingleGroupInfo, groupid) => {
     try {
-        const response = await fetch(urlBackend+"/group/"+ groupid, {
+        const response = await fetch(urlBackend + "/group/" + groupid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
@@ -41,17 +41,17 @@ export const getInfoGroup = async ( setSingleGroupInfo, groupid ) => {
         const data = await response.json();
         setSingleGroupInfo(data);
         console.log(data);
-        return data; 
+        return data;
 
     } catch (error) {
         console.error("Error en getInfoGroup:", error);
-        throw error; 
+        throw error;
     }
 }
 
 export const getGroupMembers = async (groupId) => {
     try {
-        const response = await fetch(urlBackend+"/group/"+ groupId, {
+        const response = await fetch(urlBackend + "/group/" + groupId, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -84,7 +84,7 @@ export const updateGroup = async (groupId, updatedData) => {
             },
             body: JSON.stringify(updatedData)
         });
-        
+
         if (!response.ok) {
             throw new Error("Failed to update group");
         }
@@ -98,39 +98,39 @@ export const updateGroup = async (groupId, updatedData) => {
 
 export const removeUserFromGroup = async (userId, groupId) => {
     try {
-      console.log("Sending remove user request:", { userId, groupId }); 
+        console.log("Sending remove user request:", { userId, groupId });
 
-      const token = localStorage.getItem("token");
-      const response = await fetch(urlBackend + "/group_user/delete", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          user_id: userId,   
-          group_id: groupId  
-        }) 
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error details:", errorText);
-        throw new Error(`Failed to remove user from group: ${errorText}`);
-      }
-  
-      return await response.json(); 
+        const token = localStorage.getItem("token");
+        const response = await fetch(urlBackend + "/group_user/delete", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                group_id: groupId
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Error details:", errorText);
+            throw new Error(`Failed to remove user from group: ${errorText}`);
+        }
+
+        return await response.json();
     } catch (error) {
-      console.error("Error removing user from group:", error);
-      throw error;
+        console.error("Error removing user from group:", error);
+        throw error;
     }
-  };
+};
 
 
 export const createGroup = async (groupName, groupMembers) => {
     console.log('Creating group with:', {
-        group_name: groupName, 
-        members: groupMembers, 
+        group_name: groupName,
+        members: groupMembers,
     });
 
     try {
@@ -141,8 +141,8 @@ export const createGroup = async (groupName, groupMembers) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                group_name: groupName, 
-                members: groupMembers,  
+                group_name: groupName,
+                members: groupMembers,
             }),
         });
 
@@ -167,64 +167,65 @@ export const createGroup = async (groupName, groupMembers) => {
 
 export const getGroupDebts = async (setGroupDebts, groupId) => {
     try {
-      const response = await fetch(urlBackend+"/group/group_debts/"+groupId, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-  
-      const data = await response.json();
-      setGroupDebts(data);
-      console.log(data)
+        const response = await fetch(urlBackend + "/group/group_debts/" + groupId, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await response.json();
+        setGroupDebts(data);
+        console.log(data)
 
     } catch (error) {
-      console.log(error);
+        console.log(error);
     }
-  };
-  
+};
 
-export const mapSharedObjective = async (setSharedObjective, userid ) => {
+
+export const mapSharedObjective = async (setSharedObjective, userid) => {
 
     try {
-        const response = await fetch(urlBackend+"/objective/user/" + userid, {
+        const response = await fetch(urlBackend + "/objective/user/" + userid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
             },
-    })
+        })
         const data = await response.json()
         setSharedObjective(data)
-        
-        
+
+
     } catch (error) {
         console.log(error);
-        
+
     }
-    
+
 }
 
 export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid) => {
 
     try {
-        const response = await fetch(urlBackend+"/objective/" + objectiveid, {
+        const response = await fetch(urlBackend + "/objective/" + objectiveid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
             }
-            ,})
+            ,
+        })
         const data = await response.json()
         setInfoSharedObjective(data)
-        
+
     } catch (error) {
         console.log(error);
-        
+
     }
-    
+
 }
 
 
-  
+
 export const getObjectiveContributions = async (setObjectiveContributions, objectiveId) => {
     try {
         const response = await fetch(urlBackend + "/objective/contribution/" + objectiveId, {
@@ -237,7 +238,7 @@ export const getObjectiveContributions = async (setObjectiveContributions, objec
         const data = await response.json();
 
         const contributions = Array.isArray(data) ? data : [];
-        
+
         setObjectiveContributions(contributions);
         console.log(contributions);
 
@@ -248,31 +249,31 @@ export const getObjectiveContributions = async (setObjectiveContributions, objec
     }
 };
 
-  export const updateObjective = async (objectiveId, updatedData) => {
+export const updateObjective = async (objectiveId, updatedData) => {
     try {
-      const response = await fetch(urlBackend + "/objective/update/" + objectiveId, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to update objective");
-      }
-  
-      const data = await response.json();
-      return data;
+        const response = await fetch(urlBackend + "/objective/update/" + objectiveId, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedData),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update objective");
+        }
+
+        const data = await response.json();
+        return data;
     } catch (error) {
-      console.error("Error updating objective:", error);
-      throw error;
+        console.error("Error updating objective:", error);
+        throw error;
     }
-  };
+};
 
 
-  export const createObjective = async (objectiveName, objectiveTargetAmount, objectiveMembers) => {
+export const createObjective = async (objectiveName, objectiveTargetAmount, objectiveMembers) => {
     console.log('Creating objective with:', {
         objectiveName,
         objectiveTargetAmount,
@@ -312,7 +313,7 @@ export const getObjectiveContributions = async (setObjectiveContributions, objec
 
 export const mapContacts = async (setContacts, userid) => {
     try {
-        const response = await fetch(urlBackend+"/user_contacts/" + userid, {
+        const response = await fetch(urlBackend + "/user_contacts/" + userid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
@@ -321,7 +322,7 @@ export const mapContacts = async (setContacts, userid) => {
         const data = await response.json()
         setContacts(data);
         console.log(data);
-        
+
     } catch (error) {
         console.log(error);
     }
@@ -329,7 +330,7 @@ export const mapContacts = async (setContacts, userid) => {
 
 export const addUserContactByEmail = async (contactEmail) => {
     try {
-        const response = await fetch(urlBackend+"/user_contacts", {
+        const response = await fetch(urlBackend + "/user_contacts", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -346,7 +347,7 @@ export const addUserContactByEmail = async (contactEmail) => {
 };
 
 
-    
+
 export const getContactInfo = async (setSingleContactInfo, contactId) => {
     // Add a check to ensure contactId is valid
     if (!contactId) {
@@ -369,7 +370,7 @@ export const getContactInfo = async (setSingleContactInfo, contactId) => {
         }
 
         const data = await response.json();
-        
+
         // Additional check to ensure data is valid
         if (data) {
             setSingleContactInfo(data);
@@ -406,11 +407,11 @@ export const deleteUserContact = async (contactId) => {
     }
 };
 
-    
+
 export const mapMessages = async (setMessages, userid) => {
 
     try {
-        const response = await fetch(urlBackend+"/message/user/" + userid, {
+        const response = await fetch(urlBackend + "/message/user/" + userid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
@@ -421,72 +422,107 @@ export const mapMessages = async (setMessages, userid) => {
 
     } catch (error) {
         console.log(error);
-        
+
     }
-    
+
 }
 
-export const getInfoConversation= async (setConversation, otheruserid) => {
+export const getInfoConversation = async (setConversation, otheruserid) => {
 
     try {
-        const response = await fetch(urlBackend+"/message/conversation/" + otheruserid, {
+        const response = await fetch(urlBackend + "/message/conversation/" + otheruserid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
             }
-            ,})
+            ,
+        })
         const data = await response.json()
         setConversation(data)
-        
+
     } catch (error) {
         console.log(error);
-        
+
     }
 };
 
 export const sendMessage = async (sent_to_user_id, message, from_user_id) => {
     try {
-      const response = await fetch(urlBackend + "/message/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + localStorage.getItem("token") 
-        },
-        body: JSON.stringify({ sent_to_user_id, message, from_user_id })
-      });
-  
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error sending message:", error);
-      return { error: "Something went wrong" };
-    }
-  };
+        const response = await fetch(urlBackend + "/message/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            },
+            body: JSON.stringify({ sent_to_user_id, message, from_user_id })
+        });
 
-export const mapTransactions = async (setTransactions) => {
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error sending message:", error);
+        return { error: "Something went wrong" };
+    }
+};
+
+export const mapTransactions = async (callback) => {
     try {
-        const response = await fetch(urlBackend + "/transaction/user/" , {
+        const response = await fetch(urlBackend + "/transaction/user/", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json",
             },
         });
-        if (!response.ok) {
-            throw new Error("Failed to fetch transactions");
-        }
+
+        if (!response.ok) throw new Error("Failed to fetch transactions");
 
         const data = await response.json();
-        console.log("Full transaction data received:", JSON.stringify(data));
-        setTransactions(data);
+        console.log("Full API response:", data); // Debug
+
+        callback({
+            sent_payments: data.sent_payments?.map((p) => ({
+                ...p,
+                amount: Number(p.amount) || 0,
+                payer_id: String(p.payer_id || ""),
+                receiver_id: String(p.receiver_id || ""),
+                payed_at: p.payed_at, // Ensure this field is included
+            })) || [],
+            received_payments: data.received_payments?.map((p) => ({
+                ...p,
+                amount: Number(p.amount) || 0,
+                payer_id: String(p.payer_id || ""),
+                receiver_id: String(p.receiver_id || ""),
+                payed_at: p.payed_at, // Ensure this field is included
+            })) || [],
+            group_payments: data.group_payments?.map((gp) => ({
+                ...gp,
+                amount: Number(gp.amount) || 0,
+                payer_id: String(gp.payer_id || ""),
+                receiver_id: String(gp.receiver_id || ""),
+                payed_at: gp.payed_at, // Ensure this field is included
+            })) || [],
+            objective_contributions: data.user_contributions?.map((oc) => ({
+                ...oc,
+                amount_contributed: Number(oc.amount_contributed) || 0,
+                user_id: String(oc.user_id || ""),
+                objective_id: String(oc.objective_id || ""),
+                contributed_at: oc.contributed_at, // Ensure this field is included
+            })) || [],
+        });
     } catch (error) {
         console.error("Error fetching transactions:", error);
+        callback({
+            sent_payments: [],
+            received_payments: [],
+            group_payments: [],
+            objective_contributions: [],
+        });
     }
 };
 
-
 export const submitFeedback = async (email, message) => {
     try {
-        const response = await fetch(urlBackend+ "/feedback", {
+        const response = await fetch(urlBackend + "/feedback", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -504,11 +540,11 @@ export const submitFeedback = async (email, message) => {
 
 export const updateUser = async (updatedData, token) => {
     try {
-        const response = await fetch(urlBackend + "/user/update", {  
+        const response = await fetch(urlBackend + "/user/update", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}` 
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(updatedData)
         });
@@ -523,7 +559,7 @@ export const updateUser = async (updatedData, token) => {
 
 export const signUpUser = async (name, email, password) => {
     try {
-        const response = await fetch(urlBackend+"/signup", {
+        const response = await fetch(urlBackend + "/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -552,7 +588,7 @@ export const fetchUserInfo = async (user_id) => {
             throw new Error("Failed to fetch user info");
         }
         const data = await response.json();
-        return data; 
+        return data;
     } catch (error) {
         console.error("Error fetching user info:", error);
         return null;
@@ -562,10 +598,10 @@ export const fetchUserInfo = async (user_id) => {
 
 export const makeObjectiveContribution = async (objectiveId, amount) => {
     const user_id = sessionStorage.getItem("user_id")
-    
+
     try {
         const parsedAmount = parseFloat(amount);
-  
+
         const response = await fetch(`${urlBackend}/objective/${objectiveId}`, {
             method: 'GET',
             headers: {
@@ -607,7 +643,7 @@ Please reduce your contribution.`);
                 message: contributionData.error || 'Failed to make contribution'
             };
         }
-        
+
         window.location.reload();
         return {
             success: true,
@@ -662,22 +698,22 @@ export const createPayment = async (amount, user_id, contactid, debt_id = null) 
 
 export const deleteObjective = async (objectiveId) => {
     try {
-      const response = await fetch(urlBackend + "/objective/delete/" + objectiveId, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json"
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete objective');
-      }
-      
-      const data = await response.json();
-      return data;
+        const response = await fetch(urlBackend + "/objective/delete/" + objectiveId, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete objective');
+        }
+
+        const data = await response.json();
+        return data;
     } catch (error) {
-      console.error("Error deleting objective:", error);
-      throw error;
+        console.error("Error deleting objective:", error);
+        throw error;
     }
-  };
+};

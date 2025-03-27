@@ -32,44 +32,66 @@ export default function Orders() {
     mapTransactions(setTransactions);
   }, []);
 
+  // Enhanced date parsing function
+  const parseDate = (dateString) => {
+    if (!dateString) return new Date();
+    try {
+      // Handle both ISO format and "Thu, 27 Mar 2025 19:04:25 GMT" format
+      return dateString.includes(',') ? new Date(dateString) : new Date(dateString.replace(' ', 'T'));
+    } catch (e) {
+      console.error('Error parsing date:', dateString, e);
+      return new Date();
+    }
+  };
 
   console.log("Current transactions state:", transactions);
-  const formattedTransactions = [
-    ...transactions.group_payments.map((tx) => ({
+
+  const allTransactions = [
+    ...(transactions.group_payments || []).map((tx) => ({
       id: `group_${tx.id}`,
-      date: new Date(tx.payed_at),
+      date: parseDate(tx.payed_at),
       type: "Group Payment",
-      from: tx.payer_name,
-      to: `${tx.group_name} (to ${tx.receiver_name})`,
-      amount: tx.amount
+      from: tx.payer_name || "Unknown",
+      to: tx.group_name ? `${tx.group_name}${tx.receiver_name ? ` (to ${tx.receiver_name})` : ''}` : "Unknown Group",
+      amount: Number(tx.amount) || 0
     })),
-    ...transactions.objective_contributions.map((tx) => ({
+    ...(transactions.objective_contributions || []).map((tx) => ({
       id: `objective_${tx.id}`,
-      date: new Date(tx.contributed_at),
+      date: parseDate(tx.contributed_at),
       type: "Objective Contribution",
-      from: tx.user_name,
-      to: tx.objective_name,
-      amount: tx.amount_contributed
+      from: tx.user_name || "Unknown",
+      to: tx.objective_name || "Unknown Objective",
+      amount: Number(tx.amount_contributed) || 0
     })),
-    ...transactions.received_payments.map((tx) => ({
+    ...(transactions.received_payments || []).map((tx) => ({
       id: `received_${tx.id}`,
-      date: new Date(tx.payed_at),
+      date: parseDate(tx.payed_at),
       type: "Received Payment",
-      from: tx.payer_name,
-      to: tx.receiver_name,
-      amount: tx.amount
+      from: tx.payer_name || "Unknown",
+      to: tx.receiver_name || "Unknown",
+      amount: Number(tx.amount) || 0
     })),
-    ...transactions.sent_payments.map((tx) => ({
+    ...(transactions.sent_payments || []).map((tx) => ({
       id: `sent_${tx.id}`,
-      date: new Date(tx.payed_at),
+      date: parseDate(tx.payed_at),
       type: "Sent Payment",
-      from: tx.payer_name,
-      to: tx.receiver_name,
-      amount: tx.amount
+      from: tx.payer_name || "Unknown",
+      to: tx.receiver_name || "Unknown",
+      amount: Number(tx.amount) || 0
     }))
   ];
 
-  const sortedTransactions = formattedTransactions.sort((a, b) => b.date - a.date);
+  // Optimized sorting with fallback for invalid dates
+  const sortedTransactions = [...allTransactions].sort((a, b) => {
+    const dateA = a.date instanceof Date ? a.date : new Date();
+    const dateB = b.date instanceof Date ? b.date : new Date();
+    return dateB - dateA;
+  });
+
+  // Debug transformed data
+  console.log("Formatted transactions:", allTransactions);
+  console.log("Sorted transactions:", sortedTransactions);
+
   return (
     <React.Fragment>
       <Title>Recent Transactions</Title>
@@ -90,7 +112,7 @@ export default function Orders() {
               <TableCell>{tx.type}</TableCell>
               <TableCell>{tx.from}</TableCell>
               <TableCell>{tx.to}</TableCell>
-              <TableCell align="right">{tx.amount} €</TableCell>
+              <TableCell align="right">{tx.amount.toFixed(2)} €</TableCell>
             </TableRow>
           ))}
         </TableBody>
