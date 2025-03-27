@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts, Feedback
+from api.models import db, User, Expenses, Debts, Objectives, Group, ObjectivesContributions, Messages, Payments, Group_payments, Group_to_user, User_Contacts, Group_debts, Feedback, Objective_to_user
 
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
 from datetime import datetime
-from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts, group_debts;
+from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, messages, objectives, objectives_contributions, user_contacts, group_debts, objective_to_user;
 
 
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -863,20 +863,16 @@ def send_message():
 
 
 
-
 @api.route("/objective", methods=["GET"])
 @jwt_required()
 def get_objectives():
-    current_user_id = get_jwt_identity() 
+    current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)  
-    if user is None:
+    if not user:
         return jsonify({"msg": "You need to be logged in"}), 401
     
-    objectives = Objectives.query.all()
-    objectives_info = [objective.serialize() for objective in objectives]
-    return jsonify(objectives_info), 200
-
-
+    objectives = Objectives.query.join(Objective_to_user).filter(Objective_to_user.user_id == current_user_id).all()
+    return jsonify([objective.serialize() for objective in objectives]), 200
 
 
 @api.route("/objective/user/<int:user_id>", methods=["GET"])
@@ -887,14 +883,10 @@ def get_objectives_by_user_id(user_id):
     if not User.query.get(current_user_id):
         return jsonify({"msg": "You need to be logged in"}), 401
 
-    group_membership = Group_to_user.query.filter(Group_to_user.user_id == user_id).all()
-    
-    if not group_membership:
-        return jsonify({"msg": "User is not in any groups"}), 404
+    objectives = Objectives.query.join(Objective_to_user).filter(Objective_to_user.user_id == user_id).all()
 
-    group_ids = [membership.group_id for membership in group_membership]
-
-    objectives = Objectives.query.filter(Objectives.group_id.in_(group_ids)).all()
+    if not objectives:
+        return jsonify({"msg": "User is not participating in any objectives"}), 404
 
     return jsonify([objective.serialize() for objective in objectives]), 200
 
@@ -908,16 +900,10 @@ def get_objective_by_id(objective_id):
         return jsonify({"msg": "You need to be logged in"}), 401
     
     objective = Objectives.query.get(objective_id)
-    
     if not objective:
         return jsonify({"error": "Objective not found"}), 404
-    
-    group = Group.query.get(objective.group_id)
-    
-    user_membership = Group_to_user.query.filter_by(
-        user_id=current_user_id, 
-        group_id=objective.group_id
-    ).first()
+
+    user_membership = Objective_to_user.query.filter_by(user_id=current_user_id, objective_id=objective_id).first()
     
     if not user_membership:
         return jsonify({"error": "You don't have permission to view this objective"}), 403
@@ -928,41 +914,43 @@ def get_objective_by_id(objective_id):
 @api.route("/objective/create", methods=["POST"])
 @jwt_required()
 def create_objective():
-    current_user_id = get_jwt_identity() 
+    current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)  
-    if user is None:
+    if not user:
         return jsonify({"msg": "You need to be logged in"}), 401
     
     data = request.get_json()
 
     if "name" not in data or "target_amount" not in data:
         return jsonify({"error": "Missing required fields"}), 400
-    
-    existing_objective = Objectives.query.filter_by(name=data["name"]).first()
-    if existing_objective:
-        return jsonify({"error": "Objective is already registered"}), 400
 
     new_objective = Objectives(name=data["name"], target_amount=data["target_amount"])
-
     db.session.add(new_objective)
+    db.session.commit()
+
+    # Automatically add creator to Objective_to_user
+    db.session.add(Objective_to_user(user_id=current_user_id, objective_id=new_objective.id))
     db.session.commit()
 
     return jsonify({"msg": "Objective was successfully created"}), 201
 
 
-
 @api.route("/objective/delete/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_objective(id):
-    current_user_id = get_jwt_identity() 
+    current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)  
-    if user is None:
+    if not user:
         return jsonify({"msg": "You need to be logged in"}), 401
     
-    objective = Objectives.query.filter_by(id=id).first()
-
+    objective = Objectives.query.get(id)
     if not objective:
         return jsonify({"error": "Objective not found"}), 404
+
+    # Ensure user is a participant before deleting
+    membership = Objective_to_user.query.filter_by(user_id=current_user_id, objective_id=id).first()
+    if not membership:
+        return jsonify({"error": "You cannot delete this objective"}), 403
     
     db.session.delete(objective)
     db.session.commit()
@@ -970,18 +958,21 @@ def delete_objective(id):
     return jsonify({"msg": "Objective successfully deleted"}), 200
 
 
-
 @api.route("/objective/update/<int:id>", methods=["PUT"])
 @jwt_required()
 def update_objective(id):
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
-    if user is None:
+    if not user:
         return jsonify({"msg": "You need to be logged in"}), 401
 
-    objective = Objectives.query.filter_by(id=id).first()
+    objective = Objectives.query.get(id)
     if not objective:
         return jsonify({"error": "Objective not found"}), 404
+
+    membership = Objective_to_user.query.filter_by(user_id=current_user_id, objective_id=id).first()
+    if not membership:
+        return jsonify({"error": "You cannot update this objective"}), 403
 
     data = request.get_json()
     if "name" in data:
@@ -993,29 +984,29 @@ def update_objective(id):
     return jsonify({"msg": "Objective was successfully updated"}), 200
 
 
-
-
 @api.route("/objective/contribution", methods=["POST"])
 @jwt_required()
 def objective_contribution():
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
-    if user is None:
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
         return jsonify({"msg": "You need to be logged in"}), 401
 
     data = request.get_json()
 
-    if "objective" not in data or "amount" not in data or "user" not in data:
+    if "objective" not in data or "amount" not in data:
         return jsonify({"error": "Missing required fields"}), 400
 
-    objective = Objectives.query.filter_by(id=data["objective"]).first()
+    objective = Objectives.query.get(data["objective"])
     if not objective:
         return jsonify({"error": "Objective not found"}), 404
 
-    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objective_id=data["objective"]).scalar()
-    print(total_contributed)
+    # Ensure the user is part of the objective
+    membership = Objective_to_user.query.filter_by(user_id=current_user_id, objective_id=data["objective"]).first()
+    if not membership:
+        return jsonify({"error": "You cannot contribute to this objective"}), 403
 
-    total_contributed = total_contributed or 0  
+    total_contributed = db.session.query(db.func.sum(ObjectivesContributions.amount_contributed)).filter_by(objective_id=data["objective"]).scalar() or 0
 
     if total_contributed + data["amount"] > objective.target_amount:
         return jsonify({"error": "Contribution exceeds target amount"}), 400
@@ -1023,8 +1014,7 @@ def objective_contribution():
     if objective.is_completed:
         return jsonify({"error": "Objective is already completed"}), 400
 
-    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=data["user"],objective_id=data["objective"],contributed_at=db.func.now())
-
+    contribution = ObjectivesContributions(amount_contributed=data["amount"], user_id=current_user_id, objective_id=data["objective"], contributed_at=db.func.now())
 
     db.session.add(contribution)
     db.session.commit()
@@ -1037,7 +1027,7 @@ def objective_contribution():
 def get_objective_contributions(objective_id):
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
-    if user is None:
+    if not user:
         return jsonify({"msg": "You need to be logged in"}), 401
 
     contributions = ObjectivesContributions.query.filter_by(objective_id=objective_id).all()
@@ -1045,9 +1035,7 @@ def get_objective_contributions(objective_id):
     if not contributions:
         return jsonify({"error": "No contributions found for this objective"}), 404
 
-    contribution_list = [contribution.serialize() for contribution in contributions]
-
-    return jsonify(contribution_list), 200
+    return jsonify([contribution.serialize() for contribution in contributions]), 200
 
 
 
@@ -1193,12 +1181,70 @@ def messages_populate():
 
 @api.route("/objectivespopulate", methods=["GET"])
 def objectives_populate():
-    for objective in objectives:
-        new_objective = Objectives( group_id=objective["group_id"], name=objective["name"], target_amount=objective["target_amount"], created_at=objective["created_at"], is_completed=objective["is_completed"])
-        #
-        db.session.add(new_objective)
+    # Sample data for objectives
+    objectives_data = [
+        {"id": 1, "name": "Trip to Japan", "target_amount": 5000, "created_at": "2024-02-15T14:00:00", "is_completed": False},
+        {"id": 2, "name": "New Apartment", "target_amount": 10000, "created_at": "2024-02-15T14:00:00", "is_completed": False},
+        {"id": 3, "name": "Fitness Challenge", "target_amount": 800, "created_at": "2024-02-15T14:00:00", "is_completed": True},
+        {"id": 4, "name": "Gaming Setup", "target_amount": 2000, "created_at": "2024-02-15T14:00:00", "is_completed": False},
+        {"id": 5, "name": "Startup Fund", "target_amount": 15000, "created_at": "2024-02-15T14:00:00", "is_completed": False}
+    ]
+
+    # Sample data for objective_to_user
+    objective_to_user_data = [
+        {"objective_id": 1, "user_id": 1, "created_at": "2024-01-01T12:10:00"},
+        {"objective_id": 1, "user_id": 2, "created_at": "2024-01-02T13:15:00"},
+        {"objective_id": 2, "user_id": 3, "created_at": "2024-02-11T14:30:00"},
+        {"objective_id": 3, "user_id": 4, "created_at": "2024-03-16T08:45:00"},
+        {"objective_id": 4, "user_id": 5, "created_at": "2024-04-20T14:45:00"},
+        {"objective_id": 5, "user_id": 1, "created_at": "2024-05-05T17:20:00"},
+        {"objective_id": 5, "user_id": 5, "created_at": "2024-05-06T10:00:00"}
+    ]
+
+    try:
+        # Populate the objectives table
+        for objective in objectives_data:
+            new_objective = Objectives(
+                name=objective["name"],
+                target_amount=objective["target_amount"],
+                created_at=datetime.fromisoformat(objective["created_at"]),
+                is_completed=objective["is_completed"]
+            )
+            db.session.add(new_objective)
+
+        # Populate the objective_to_user table
+        for entry in objective_to_user_data:
+            new_objective_to_user = Objective_to_user(
+                objective_id=entry["objective_id"],
+                user_id=entry["user_id"],
+                created_at=datetime.fromisoformat(entry["created_at"])
+            )
+            db.session.add(new_objective_to_user)
+
+        # Commit all changes to the database
+        db.session.commit()
+
+        return jsonify({"message": "Objectives and objective_to_user data have been successfully populated"}), 200
+
+    except Exception as e:
+        # Rollback in case of error
+        db.session.rollback()
+        return jsonify({"error": f"An error occurred while populating the database: {str(e)}"}), 500
+
+
+@api.route("/objectivetouserpopulate", methods=["GET"])
+def objective_to_user_populate():
+    for entry in objective_to_user:
+        new_objective_to_user = Objective_to_user(
+             objective_id=entry["objective_id"],
+             user_id=entry["user_id"],
+             created_at=datetime.fromisoformat(entry["created_at"])  # Convert string to datetime
+            )
+         
+        db.session.add(new_objective_to_user)
     db.session.commit()
-    return jsonify("Objectives have been created")
+    return jsonify({"message": "Objective_to_user data has been successfully populated"}), 200
+
 
 @api.route("/objectivescontributionspopulate", methods=["GET"])
 def objectives_contributions_populate():
