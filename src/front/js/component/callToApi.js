@@ -658,3 +658,26 @@ export const createPayment = async (amount, user_id, contactid, debt_id = null) 
         throw error;
     }
 };
+
+
+export const deleteObjective = async (objectiveId) => {
+    try {
+      const response = await fetch(urlBackend + "/objective/delete/" + objectiveId, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json"
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete objective');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error deleting objective:", error);
+      throw error;
+    }
+  };

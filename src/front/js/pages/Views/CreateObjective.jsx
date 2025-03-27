@@ -163,6 +163,8 @@ const useStyles = makeStyles((theme) => ({
 export default function CreateObjective() {
     const classes = useStyles();
     const [open, setOpen] = React.useState(true);
+    const navigate = useNavigate();
+    const user_id = sessionStorage.getItem("user_id")
     const handleDrawerOpen = () => {
         setOpen(true);
     };
@@ -208,6 +210,7 @@ export default function CreateObjective() {
                 alert(response.error);
             } else {
                 alert("Objective created successfully!");
+                navigate(`/objective/user/${user_id}`);
                 setValues({ objectiveName: '', objectiveTargetAmount: '' });
                 setSelectedMembers([]); // Limpiar miembros seleccionados
             }

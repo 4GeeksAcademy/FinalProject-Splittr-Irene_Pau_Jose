@@ -11,39 +11,19 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems, SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import { useParams } from 'react-router-dom';
-
-import Deposits from '../../Dashboard/Deposits.jsx';
-import Orders from '../../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../../Home.jsx';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
-import Icon from '@material-ui/core/Icon';
-import SendIcon from '@material-ui/icons/Save';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
-import { getInfoSharedObjective } from '../../../component/callToApi.js'; 
-import { updateObjective } from '../../../component/callToApi.js';
-
+import { getInfoSharedObjective, deleteObjective, updateObjective } from '../../../component/callToApi.js'; 
+import { useNavigate } from 'react-router-dom';
 
 function Copyright() {
   return (
@@ -149,6 +129,8 @@ const useStyles = makeStyles((theme) => ({
 export default function EditObjective() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
+  const navigate = useNavigate();
+  const user_id = sessionStorage.getItem("user_id")
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -178,6 +160,21 @@ export default function EditObjective() {
       alert("Failed to update objective.");
     }
   };
+
+  const handleDelete = async () => {
+   
+    
+    if (window.confirm("Are you sure you want to delete this objective?")) {
+      try {
+        await deleteObjective(objectiveid);
+        alert("Objective deleted successfully!");
+        navigate(`/objective/user/${user_id}`);
+      } catch (error) {
+        alert("Failed to delete objective.");
+      }
+    }
+  };
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -281,7 +278,7 @@ export default function EditObjective() {
             </Box>            
             <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
               
-              <Button variant="outlined" color="secondary">Delete Objective</Button>
+              <Button variant="outlined" color="secondary" onClick={handleDelete} >Delete Objective</Button>
             </Box>
 
 
