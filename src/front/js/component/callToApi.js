@@ -65,12 +65,51 @@ export const getGroupMembers = async (groupId) => {
         }
 
         const data = await response.json();
-        return data;
+        return data.members;
     } catch (error) {
         console.error("Error in getGroupMembers:", error);
         throw error;
     }
 };
+
+export const getNonGroupMembers = async (setNonMembers, userId, groupId) => {
+    try {
+
+        const allContacts = await mapContacts(null, userId);
+
+        if (!Array.isArray(allContacts)) {
+            console.error("Error: 'allContacts' no es un array o es null", allContacts);
+            return;
+        }
+
+        console.log("All contacts:", allContacts);
+
+        const groupMembers = await getGroupMembers(groupId);
+
+        if (!Array.isArray(groupMembers)) {
+            console.error("Error: 'groupMembers' no es un array o es null", groupMembers);
+            return;
+        }
+
+        console.log("Group members:", groupMembers);
+
+
+        const memberIds = new Set(groupMembers.map(member => member.id));
+
+
+        const nonMembers = allContacts.filter(contact => contact && !memberIds.has(contact.id));
+
+
+        setNonMembers(nonMembers);
+
+        console.log("Non-members:", nonMembers);
+    } catch (error) {
+        console.error("Error in getNonGroupMembers:", error);
+    }
+};
+
+
+
 
 export const updateGroup = async (groupId, updatedData) => {
     try {
@@ -94,6 +133,45 @@ export const updateGroup = async (groupId, updatedData) => {
         throw error;
     }
 };
+
+
+export const addContactToGroup = async (userId, groupId) => {
+    try {
+        console.log("Datos enviados:", { userId, groupId });
+        
+        if (!userId || !groupId) {
+            throw new Error("userId o groupId faltante");
+        }
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            throw new Error("Token no encontrado");
+        }
+
+        const response = await fetch(urlBackend + "/group_user", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                group_id: groupId
+            })
+        });
+
+        console.log("Respuesta del servidor:", response);
+        const data = await response.json();
+        console.log("Datos recibidos:", data);
+        return data;
+
+    } catch (error) {
+        console.error("Error agregando contacto al grupo:", error);
+        throw error;
+    }
+};
+
+
 
 export const removeUserFromGroup = async (userId, groupId) => {
     try {
@@ -124,6 +202,8 @@ export const removeUserFromGroup = async (userId, groupId) => {
         throw error;
     }
 };
+
+
 
 
 export const createGroup = async (groupName, groupMembers) => {

@@ -24,6 +24,7 @@ import AddContactCard from './AddContactCard.jsx';
 import Deposits from '../../Dashboard/Deposits.jsx';
 import Orders from '../../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { getNonGroupMembers } from '../../../component/callToApi.js';
 
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../../Home.jsx';
@@ -47,6 +48,7 @@ import { updateGroup } from '../../../component/callToApi.js';
 import { mapContacts } from '../../../component/callToApi.js';
 import { getGroupMembers } from '../../../component/callToApi.js';
 import MemberCard from './MemberCard.jsx';
+import AddContactCardInEditGroup from './AddContactCardInEditGroup.jsx';
 
 
 function Copyright() {
@@ -170,25 +172,35 @@ export default function EditGroup() {
   const { groupid } = useParams();
   const [singleGroup, setSingleGroup] = useState({});
   const [contacts, setContacts] = useState({ contacts: [] });
-  const { userid } = useParams();
+  const userid = sessionStorage.getItem("user_id");
+  const [allContacts, setAllContacts] = useState([]);
+
+  console.log(userid)
+
+  const fetchGroupDetails = async () => {
+    try {
+      const response = await fetch(urlBackend + `/groups/${groupId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      setGroup(data);
+    } catch (error) {
+      console.error("Error fetching group details:", error);
+    }
+  };
+
 
   useEffect(() => {
+    getInfoGroup(setSingleGroup, groupid);
+  }, [groupid]);
 
-    getInfoGroup(setSingleGroup, groupid)
-  }, [])
-
-  //useEffect(() => {
-  //  let isMounted = true;
-
-  //  mapContacts(setContacts, userid).then(() => {
-  //    if (isMounted) {
-  //    }
-  //  });
-
-  //  return () => {
-  //    isMounted = false;
-  //  };
-  //}, [userid]);
+  useEffect(() => {
+    if (userid) {
+      mapContacts(setAllContacts, userid);
+    }
+  }, [userid]);
 
   useEffect(() => {
     if (!groupid) return;
@@ -210,7 +222,13 @@ export default function EditGroup() {
       });
   }, [groupid]);
 
+  useEffect(() => {
+    fetchGroupDetails();
+  }, [groupid]);
+
+
   const [members, setMembers] = useState([]);
+  const [nonGroupMembers, setNonGroupMembers] = useState([]);
 
   const handleUpdateGroup = async (field) => {
     try {
@@ -255,13 +273,41 @@ export default function EditGroup() {
   const [groupMembers, setGroupMembers] = useState([]);
 
   useEffect(() => {
-    getInfoGroup(setSingleGroup, groupid).then(groupData => {
-      if (groupData && groupData.members) {
-        setGroupMembers(groupData.members);
-      }
-    });
+    if (groupid) {
+      getGroupMembers(groupid)
+        .then(members => {
+          if (Array.isArray(members)) {
+            setGroupMembers(members);
+          } else if (members && Array.isArray(members.members)) {
+            setGroupMembers(members.members);
+          } else {
+            console.error("Error: miembros del grupo no son un array:", members);
+            setGroupMembers([]);
+          }
+        })
+        .catch(error => {
+          console.error("Error al obtener miembros del grupo:", error);
+          setGroupMembers([]);
+        });
+    }
   }, [groupid]);
 
+  useEffect(() => {
+    console.log("allContacts antes del filtrado:", allContacts);
+    console.log("groupMembers antes del filtrado:", groupMembers);
+
+    if (allContacts.contacts && allContacts.contacts.length > 0 && groupMembers.length > 0) {
+      const filteredNonMembers = allContacts.contacts.filter(contact => {
+        console.log("Comparando contacto:", contact, "con miembros:", groupMembers);
+        return !groupMembers.some(member => member.id === contact.id);
+      });
+      console.log("nonGroupMembers después del filtrado:", filteredNonMembers);
+      setNonGroupMembers(filteredNonMembers);
+    } else {
+      console.log("No se realiza el filtrado porque allContacts.contacts o groupMembers están vacíos.");
+      setNonGroupMembers([]);
+    }
+  }, [allContacts, groupMembers]);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -366,46 +412,47 @@ export default function EditGroup() {
 
               </Box>
               <Box sx={{ marginTop: "20px" }}>
-            <h3>Members</h3>
-            {groupMembers.length === 0 ? (
-              <Typography>No members in this group yet.</Typography>
-            ) : (
-              <Grid container spacing={2}>
-                {groupMembers.map((member) => (
-                  <Grid item xs={12} sm={6} md={4} key={member.id}>
-                    <MemberCard
-                      member={member}
-                      groupId={groupid}
-                      onMemberRemoved={handleMemberRemoved}
-                    />
+                <h3>Members</h3>
+                {groupMembers.length === 0 ? (
+                  <Typography>No members in this group yet.</Typography>
+                ) : (
+                  <Grid container spacing={2}>
+                    {groupMembers.map((member) => (
+                      <Grid item xs={12} sm={6} md={4} key={member.id}>
+                        <MemberCard
+                          member={member}
+                          groupId={groupid}
+                          onMemberRemoved={handleMemberRemoved}
+                        />
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
-            )}
-          </Box>
+                )}
+              </Box>
               <Typography variant="h6" className={classes.addMembersTitle}>
                 Add members
               </Typography>
               <Grid container spacing={2} className={classes.contactGrid}>
-                {!contacts.contacts ? (
-                  <Typography>Loading contacts...</Typography>
-                ) : contacts.contacts.length === 0 ? (
-                  <Typography>No contacts found</Typography>
-                ) : (
-                  contacts.contacts
-                    .filter(contact => {
-                      return !groupMembers.some(member => member.contact_id === contact.id);
-                    })
-                    .map((contact) => (
-                      <Grid item xs={12} sm={6} md={4} key={contact.id}>
-                        <AddContactCard
-                          contact={contact}
+                        {allContacts.length === 0 && groupMembers.length > 0 ? (
+                            <Typography>No contacts available to add.</Typography>
+                        ) : allContacts.length === 0 && groupMembers.length === 0 ? (
+                            <Typography>Loading contacts...</Typography>
+                        ) : (
+                            nonGroupMembers.map((contact) => (
+                                <Grid item xs={12} sm={6} md={4} key={contact.contact_id}> {/* Cambiar key a contact.contact_id */}
+                                    {/* Cambios aquí: Añadir user_id al objeto contact */}
+                                    <AddContactCardInEditGroup
+                                        contact={{
+                                            ...contact,
+                                            user_id: contact.contact_id
+                                        }}
+                                        groupId={groupid}
+                                    />
+                                </Grid>
+                            ))
+                        )}
+                    </Grid>
 
-                        />
-                      </Grid>
-                    ))
-                )}
-              </Grid>
               <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
                 <Button variant="outlined" color="secondary">Delete Group</Button>
               </Box>
