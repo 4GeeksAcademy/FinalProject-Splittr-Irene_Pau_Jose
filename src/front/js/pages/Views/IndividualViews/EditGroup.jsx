@@ -175,17 +175,32 @@ export default function EditGroup() {
   const userid = sessionStorage.getItem("user_id");
   const [allContacts, setAllContacts] = useState([]);
 
-console.log(userid)
+  console.log(userid)
 
-useEffect(() => {
-  getInfoGroup(setSingleGroup, groupid);
-}, [groupid]);
+  const fetchGroupDetails = async () => {
+    try {
+      const response = await fetch(urlBackend + `/groups/${groupId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      setGroup(data);
+    } catch (error) {
+      console.error("Error fetching group details:", error);
+    }
+  };
 
-useEffect(() => {
-  if (userid) {
-    mapContacts(setAllContacts, userid);
-  }
-}, [userid]);
+
+  useEffect(() => {
+    getInfoGroup(setSingleGroup, groupid);
+  }, [groupid]);
+
+  useEffect(() => {
+    if (userid) {
+      mapContacts(setAllContacts, userid);
+    }
+  }, [userid]);
 
   useEffect(() => {
     if (!groupid) return;
@@ -206,6 +221,11 @@ useEffect(() => {
         setGroupMembers([]);
       });
   }, [groupid]);
+
+  useEffect(() => {
+    fetchGroupDetails();
+  }, [groupid]);
+
 
   const [members, setMembers] = useState([]);
   const [nonGroupMembers, setNonGroupMembers] = useState([]);
@@ -410,21 +430,28 @@ useEffect(() => {
                 )}
               </Box>
               <Typography variant="h6" className={classes.addMembersTitle}>
-            Add members
-          </Typography>
-          <Grid container spacing={2} className={classes.contactGrid}>
-  {allContacts.length === 0 && groupMembers.length > 0 ? (
-    <Typography>No contacts available to add.</Typography>
-  ) : allContacts.length === 0 && groupMembers.length === 0 ? (
-    <Typography>Loading contacts...</Typography>
-  ) : (
-    nonGroupMembers.map((contact) => (
-      <Grid item xs={12} sm={6} md={4} key={contact.id}>
-        <AddContactCardInEditGroup contact={contact} />
-      </Grid>
-    ))
-  )}
-</Grid> 
+                Add members
+              </Typography>
+              <Grid container spacing={2} className={classes.contactGrid}>
+                        {allContacts.length === 0 && groupMembers.length > 0 ? (
+                            <Typography>No contacts available to add.</Typography>
+                        ) : allContacts.length === 0 && groupMembers.length === 0 ? (
+                            <Typography>Loading contacts...</Typography>
+                        ) : (
+                            nonGroupMembers.map((contact) => (
+                                <Grid item xs={12} sm={6} md={4} key={contact.contact_id}> {/* Cambiar key a contact.contact_id */}
+                                    {/* Cambios aquí: Añadir user_id al objeto contact */}
+                                    <AddContactCardInEditGroup
+                                        contact={{
+                                            ...contact,
+                                            user_id: contact.contact_id
+                                        }}
+                                        groupId={groupid}
+                                    />
+                                </Grid>
+                            ))
+                        )}
+                    </Grid>
 
               <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
                 <Button variant="outlined" color="secondary">Delete Group</Button>

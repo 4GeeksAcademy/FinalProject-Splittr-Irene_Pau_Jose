@@ -138,33 +138,40 @@ export const updateGroup = async (groupId, updatedData) => {
 
 export const addContactToGroup = async (userId, groupId) => {
     try {
-        console.log("Sending add user to group request:", { userId, groupId });
+        console.log("Datos enviados:", { userId, groupId });
+        
+        if (!userId || !groupId) {
+            throw new Error("userId o groupId faltante");
+        }
 
         const token = localStorage.getItem("token");
-        const response = await fetch(urlBackend + "/group_user/", {
+        if (!token) {
+            throw new Error("Token no encontrado");
+        }
+
+        const response = await fetch(urlBackend + "/group_user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify({ 
-                user_id: userId,   
-                group_id: groupId  
-            }) 
+            body: JSON.stringify({
+                user_id: userId,
+                group_id: groupId
+            })
         });
-    
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Error details:", errorText);
-            throw new Error(`Failed to add user to group: ${errorText}`);
-        }
-    
-        return await response.json(); 
+
+        console.log("Respuesta del servidor:", response);
+        const data = await response.json();
+        console.log("Datos recibidos:", data);
+        return data;
+
     } catch (error) {
-        console.error("Error adding user to group:", error);
+        console.error("Error agregando contacto al grupo:", error);
         throw error;
     }
 };
+
 
 
 export const removeUserFromGroup = async (userId, groupId) => {

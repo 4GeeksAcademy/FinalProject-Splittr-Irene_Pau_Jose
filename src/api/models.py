@@ -43,7 +43,7 @@ class Group(db.Model):
     group_id = db.Column(db.Integer, unique=True, primary_key=True)
     group_name = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime) 
-    members = db.relationship("Group_to_user")
+    members = db.relationship("Group_to_user", back_populates="group", lazy='dynamic') 
     total_amount = db.Column(db.Integer, nullable=False, default=0)
     expenses = db.Column(db.Integer, db.ForeignKey("expenses.expense_id"))
 
@@ -101,6 +101,7 @@ class Group_to_user(db.Model):
     created_at = db.Column(db.DateTime) 
 
     user = db.relationship("User", back_populates="groups")
+    group = db.relationship("Group", back_populates="members") 
 
     def __repr__(self):
         return f'<Group_to_user {self.id}>'

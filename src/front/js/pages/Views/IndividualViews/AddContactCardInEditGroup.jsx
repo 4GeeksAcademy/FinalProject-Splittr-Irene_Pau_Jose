@@ -4,7 +4,7 @@ import { Paper, Typography, CardContent } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CheckIcon from "@material-ui/icons/Check";
 import Button from '@material-ui/core/Button';
-import { addUserToGroup } from '../../../component/callToApi.js'; // Assuming you have this method
+import { addContactToGroup } from "../../../component/callToApi";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,20 +47,38 @@ const AddContactCardInEditGroup = ({
     const classes = useStyles();
     const [isAdded, setIsAdded] = useState(false);
 
+
     const handleAddContact = async () => {
         try {
-            const result = await addContactToGroup(contact.user_id, groupId);
-            setIsAdded(true);
-            if (onAddContact) {
-                onAddContact(contact);
+            console.log("Contact object:", contact);
+            console.log("Group ID:", groupId);
+            console.log("Contact user_id:", contact.user_id); // Agrega este console.log
+            
+            if (!contact || !contact.user_id) {
+                throw new Error("Invalid contact object or missing user_id.");
             }
-            alert("Contact added to group successfully!");
+            if (!groupId) {
+                throw new Error("Missing groupId.");
+            }
+
+            const result = await addContactToGroup(contact.user_id, groupId);
+            console.log("API result:", result);
+
+            if (result.msg === 'User added to group successfully') {
+                setIsAdded(true);
+                if (onAddContact) {
+                    onAddContact(contact);
+                }
+                alert("Contacto agregado exitosamente al grupo.");
+            } else {
+                throw new Error(result.msg || "Error desconocido.");
+            }
         } catch (error) {
-            console.error("Error adding contact to group:", error); // Muestra el error completo.
-            alert("Failed to add contact to group");
+            console.error("Error adding contact to group:", error);
+            alert("Error al agregar el contacto al grupo: " + (error.message || "Error desconocido."));
         }
     };
-
+    
 
 
     return (

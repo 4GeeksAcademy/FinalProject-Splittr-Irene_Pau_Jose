@@ -436,17 +436,16 @@ def hard_delete_contact(contact_id):
 @api.route('/group_user', methods=['POST'])
 @jwt_required()
 def add_user_to_group():
-    current_user_id = get_jwt_identity() 
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
-    
+
     request_data = request.get_json()
 
-
-    if "user_id" not in request_data or "group_id" not in request_data:
+    if not request_data or "user_id" not in request_data or "group_id" not in request_data:
         return jsonify({"msg": "Both user_id and group_id are required"}), 400
-    
+
     user_id = request_data["user_id"]
     group_id = request_data["group_id"]
 
@@ -454,19 +453,26 @@ def add_user_to_group():
     if not group:
         return jsonify({"msg": "Group not found"}), 404
 
-    user = User.query.get(user_id)
-    if not user:
+    user_to_add = User.query.get(user_id)
+    if not user_to_add:
         return jsonify({"msg": "User not found"}), 404
 
-    existing_entry = Group_to_user.query.filter_by(user_id=user_id, group_id=group_id).first()
-    if existing_entry:
-        return jsonify({"msg": "User is already in the group"}), 400
+    try:
+        existing_entry = Group_to_user.query.filter_by(user_id=user_id, group_id=group_id).first()
+        if existing_entry:
+            return jsonify({"msg": "User is already in the group"}), 400
 
-    new_group_user = Group_to_user(user_id=user_id, group_id=group_id, created_at=datetime.utcnow())
-    db.session.add(new_group_user)
-    db.session.commit()
+        new_group_user = Group_to_user(user_id=user_id, group_id=group_id, created_at=datetime.utcnow())
+        db.session.add(new_group_user)
+        db.session.commit()
 
-    return jsonify({"msg": "User added to group successfully"}), 201
+        return jsonify({
+            "msg": "User added to group successfully",
+            "group": group.serialize()
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Internal server error"}), 500
 
 
 
