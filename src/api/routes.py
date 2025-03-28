@@ -791,52 +791,77 @@ def get_messages_by_id(sent_to_user_id):
 
     return jsonify(user_messages), 200
 
-
 @api.route('/message/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_messages_by_user_id(user_id):
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
-    
+
     if user is None:
         return jsonify({"msg": "You need to be logged in"}), 401
 
-    # Get all conversations where current user is a participant
-    user_conversations = db.session.query(Conversation).join(
-        User_to_Conversation,
-        User_to_Conversation.conversation_id == Conversation.id
-    ).filter(
-        User_to_Conversation.user_id == current_user_id
-    ).all()
 
-    if not user_conversations:
-        return jsonify({"error": "No conversations found"}), 404
+    user_conversations = User_to_Conversation.query.filter_by(user_id=user_id).all()
 
-    # Get all messages from these conversations with participant info
-    messages = []
-    for conv in user_conversations:
-        conv_messages = db.session.query(
-            Messages,
-            User.name.label('from_user_name'),
-            User.name.label('to_user_name')
-        ).join(
-            User, Messages.from_user_id == User.user_id
-        ).filter(
-            Messages.conversation_id == conv.id
-        ).order_by(
-            Messages.sent_at.desc()
-        ).all()
+    conversations = []
+    for user_conversation in user_conversations:
+        conversation = Conversation.query.get(user_conversation.conversation_id)
+        if conversation:
+            conversations.append(conversation.serialize())
 
-        for msg, from_name, to_name in conv_messages:
-            serialized = msg.serialize()
-            serialized['from_user_name'] = from_name
-            serialized['to_user_name'] = to_name
-            messages.append(serialized)
+    return jsonify(conversations), 200
 
-    # Sort all messages by date (newest first)
-    messages.sort(key=lambda x: x['sent_at'], reverse=True)
 
-    return jsonify(messages), 200
+@api.route('/conversations/mapped/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_mapped_conversations(user_id):
+    current_user_id = get_jwt_identity()
+
+    # Find all conversations the user is part of
+    user_conversations = User_to_Conversation.query.filter_by(user_id=user_id).all()
+
+    # Dictionary to store mapped conversations
+    mapped_conversations = {}
+
+    for user_conversation in user_conversations:
+        conversation = user_conversation.conversation
+        
+        if conversation:
+            # Get all messages in this conversation sorted by timestamp
+            messages = Messages.query.filter_by(conversation_id=conversation.id)\
+                .order_by(Messages.sent_at.desc()).all()
+            
+            # Find other participants in the conversation
+            other_participants = User_to_Conversation.query.filter(
+                User_to_Conversation.conversation_id == conversation.id,
+                User_to_Conversation.user_id != user_id
+            ).all()
+
+            for participant in other_participants:
+                other_user = participant.user
+                
+                if other_user:
+                    # Create or update conversation entry for this user
+                    if other_user.user_id not in mapped_conversations:
+                        mapped_conversations[other_user.user_id] = {
+                            'user_id': other_user.user_id,
+                            'username': other_user.name,
+                            'conversations': []
+                        }
+
+                    # Prepare conversation details
+                    conversation_details = {
+                        'conversation_id': conversation.id,
+                        'last_message': messages[0].message if messages else None,
+                        'last_message_timestamp': messages[0].sent_at.isoformat() if messages else None,
+                        'last_message_sender_id': messages[0].from_user_id if messages else None,
+                        'messages': [msg.serialize() for msg in messages]
+                    }
+                    
+                    mapped_conversations[other_user.user_id]['conversations'].append(conversation_details)
+
+    # Convert dictionary to list and return
+    return jsonify(list(mapped_conversations.values())), 200
 
 
 @api.route('/message/conversation/<int:other_user_id>', methods=['GET'])

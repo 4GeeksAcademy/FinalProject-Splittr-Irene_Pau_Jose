@@ -29,7 +29,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
-import { mapMessages, mapContacts  } from '../../component/callToApi.js';
+import { mapMessages, mapContacts, mapConversations } from '../../component/callToApi.js';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
 import Dialog from '@material-ui/core/Dialog';
@@ -160,7 +160,7 @@ const useStyles = makeStyles((theme) => {
     appBarSpacer: {
       minHeight: theme.spacing(4),
     },
-   
+
     card: {
       display: 'flex',
       width: 500,
@@ -216,17 +216,17 @@ const useStyles = makeStyles((theme) => {
       flexDirection: 'column',
       width: '100%',
       paddingBottom: theme.spacing(1),
-      
+
     },
     fabButton: {
       position: 'fixed',
       bottom: theme.spacing(3),
       right: theme.spacing(3),
-      borderRadius: '50%', 
-      width: theme.spacing(7), 
+      borderRadius: '50%',
+      width: theme.spacing(7),
       height: theme.spacing(7),
     },
-    
+
   };
 });
 
@@ -234,38 +234,32 @@ const useStyles = makeStyles((theme) => {
 export default function Messages() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
 
   const { store, actions } = useContext(Context);
 
-  const [messages, setMessages] = useState([]); // Initialize as empty array
+  const [mappedConversations, setMappedConversations] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [openContactDialog, setOpenContactDialog] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const { userid } = useParams();
   const navigate = useNavigate();
 
+  // Fetch conversations and contacts
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch messages and contacts in parallel
-        const [messagesData, contactsData] = await Promise.all([
-          mapMessages(setMessages, userid),
+
+        // Fetch conversations and contacts
+        await Promise.all([
+          mapConversations(setMappedConversations, userid),
           mapContacts(setContacts, userid)
         ]);
-        
-        // Additional processing if needed
       } catch (err) {
         console.error("Error in fetching data:", err);
         setError(err.message);
@@ -274,22 +268,47 @@ export default function Messages() {
       }
     };
 
-    fetchData();
+    if (userid) {
+      fetchData();
+    }
   }, [userid]);
 
+  // Handler to start a new conversation
   const handleStartConversation = (contactId) => {
+    // Navigate to conversation with selected contact
     navigate(`/message/conversation/${contactId}`);
     setOpenContactDialog(false);
   };
 
- 
+  // Transform mapped conversations for rendering, sorted by most recent message
+  const getConversationsList = () => {
+    // Flatten conversations and add sorting
+    const flattenedConvos = mappedConversations.flatMap(userConvos => 
+      userConvos.conversations.map(convo => ({
+        from_user_id: userConvos.user_id,
+        from_user_name: userConvos.username,
+        from_user_initial: userConvos.username ? userConvos.username[0] : '',
+        message: convo.last_message,
+        sent_at: convo.last_message_timestamp
+      }))
+    );
+
+    // Sort conversations by sent_at in descending order (most recent first)
+    return flattenedConvos.sort((a, b) => {
+      // Convert to timestamps for proper comparison
+      const dateA = new Date(a.sent_at).getTime();
+      const dateB = new Date(b.sent_at).getTime();
+      
+      // Sort in descending order (most recent first)
+      return dateB - dateA;
+    });
+  };
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            {/* Show MenuIcon when the drawer is closed */}
             {!open && (
               <IconButton
                 edge="start"
@@ -302,7 +321,6 @@ export default function Messages() {
               </IconButton>
             )}
 
-            {/* Show ChevronLeftIcon when the drawer is open */}
             {open && (
               <IconButton
                 edge="start"
@@ -316,7 +334,7 @@ export default function Messages() {
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
@@ -326,6 +344,7 @@ export default function Messages() {
             </IconButton>
           </Toolbar>
         </AppBar>
+        
         <Drawer
           variant="permanent"
           classes={{
@@ -333,62 +352,52 @@ export default function Messages() {
           }}
           open={open}
         >
-
           <Divider />
           <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
+        
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
-
-            <Grid container spacing={3} justifyContent="center" className={classes.contactGrid} >
-              {messages && Array.isArray(messages) && messages.length > 0 ? (
-                (() => {
-                  const currentUser = store.userInfo;
-                  if (!currentUser || !currentUser.user_id) {
-                    return null
-                  }
-                  const currentUserId = currentUser.user_id;
-
-                  const filteredMessages = messages.filter(
-                    message => message.from_user_id !== currentUserId
-                  );
-                  const uniqueUserIds = [...new Set(filteredMessages.map(message => message.from_user_id))];
-                  
-                  return uniqueUserIds.map(uniqueUserId => {
-                    const latestMessageFromUser = filteredMessages
-                        .filter(message => message.from_user_id === uniqueUserId)
-                        .sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at))[0];
-                
-                    return (
-                        <MessageCard 
-                            key={uniqueUserId}
-                            message={latestMessageFromUser || {}}
-                            className={classes.contactGrid}
-                            
-                        />
-                    );
-                });
-                })()
+            <Grid container spacing={3} justifyContent="center" className={classes.contactGrid}>
+              {loading ? (
+                <Typography variant="subtitle1" color="textSecondary">
+                  Loading conversations...
+                </Typography>
+              ) : error ? (
+                <Typography variant="subtitle1" color="error">
+                  Error: {error}
+                </Typography>
+              ) : mappedConversations.length === 0 ? (
+                <Typography variant="subtitle1" color="textSecondary">
+                  No conversations found
+                </Typography>
               ) : (
-                <Typography variant="subtitle1" color="textSecondary"></Typography>
+                getConversationsList().map((conversation, index) => (
+                  <MessageCard
+                    key={`conversation-${conversation.from_user_id}-${index}`}
+                    message={conversation}
+                    className={classes.contactGrid}
+                  />
+                ))
               )}
             </Grid>
           </Container>
         </main>
-        <Fab 
-          color="primary" 
-          className={classes.fabButton} 
+        
+        <Fab
+          color="primary"
+          className={classes.fabButton}
           onClick={() => setOpenContactDialog(true)}
         >
           <AddIcon />
         </Fab>
 
         {/* Dialog to Select Contact */}
-        <Dialog 
-          open={openContactDialog} 
+        <Dialog
+          open={openContactDialog}
           onClose={() => setOpenContactDialog(false)}
           maxWidth="xs"
           fullWidth
@@ -397,15 +406,15 @@ export default function Messages() {
           <DialogContent dividers>
             <List>
               {contacts && contacts.contacts && contacts.contacts.map((contact) => (
-                <ListItem 
-                  button 
+                <ListItem
+                  button
                   key={contact.contact_id}
                   onClick={() => handleStartConversation(contact.contact_id)}
                 >
                   <ListItemAvatar>
                     <Avatar>{contact.contact_initial}</Avatar>
                   </ListItemAvatar>
-                  <ListItemText 
+                  <ListItemText
                     primary={contact.contact_name}
                     secondary={contact.contact_email}
                   />
@@ -419,7 +428,6 @@ export default function Messages() {
             </Button>
           </DialogActions>
         </Dialog>
-
       </div>
     </ThemeProvider>
   );

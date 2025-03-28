@@ -445,6 +445,39 @@ export const mapMessages = async (setMessages, currentUserId) => {
     }
 }
 
+export const mapConversations = async (setMappedConversations, userId) => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URL}/conversations/mapped/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch mapped conversations');
+        }
+
+        const data = await response.json();
+        
+        // Sort conversations by last message timestamp
+        const sortedData = data.map(userConversations => ({
+            ...userConversations,
+            conversations: userConversations.conversations.sort((a, b) => 
+                new Date(b.last_message_timestamp) - new Date(a.last_message_timestamp)
+            )
+        }));
+
+        setMappedConversations(sortedData);
+        return sortedData;
+
+    } catch (error) {
+        console.error('Error mapping conversations:', error);
+        return null;
+    }
+};
+
 
 export const getInfoConversation = async (setConversation, otheruserid) => {
     try {

@@ -20,7 +20,6 @@ class User(db.Model):
         return f'<User {self.name}>'
 
     def get_initial(self):
-        """Return the first letter of the user's name in uppercase."""
         return self.name[0].upper() if self.name else "?"
 
     def serialize(self):
@@ -28,7 +27,7 @@ class User(db.Model):
             "user_id": self.user_id,
             "name": self.name,
             "email": self.email,
-            "birthday": self.birthday.strftime('%Y-%m-%d') if self.birthday else None,  # Format for JSON
+            "birthday": self.birthday.strftime('%Y-%m-%d') if self.birthday else None, 
             "initial": self.get_initial(),
             "groups": [group.serialize() for group in self.groups] if self.groups else [],
             "expenses": [expense.serialize() for expense in self.expenses] if self.expenses else [],
@@ -251,7 +250,7 @@ class Messages(db.Model):
     message = db.Column(db.String(200))
     sent_at = db.Column(db.DateTime, default=datetime.now)
 
-    # Relationships
+
     conversation = db.relationship("Conversation", back_populates="messages")
     sender = db.relationship("User", foreign_keys=[from_user_id])
     recipient = db.relationship("User", foreign_keys=[sent_to_user_id])
@@ -261,10 +260,10 @@ class Messages(db.Model):
             "id": self.id,
             "conversation_id": self.conversation_id,
             "sent_to_user_id": self.sent_to_user_id,
-            "sent_to_user_name": self.recipient.name if self.recipient else None,  
+            "sent_to_user_name": self.recipient.name if self.recipient else None,
             "sent_to_user_initial": self.recipient.name[0] if self.recipient and self.recipient.name else None,
             "from_user_id": self.from_user_id,
-            "from_user_name": self.sender.name if self.sender else None,  
+            "from_user_name": self.sender.name if self.sender else None,
             "from_user_initial": self.sender.name[0] if self.sender and self.sender.name else None,
             "message": self.message,
             "sent_at": self.sent_at
@@ -278,7 +277,7 @@ class User_to_Conversation(db.Model):
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
 
-    # Relationships
+    
     user = db.relationship("User", backref="conversation_memberships")
     conversation = db.relationship("Conversation", back_populates="participants")
 
@@ -296,11 +295,11 @@ class Conversation(db.Model):
     __tablename__ = "conversations"
     id = db.Column(db.Integer, unique=True, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
     
-    # Relationship to track participants
     participants = db.relationship("User_to_Conversation", back_populates="conversation")
+
     
-    # Relationship to track messages in this conversation
     messages = db.relationship("Messages", back_populates="conversation")
 
     def serialize(self):
@@ -310,6 +309,8 @@ class Conversation(db.Model):
             "participants": [participant.serialize() for participant in self.participants],
             "messages": [message.serialize() for message in self.messages]
         }
+
+
     
 class Objectives(db.Model):
     __tablename__ = "objectives"
