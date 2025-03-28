@@ -40,7 +40,6 @@ export const getInfoGroup = async (setSingleGroupInfo, groupid) => {
 
         const data = await response.json();
         setSingleGroupInfo(data);
-        console.log(data);
         return data;
 
     } catch (error) {
@@ -98,7 +97,7 @@ export const updateGroup = async (groupId, updatedData) => {
 
 export const removeUserFromGroup = async (userId, groupId) => {
     try {
-        console.log("Sending remove user request:", { userId, groupId });
+
 
         const token = localStorage.getItem("token");
         const response = await fetch(urlBackend + "/group_user/delete", {
@@ -408,62 +407,151 @@ export const deleteUserContact = async (contactId) => {
 };
 
 
-export const mapMessages = async (setMessages, userid) => {
-
+export const mapMessages = async (setMessages, currentUserId) => {
     try {
-        const response = await fetch(urlBackend + "/message/user/" + userid, {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(`${urlBackend}/message/user/${currentUserId}`, {
+            method: "GET",
             headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
-            },
-        })
-        const data = await response.json()
-        setMessages(data)
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch messages');
+        }
+
+        const data = await response.json();
+        
+        // Transform data to include conversation context
+        const transformedMessages = data.map(msg => ({
+            ...msg,
+            conversation_context: `Conversation with ${msg.from_user_id === currentUserId ? msg.to_user_name : msg.from_user_name}`
+        }));
+
+        setMessages(transformedMessages);
+        return transformedMessages;
 
     } catch (error) {
-        console.log(error);
-
+        console.error("Error fetching messages:", error);
+        setMessages([]);
+        return []; 
     }
-
 }
 
-export const getInfoConversation = async (setConversation, otheruserid) => {
+export const mapConversations = async (setMappedConversations, userId) => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URL}/conversations/mapped/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
+        if (!response.ok) {
+            throw new Error('Failed to fetch mapped conversations');
+        }
+
+        const data = await response.json();
+        
+        // Sort conversations by last message timestamp
+        const sortedData = data.map(userConversations => ({
+            ...userConversations,
+            conversations: userConversations.conversations.sort((a, b) => 
+                new Date(b.last_message_timestamp) - new Date(a.last_message_timestamp)
+            )
+        }));
+
+        setMappedConversations(sortedData);
+        return sortedData;
+
+    } catch (error) {
+        console.error('Error mapping conversations:', error);
+        return null;
+    }
+};
+
+
+export const getInfoConversation = async (setConversation, otheruserid) => {
     try {
         const response = await fetch(urlBackend + "/message/conversation/" + otheruserid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
-            }
-            ,
+            },
         })
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch conversation');
+        }
+
         const data = await response.json()
         setConversation(data)
 
     } catch (error) {
-        console.log(error);
-
+        console.error("Error fetching conversation:", error);
+        setConversation([]);
     }
 };
 
-export const sendMessage = async (sent_to_user_id, message, from_user_id) => {
+
+export const sendMessage = async (sent_to_user_id, message) => {
     try {
-        const response = await fetch(urlBackend + "/message/send", {
+        // Get token from localStorage
+        const token = localStorage.getItem("token");
+        if (!token) {
+            throw new Error('Authentication token not found');
+        }
+
+        // Validate input before sending
+        if (!sent_to_user_id || !message?.trim()) {
+            throw new Error('Recipient and message are required');
+        }
+
+        if (isNaN(parseInt(sent_to_user_id))) {
+            throw new Error('Invalid recipient ID');
+        }
+
+        const response = await fetch(`${urlBackend}/message/send`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("token")
+                "Authorization": `Bearer ${token}`  // Use the token we got from localStorage
             },
-            body: JSON.stringify({ sent_to_user_id, message, from_user_id })
+            body: JSON.stringify({ 
+                sent_to_user_id: parseInt(sent_to_user_id), 
+                message: message.trim() 
+            })
         });
 
         const data = await response.json();
-        return data;
+
+        if (!response.ok) {
+            throw new Error(data.error || data.msg || 'Failed to send message');
+        }
+
+        return {
+            success: true,
+            message: data.message,
+            conversation_id: data.conversation_id
+        };
+
     } catch (error) {
         console.error("Error sending message:", error);
-        return { error: "Something went wrong" };
+        return { 
+            success: false,
+            error: error.message || "Failed to send message" 
+        };
     }
 };
+
 
 export const mapTransactions = async (callback) => {
     try {
@@ -477,8 +565,6 @@ export const mapTransactions = async (callback) => {
         if (!response.ok) throw new Error("Failed to fetch transactions");
 
         const data = await response.json();
-        console.log("Full API response:", data); // Debug
-
         callback({
             sent_payments: data.sent_payments?.map((p) => ({
                 ...p,
@@ -519,6 +605,9 @@ export const mapTransactions = async (callback) => {
         });
     }
 };
+
+
+
 
 export const submitFeedback = async (email, message) => {
     try {

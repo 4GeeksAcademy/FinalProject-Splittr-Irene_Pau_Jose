@@ -20,7 +20,6 @@ class User(db.Model):
         return f'<User {self.name}>'
 
     def get_initial(self):
-        """Return the first letter of the user's name in uppercase."""
         return self.name[0].upper() if self.name else "?"
 
     def serialize(self):
@@ -28,7 +27,7 @@ class User(db.Model):
             "user_id": self.user_id,
             "name": self.name,
             "email": self.email,
-            "birthday": self.birthday.strftime('%Y-%m-%d') if self.birthday else None,  # Format for JSON
+            "birthday": self.birthday.strftime('%Y-%m-%d') if self.birthday else None, 
             "initial": self.get_initial(),
             "groups": [group.serialize() for group in self.groups] if self.groups else [],
             "expenses": [expense.serialize() for expense in self.expenses] if self.expenses else [],
@@ -175,7 +174,7 @@ class Payments(db.Model):
     payer_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     receiver_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     amount = db.Column(db.Integer, nullable=False)
-    payed_at = db.Column(db.DateTime)
+    payed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def serialize(self):
         payer = User.query.get(self.payer_id)
@@ -187,7 +186,7 @@ class Payments(db.Model):
             "payer_name": payer.name if payer else "Unknown",
             "receiver_name": receiver.name if receiver else "Unknown",
             "amount": self.amount,
-            "payed_at": self.payed_at
+            "payed_at": self.payed_at.isoformat() if self.payed_at else None 
         }
     
 class Expenses(db.Model):
@@ -245,33 +244,73 @@ class Debts(db.Model):
 class Messages(db.Model):
     __tablename__ = "messages"
     id = db.Column(db.Integer, unique=True, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey("conversations.id"), nullable=False)
     sent_to_user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     from_user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
     message = db.Column(db.String(200))
     sent_at = db.Column(db.DateTime, default=datetime.now)
 
-    def __repr__(self):
-        return f'<Messages {self.id}>'
+
+    conversation = db.relationship("Conversation", back_populates="messages")
+    sender = db.relationship("User", foreign_keys=[from_user_id])
+    recipient = db.relationship("User", foreign_keys=[sent_to_user_id])
 
     def serialize(self):
-        
-        sender = User.query.get(self.from_user_id)
-        recipient = User.query.get(self.sent_to_user_id)
-
-        sender_initial = sender.name[0] if sender and sender.name else None
-        recipient_initial = recipient.name[0] if recipient and recipient.name else None
-
         return {
             "id": self.id,
+            "conversation_id": self.conversation_id,
             "sent_to_user_id": self.sent_to_user_id,
-            "sent_to_user_name": recipient.name if recipient else None,  
-            "sent_to_user_initial": recipient_initial,
+            "sent_to_user_name": self.recipient.name if self.recipient else None,
+            "sent_to_user_initial": self.recipient.name[0] if self.recipient and self.recipient.name else None,
             "from_user_id": self.from_user_id,
-            "from_user_name": sender.name if sender else None,  
-            "from_user_initial": sender_initial,
+            "from_user_name": self.sender.name if self.sender else None,
+            "from_user_initial": self.sender.name[0] if self.sender and self.sender.name else None,
             "message": self.message,
             "sent_at": self.sent_at
         }
+    
+class User_to_Conversation(db.Model):
+    __tablename__ = "user_to_conversation"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
+    conversation_id = db.Column(db.Integer, db.ForeignKey("conversations.id"), nullable=False)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+
+    
+    user = db.relationship("User", backref="conversation_memberships")
+    conversation = db.relationship("Conversation", back_populates="participants")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "conversation_id": self.conversation_id,
+            "user_name": self.user.name if self.user else "Unknown",
+            "joined_at": self.joined_at,
+            "is_active": self.is_active
+        }
+    
+class Conversation(db.Model):
+    __tablename__ = "conversations"
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    
+    participants = db.relationship("User_to_Conversation", back_populates="conversation")
+
+    
+    messages = db.relationship("Messages", back_populates="conversation")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "created_at": self.created_at,
+            "participants": [participant.serialize() for participant in self.participants],
+            "messages": [message.serialize() for message in self.messages]
+        }
+
+
     
 class Objectives(db.Model):
     __tablename__ = "objectives"

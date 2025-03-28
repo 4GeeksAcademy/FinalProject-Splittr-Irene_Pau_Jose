@@ -44,53 +44,71 @@ export default function Orders() {
     }
   };
 
-  console.log("Current transactions state:", transactions);
+  ("Current transactions state:", transactions);
 
   const allTransactions = [
-    ...(transactions.group_payments || []).map((tx) => ({
-      id: `group_${tx.id}`,
-      date: parseDate(tx.payed_at),
-      type: "Group Payment",
-      from: tx.payer_name || "Unknown",
-      to: tx.group_name ? `${tx.group_name}${tx.receiver_name ? ` (to ${tx.receiver_name})` : ''}` : "Unknown Group",
-      amount: Number(tx.amount) || 0
-    })),
-    ...(transactions.objective_contributions || []).map((tx) => ({
-      id: `objective_${tx.id}`,
-      date: parseDate(tx.contributed_at),
-      type: "Objective Contribution",
-      from: tx.user_name || "Unknown",
-      to: tx.objective_name || "Unknown Objective",
-      amount: Number(tx.amount_contributed) || 0
-    })),
-    ...(transactions.received_payments || []).map((tx) => ({
-      id: `received_${tx.id}`,
-      date: parseDate(tx.payed_at),
-      type: "Received Payment",
-      from: tx.payer_name || "Unknown",
-      to: tx.receiver_name || "Unknown",
-      amount: Number(tx.amount) || 0
-    })),
-    ...(transactions.sent_payments || []).map((tx) => ({
-      id: `sent_${tx.id}`,
-      date: parseDate(tx.payed_at),
-      type: "Sent Payment",
-      from: tx.payer_name || "Unknown",
-      to: tx.receiver_name || "Unknown",
-      amount: Number(tx.amount) || 0
-    }))
+    ...(transactions.group_payments || []).map((tx) => {
+      const parsedDate = parseDate(tx.payed_at);
+      ("Group Payment Date:", tx.payed_at, parsedDate);
+      return {
+        id: `group_${tx.id}`,
+        date: parsedDate,
+        type: "Group Payment",
+        from: tx.payer_name || "Unknown",
+        to: tx.group_name ? `${tx.group_name}${tx.receiver_name ? ` (to ${tx.receiver_name})` : ''}` : "Unknown Group",
+        amount: Number(tx.amount) || 0
+      };
+    }),
+    ...(transactions.objective_contributions || []).map((tx) => {
+      const parsedDate = parseDate(tx.contributed_at);
+      ("Objective Contribution Date:", tx.contributed_at, parsedDate);
+      return {
+        id: `objective_${tx.id}`,
+        date: parsedDate,
+        type: "Objective Contribution",
+        from: tx.user_name || "Unknown",
+        to: tx.objective_name || "Unknown Objective",
+        amount: Number(tx.amount_contributed) || 0
+      };
+    }),
+    ...(transactions.received_payments || []).map((tx) => {
+      const parsedDate = parseDate(tx.payed_at);
+      ("Received Payment Date:", tx.payed_at, parsedDate);
+      return {
+        id: `received_${tx.id}`,
+        date: parsedDate,
+        type: "Received Payment",
+        from: tx.payer_name || "Unknown",
+        to: tx.receiver_name || "Unknown",
+        amount: Number(tx.amount) || 0
+      };
+    }),
+    ...(transactions.sent_payments || []).map((tx) => {
+      const parsedDate = parseDate(tx.payed_at);
+      ("Sent Payment Date:", tx.payed_at, parsedDate);
+      return {
+        id: `sent_${tx.id}`,
+        date: parsedDate,
+        type: "Sent Payment",
+        from: tx.payer_name || "Unknown",
+        to: tx.receiver_name || "Unknown",
+        amount: Number(tx.amount) || 0
+      };
+    })
   ];
 
   // Optimized sorting with fallback for invalid dates
   const sortedTransactions = [...allTransactions].sort((a, b) => {
     const dateA = a.date instanceof Date ? a.date : new Date();
     const dateB = b.date instanceof Date ? b.date : new Date();
+    if (isNaN(dateA.getTime())) console.warn("Invalid dateA:", a.date);
+    if (isNaN(dateB.getTime())) console.warn("Invalid dateB:", b.date);
     return dateB - dateA;
   });
 
   // Debug transformed data
-  console.log("Formatted transactions:", allTransactions);
-  console.log("Sorted transactions:", sortedTransactions);
+  ("Formatted transactions:", allTransactions);
+  ("Sorted transactions:", sortedTransactions);
 
   return (
     <React.Fragment>

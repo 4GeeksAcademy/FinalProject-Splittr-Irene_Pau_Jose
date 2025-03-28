@@ -1,7 +1,7 @@
   
 import os
 from flask_admin import Admin
-from .models import db, User, Group, Payments, Group_to_user, Expenses, Debts, Messages, Objectives, Objective_to_user, ObjectivesContributions, Group_payments, User_Contacts, Feedback
+from .models import db, User, Group, Payments, Group_to_user, Expenses, Debts, Messages, Objectives, Objective_to_user, ObjectivesContributions, Group_payments, User_Contacts, Feedback, User_to_Conversation, Conversation
 from flask_admin.contrib.sqla import ModelView
 
 def setup_admin(app):
@@ -20,6 +20,8 @@ def setup_admin(app):
     admin.add_view(ModelView(Expenses, db.session))
     admin.add_view(ModelView(Debts, db.session))
     admin.add_view(ModelView(Messages, db.session))
+    admin.add_view(ModelView(User_to_Conversation, db.session))
+    admin.add_view(ModelView(Conversation, db.session))
     admin.add_view(ModelView(Objectives, db.session))
     admin.add_view(ModelView(ObjectivesContributions, db.session))
     admin.add_view(ModelView(Objective_to_user, db.session))

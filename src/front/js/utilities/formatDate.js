@@ -3,6 +3,7 @@ import React from "react";
 export function formatDate(dateString) {
 
   if (!dateString) return 'N/A';
+
   try {
     const date = new Date(dateString);
 

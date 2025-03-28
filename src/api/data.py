@@ -65,19 +65,7 @@ debts = [
     {"debt_id": 5, "expenses_id": 5, "debtor_id": 1, "amount_to_pay": 170, "is_paid": False, "payed_at": None}
 ]
 
-messages = [
-    {"id": 1, "from_user_id": 1, "sent_to_user_id": 3, "message": "Hello, team!", "sent_at": "2024-01-10T09:00:00"},
-    {"id": 1, "from_user_id": 1, "sent_to_user_id": 3, "message": "que pesada", "sent_at": "2024-04-10T09:00:00"},
-    {"id": 1, "from_user_id": 4, "sent_to_user_id": 3, "message": "que pesada", "sent_at": "2024-04-10T09:00:00"},
-    {"id": 1, "from_user_id": 2, "sent_to_user_id": 3, "message": "que pesada", "sent_at": "2024-04-10T09:00:00"},
-    {"id": 1, "from_user_id": 1, "sent_to_user_id": 3, "message": "calla oh", "sent_at": "2024-07-10T09:00:00"},
-    {"id": 8, "from_user_id": 3, "sent_to_user_id": 1, "message": "Hello, team!", "sent_at": "2024-02-10T10:00:00"},
-    {"id": 9, "from_user_id": 3, "sent_to_user_id": 1, "message": "ya no quiero", "sent_at": "2024-01-10T11:00:00"},
-    {"id": 2, "from_user_id": 2, "sent_to_user_id": 1,"message": "Let's split the bill.", "sent_at": "2024-02-15T14:00:00"},
-    {"id": 3, "from_user_id": 3, "sent_to_user_id": 4,"message": "Meeting at 5 PM?", "sent_at": "2024-03-20T16:30:00"},
-    {"id": 4, "from_user_id": 4, "sent_to_user_id": 5,"message": "Don't forget to contribute.", "sent_at": "2024-04-25T18:45:00"},
-    {"id": 5, "from_user_id": 5, "sent_to_user_id": 2,"message": "See you tomorrow!", "sent_at": "2024-05-30T20:15:00"}
-]
+
 
 objectives = [
     {"id": 1, "group_id": 1, "name": "Trip to Japan", "target_amount": 5000,"created_at": "2024-02-15T14:00:00", "is_completed": False},
@@ -120,4 +108,39 @@ objective_to_user = [
     # Objective 5: "Startup Fund" (Group 5: Startup Team)
     {"id": 6, "objective_id": 5, "user_id": 1, "created_at": "2024-05-05T17:20:00"},
     {"id": 7, "objective_id": 5, "user_id": 5, "created_at": "2024-05-06T10:00:00"}
+]
+
+conversations = [
+    {"id": 1, "created_at": "2024-01-10T09:00:00"},
+    {"id": 2, "created_at": "2024-02-15T14:30:00"},
+    {"id": 3, "created_at": "2024-03-20T11:15:00"},
+    {"id": 4, "created_at": "2024-04-05T16:45:00"},
+    {"id": 5, "created_at": "2024-05-12T10:20:00"}
+]
+# Sample User_to_Conversation (participants)
+user_to_conversation = [
+    {"id": 1, "user_id": 1, "conversation_id": 1, "joined_at": "2024-01-10T09:00:00", "is_active": True},
+    {"id": 2, "user_id": 2, "conversation_id": 1, "joined_at": "2024-01-10T09:05:00", "is_active": True},
+    {"id": 3, "user_id": 3, "conversation_id": 1, "joined_at": "2024-01-10T09:10:00", "is_active": True},
+    {"id": 4, "user_id": 1, "conversation_id": 2, "joined_at": "2024-02-15T14:30:00", "is_active": True},
+    {"id": 5, "user_id": 4, "conversation_id": 2, "joined_at": "2024-02-15T14:35:00", "is_active": True},
+    {"id": 6, "user_id": 2, "conversation_id": 3, "joined_at": "2024-03-20T11:15:00", "is_active": True},
+    {"id": 7, "user_id": 3, "conversation_id": 3, "joined_at": "2024-03-20T11:20:00", "is_active": False},
+    {"id": 8, "user_id": 5, "conversation_id": 4, "joined_at": "2024-04-05T16:45:00", "is_active": True},
+    {"id": 9, "user_id": 1, "conversation_id": 5, "joined_at": "2024-05-12T10:20:00", "is_active": True},
+    {"id": 10, "user_id": 5, "conversation_id": 5, "joined_at": "2024-05-12T10:25:00", "is_active": True}
+]
+
+# Sample Messages
+messages = [
+    {"id": 1, "conversation_id": 1, "from_user_id": 1, "sent_to_user_id": None, "message": "Hi team, let's discuss the project", "sent_at": "2024-01-10T09:15:00"},
+    {"id": 2, "conversation_id": 1, "from_user_id": 2, "sent_to_user_id": None, "message": "Sounds good, I've prepared some notes", "sent_at": "2024-01-10T09:18:00"},
+    {"id": 3, "conversation_id": 1, "from_user_id": 3, "sent_to_user_id": None, "message": "When is our deadline?", "sent_at": "2024-01-10T09:20:00"},
+    {"id": 4, "conversation_id": 2, "from_user_id": 1, "sent_to_user_id": 4, "message": "Hi mom, how are you?", "sent_at": "2024-02-15T14:40:00"},
+    {"id": 5, "conversation_id": 2, "from_user_id": 4, "sent_to_user_id": 1, "message": "I'm good dear, how about you?", "sent_at": "2024-02-15T14:45:00"},
+    {"id": 6, "conversation_id": 3, "from_user_id": 2, "sent_to_user_id": None, "message": "Who's up for lunch tomorrow?", "sent_at": "2024-03-20T11:30:00"},
+    {"id": 7, "conversation_id": 4, "from_user_id": 5, "sent_to_user_id": None, "message": "Does anyone have the study materials?", "sent_at": "2024-04-05T17:00:00"},
+    {"id": 8, "conversation_id": 5, "from_user_id": 1, "sent_to_user_id": 5, "message": "Can we meet later?", "sent_at": "2024-05-12T10:30:00"},
+    {"id": 9, "conversation_id": 5, "from_user_id": 5, "sent_to_user_id": 1, "message": "Sure, what time works for you?", "sent_at": "2024-05-12T10:35:00"},
+    {"id": 10, "conversation_id": 1, "from_user_id": 1, "sent_to_user_id": None, "message": "The deadline is next Friday", "sent_at": "2024-01-10T09:25:00"}
 ]

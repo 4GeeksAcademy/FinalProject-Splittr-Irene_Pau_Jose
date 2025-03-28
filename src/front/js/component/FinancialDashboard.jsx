@@ -59,7 +59,7 @@ export default function FinancialDashboard() {
     useEffect(() => {
         const fetchTransactions = async () => {
             await mapTransactions((data) => {
-                console.log("Data received from API:", data); // Debug
+
 
                 const totalReceived = data.received_payments.reduce((sum, payment) => sum + payment.amount, 0);
                 const totalSpent = data.sent_payments.reduce((sum, payment) => sum + payment.amount, 0);
