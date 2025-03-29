@@ -11,6 +11,10 @@ from datetime import datetime
 from api.data import users, groups, group_to_user, group_payments, payments, expenses, debts, objectives, objectives_contributions, user_contacts, group_debts, objective_to_user, messages, conversations, user_to_conversation;
 
 
+from flask_mail import Mail, Message
+from flask import current_app
+
+
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 #from api import api
 
@@ -361,6 +365,178 @@ def add_contact():
     
     return jsonify({"msg": "Contact added successfully"}), 201
 
+@api.route('/user_contacts/invitation', methods=['POST'])
+@jwt_required()
+def send_invitation():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+    
+    request_data = request.get_json()
+    contact_email = request_data.get("contact_email")
+
+    if not contact_email:
+        return jsonify({"msg": "contact_email is required"}), 400
+    
+    if contact_email.lower() == user.email.lower():
+        return jsonify({"msg": "You cannot invite yourself"}), 400
+    
+    # Check if the email belongs to a registered user
+    contact = User.query.filter_by(email=contact_email).first()
+    if contact:
+        return jsonify({"msg": "This user is already registered, add them as a contact instead"}), 400
+    
+    # Generate a random temporary password
+    import secrets
+    import string
+    alphabet = string.ascii_letters + string.digits
+    temp_password = ''.join(secrets.choice(alphabet) for _ in range(12))
+    
+    # Extract a username from the email to keep name length within 20 chars
+    username = contact_email.split('@')[0]
+    if len(username) > 12:  # Ensure "Invited-" + username stays under 20 chars
+        username = username[:12]
+    
+    # Check if there's already an invitation
+    existing_invitation = (
+        db.session.query(User_Contacts)
+        .join(User, User_Contacts.contact_id == User.user_id)
+        .filter(
+            User_Contacts.user_id == current_user_id,
+            User.email == contact_email,
+            User_Contacts.is_active == True
+        )
+        .first()
+    )
+    
+    if existing_invitation:
+        return jsonify({"msg": "An invitation has already been sent to this email"}), 400
+
+    try:
+        # Create temporary placeholder user with the generated password
+        temp_user = User(
+            name=f"Invited-{username}",
+            email=contact_email,
+            password=temp_password,  # Store the generated password
+            birthday=None
+        )
+        db.session.add(temp_user)
+        db.session.flush()
+
+        # Send invitation email
+        invitation_link = f"https://your-app.com/register?email={contact_email}"
+        login_link = f"https://your-app.com/login"
+        
+        try:
+            subject = f"{user.name} invited you to join SPLTTR!"
+            msg = Message(
+                subject=subject,
+                sender=current_app.config.get("MAIL_USERNAME"),
+                recipients=[contact_email],
+                body=f"""Hi there,
+
+{user.name} ({user.email}) has invited you to join SPLTTR, the expense sharing platform!
+
+Here are your temporary account details:
+Email: {contact_email}
+Temporary Password: {temp_password}
+
+You can:
+1. Click here to login directly: {login_link}
+   (Use the temporary credentials above)
+   
+2. Or register a new account here: {invitation_link}
+
+Note: For security reasons, please change your password after first login.
+
+We're excited to have you on board!
+The SPLTTR Team""",
+                html=f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ color: #2c3e50; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; }}
+        .content {{ margin: 20px 0; }}
+        .details {{ background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .button {{ display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ margin-top: 20px; font-size: 0.9em; color: #7f8c8d; border-top: 1px solid #f1f1f1; padding-top: 10px; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>You've been invited to SPLTTR!</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hello,</p>
+        <p><strong>{user.name}</strong> ({user.email}) has invited you to join SPLTTR, the expense sharing platform.</p>
+        
+        <div class="details">
+            <h3>Your temporary account details:</h3>
+            <p><strong>Email:</strong> {contact_email}</p>
+            <p><strong>Temporary Password:</strong> {temp_password}</p>
+            
+            <p>You have two options:</p>
+            <ol>
+                <li>Use the temporary credentials to <a href="{login_link}" class="button">Login Now</a></li>
+                <li>Or <a href="{invitation_link}">register a new account</a> with your own password</li>
+            </ol>
+            
+            <p><em>Security note: Please change your password after first login.</em></p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>We're excited to have you on board!</p>
+        <p>The SPLTTR Team</p>
+    </div>
+</body>
+</html>
+"""
+            )
+            mail = current_app.extensions.get('mail')
+            if mail:
+                mail.send(msg)
+                email_sent = True
+            else:
+                email_sent = False
+        except Exception as mail_error:
+            print(f"Email sending failed: {str(mail_error)}")
+            email_sent = False
+
+        # Store invitation with the temporary user ID as contact_id
+        new_invitation = User_Contacts(
+            user_id=current_user_id,
+            contact_id=temp_user.user_id,
+            created_at=datetime.utcnow(),
+            is_active=True
+        )
+        db.session.add(new_invitation)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Invitation sent successfully",
+            "contact": {
+                "id": new_invitation.id,
+                "contact_email": contact_email,
+                "user_id": current_user_id,
+                "contact_id": temp_user.user_id,
+                "created_at": new_invitation.created_at,
+                "is_active": new_invitation.is_active,
+                "status": "invited"
+            },
+            "email_sent": email_sent,
+            "temp_password": temp_password  
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Error sending invitation", "error": str(e)}), 500
+    
 
 @api.route('/singlecontact/<int:contact_id>', methods=['GET'])
 @jwt_required()

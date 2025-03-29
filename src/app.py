@@ -12,7 +12,7 @@ from api.admin import setup_admin
 from api.commands import setup_commands
 from datetime import timedelta
 
-
+from flask_mail import Mail, Message
 from flask_jwt_extended import JWTManager
 # from models import Person
 
@@ -20,6 +20,15 @@ ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../public/')
 app = Flask(__name__)
+app.config.update(
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = 587,
+    MAIL_USE_TLS = True,
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME'),
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+)
+mail = Mail(app)
+
 app.url_map.strict_slashes = False
 
 

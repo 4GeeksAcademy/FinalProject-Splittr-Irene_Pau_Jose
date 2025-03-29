@@ -39,7 +39,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import { mapContacts, addUserContactByEmail } from '../../component/callToApi.js';
+import { mapContacts, addUserContactByEmail, sendInvitation } from '../../component/callToApi.js';
 
 
 const darkTheme = createMuiTheme({
@@ -168,6 +168,8 @@ export default function ListOfContacts() {
   const [contacts, setContacts] = useState([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [email, setEmail] = useState('');
+  const [invitationDialog, setInvitationDialog] = useState(false);
+  const [invitationEmail, setInvitationEmail] = useState('');
 
   const { userid } = useParams();
 
@@ -186,28 +188,49 @@ export default function ListOfContacts() {
     };
   }, []);
 
+  const handleSendInvitation = async () => {
+    try {
+      const response = await sendInvitation(invitationEmail);
+      if (response.msg === "Invitation sent successfully") {
+        alert("Invitation sent successfully!");
+        // Close both dialogs and clear the email
+        setInvitationDialog(false);
+        setOpenAddDialog(false);
+        setInvitationEmail("");
+        setEmail("");
+
+        await mapContacts(setContacts, userid);
+      } else {
+        alert(response.msg || "Failed to send invitation");
+      }
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      alert("Failed to send invitation. Please try again.");
+    }
+  };
 
   const handleAddContact = async () => {
     console.log('Adding contact with email:', email);
-  
+
     try {
       const response = await addUserContactByEmail(email);
       console.log("Response from API:", response);
-  
+
       if (response.msg === "Contact added successfully") {
         await mapContacts(setContacts, userid);
-        
         alert("The contact was successfully added to your contact list!");
-        setEmail(""); 
+        setEmail("");
         setOpenAddDialog(false);
       } else if (response.msg === "Contact not found") {
-        alert("This user does not exist in SPLTTR.");
+        // User doesn't exist, show invitation dialog
+        setInvitationEmail(email);
+        setOpenAddDialog(false);
+        setInvitationDialog(true);
       } else if (response.msg === "User is already a contact") {
         alert("This contact is already in your list of contacts.");
       } else if (response.msg === "A user cannot add themselves as a contact") {
         alert("You cannot add yourself as a contact.");
       } else {
-        // Handle other potential error messages
         alert(response.msg || "There was a problem adding this contact.");
       }
     } catch (error) {
@@ -267,12 +290,11 @@ export default function ListOfContacts() {
           </Container>
         </main>
 
-
         <Fab color="primary" className={classes.fabButton} onClick={() => setOpenAddDialog(true)}>
           <AddIcon />
         </Fab>
 
-
+        {/* Add Contact Dialog */}
         <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
           <DialogTitle>Add Contact</DialogTitle>
           <DialogContent>
@@ -294,6 +316,35 @@ export default function ListOfContacts() {
             </Button>
             <Button onClick={handleAddContact} color="primary">
               Add
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+       
+        <Dialog open={invitationDialog} onClose={() => {
+          setInvitationDialog(false);
+          setInvitationEmail("");
+          setEmail("");
+        }}>
+          <DialogTitle>Invite Contact</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" gutterBottom>
+              This user doesn't exist in SPLTTR. Would you like to invite them to join?
+            </Typography>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              Email: {invitationEmail}
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {
+              setInvitationDialog(false);
+              setInvitationEmail("");
+              setEmail("");
+            }} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleSendInvitation} color="primary">
+              Send Invitation
             </Button>
           </DialogActions>
         </Dialog>
