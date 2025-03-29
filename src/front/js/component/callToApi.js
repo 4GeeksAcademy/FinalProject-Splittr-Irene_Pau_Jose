@@ -425,7 +425,28 @@ export const addUserContactByEmail = async (contactEmail) => {
     }
 };
 
+export const sendInvitation = async (email) => {
+    try {
+        const response = await fetch(`${urlBackend}/user_contacts/invitation`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ contact_email: email })
+        });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.msg || 'Failed to send invitation');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error sending invitation:", error);
+        throw error; 
+    }
+};
 
 export const getContactInfo = async (setSingleContactInfo, contactId) => {
     // Add a check to ensure contactId is valid
