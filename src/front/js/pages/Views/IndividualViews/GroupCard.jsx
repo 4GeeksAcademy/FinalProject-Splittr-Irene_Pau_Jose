@@ -16,7 +16,7 @@ const GroupCard = ({ group }) => {
       getGroupDebts(setGroupDebts, groupid);
     }, []);
   return (
-    <> <Link to={`/singlegroup/${group.group_id}`}>
+    <> <Link to={`/singlegroup/${group.group_id}`} style={{ textDecoration: 'none' }}>
       <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "auto", minWidth: "250px" }}>
         <Typography variant="h6" style={{ marginBottom: 10 }}>{group.group_name} </Typography>
 
