@@ -32,6 +32,7 @@ import { mapTransactions } from '../../component/callToApi.js';
 
 import FloatingActionButtonMenu from '../../component/FloatingActionButtonMenu.jsx';
 import FinancialDashboard from '../../component/FinancialDashboard.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 function Copyright() {
   return (
@@ -209,9 +210,9 @@ export default function Dashboard() {
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+            
+                <LogoutButton />
+       
             </IconButton>
           </Toolbar>
         </AppBar>
