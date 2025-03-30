@@ -155,6 +155,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CreateGroup() {
     const classes = useStyles();
+    const navigate = useNavigate();
+    const user_id = sessionStorage.getItem("user_id")
     const [open, setOpen] = React.useState(true);
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -194,6 +196,7 @@ export default function CreateGroup() {
         try {
             const response = await createGroup(values.groupName, groupMembers, userId);
             alert("Group created successfully!")
+            navigate(`/group/user/${user_id}`);
             setValues({ groupName: '' });
             setSelectedMembers([]);
 
