@@ -307,7 +307,7 @@ export default function ListOfContacts() {
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              SPLITTR
             </Typography>
 
             <IconButton color="inherit">

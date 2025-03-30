@@ -168,6 +168,8 @@ export default function Dashboard() {
     const getUser = async () => {
       const data = await actions.getUser()
       setUser(data)
+      console.log(data);
+
     }
     getUser();
   }, [])
@@ -206,13 +208,13 @@ export default function Dashboard() {
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              Welcome, {user?.name}!
             </Typography>
 
             <IconButton color="inherit">
-            
-                <LogoutButton />
-       
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>
@@ -234,14 +236,14 @@ export default function Dashboard() {
           <Container maxWidth="lg" className={classes.container}>
             <Grid container spacing={3}>
 
-             
+
               <Grid item xs={12} style={{ display: "flex", width: "100%" }}>
                 <Paper className={fixedHeightPaper}>
                   <FinancialDashboard />
                 </Paper>
               </Grid>
 
-             
+
               <Grid item xs={12} style={{ display: "flex", flexDirection: "column", width: "100%" }}>
                 <Paper className={classes.paper} style={{ flexGrow: 1 }}>
                   <Orders />
@@ -253,7 +255,7 @@ export default function Dashboard() {
             </Box>
           </Container>
         </main>
-        <FloatingActionButtonMenu/>
+        <FloatingActionButtonMenu />
       </div>
     </ThemeProvider>
   );
