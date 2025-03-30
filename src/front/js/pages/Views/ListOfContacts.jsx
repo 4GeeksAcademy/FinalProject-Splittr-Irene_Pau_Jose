@@ -40,6 +40,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { mapContacts, addUserContactByEmail, sendInvitation } from '../../component/callToApi.js';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 
 const darkTheme = createMuiTheme({
@@ -306,14 +308,17 @@ export default function ListOfContacts() {
               </IconButton>
             )}
 
+<Typography component="h1" variant="h6" noWrap className={classes.title}>
+              <SplittrLogo />
+            </Typography>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              SPLITTR
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>

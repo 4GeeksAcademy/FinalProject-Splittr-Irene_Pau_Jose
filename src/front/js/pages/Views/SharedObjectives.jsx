@@ -26,8 +26,8 @@ import Orders from '../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
-
-
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
@@ -142,9 +142,9 @@ const useStyles = makeStyles((theme) => ({
     position: 'fixed',
     bottom: theme.spacing(3),
     right: theme.spacing(3),
-    borderRadius: '50%', 
-    width: theme.spacing(7), 
-    height: theme.spacing(7), 
+    borderRadius: '50%',
+    width: theme.spacing(7),
+    height: theme.spacing(7),
   },
 }));
 
@@ -164,7 +164,7 @@ export default function SharedObjectives() {
   const [sharedObjectives, setSharedObjectives] = useState([]);
   const { userid } = useParams();
   const navigate = useNavigate();
-console.log(userid);
+  console.log(userid);
 
 
   useEffect(() => {
@@ -172,7 +172,7 @@ console.log(userid);
 
   }, [])
 
- 
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -206,13 +206,16 @@ console.log(userid);
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              <SplittrLogo />
+            </Typography>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>
@@ -235,17 +238,17 @@ console.log(userid);
 
             <Grid container spacing={3} className={classes.contactGrid}>
               {Array.isArray(sharedObjectives) && sharedObjectives.map((sharedObjective, index) => (
-                <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective}  />
+                <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective} />
               ))}
             </Grid>
           </Container>
         </main>
-        <Fab   variant="contained" className={classes.fabButton}
-  color="primary" 
-  onClick={() => navigate(`/objective/create/${userid}`)} 
-  style={{ marginTop: '10px' }}
->
-  <AddIcon />
+        <Fab variant="contained" className={classes.fabButton}
+          color="primary"
+          onClick={() => navigate(`/objective/create/${userid}`)}
+          style={{ marginTop: '10px' }}
+        >
+          <AddIcon />
         </Fab>
       </div>
     </ThemeProvider>

@@ -30,6 +30,8 @@ import FormControl from '@material-ui/core/FormControl';
 import { Context } from '../../store/appContext.js';
 import { updateUser } from '../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 // Copyright component
 function Copyright() {
@@ -162,12 +164,15 @@ export default function Settings() {
               {open ? <ChevronLeftIcon /> : <MenuIcon />}
             </IconButton>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              <SplittrLogo />
+            </Typography>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>

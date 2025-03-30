@@ -33,6 +33,8 @@ import { mapTransactions } from '../../component/callToApi.js';
 import FloatingActionButtonMenu from '../../component/FloatingActionButtonMenu.jsx';
 import FinancialDashboard from '../../component/FinancialDashboard.jsx';
 import LogoutButton from '../../component/LogOutButton.jsx';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+
 
 function Copyright() {
   return (
@@ -206,6 +208,10 @@ export default function Dashboard() {
                 <ChevronLeftIcon />
               </IconButton>
             )}
+
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              <SplittrLogo />
+            </Typography>
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, {user?.name}!

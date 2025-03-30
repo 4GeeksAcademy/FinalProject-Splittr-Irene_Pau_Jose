@@ -42,7 +42,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
-
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 function Copyright() {
   return (
@@ -283,7 +284,7 @@ export default function Messages() {
   // Transform mapped conversations for rendering, sorted by most recent message
   const getConversationsList = () => {
     // Flatten conversations and add sorting
-    const flattenedConvos = mappedConversations.flatMap(userConvos => 
+    const flattenedConvos = mappedConversations.flatMap(userConvos =>
       userConvos.conversations.map(convo => ({
         from_user_id: userConvos.user_id,
         from_user_name: userConvos.username,
@@ -298,7 +299,7 @@ export default function Messages() {
       // Convert to timestamps for proper comparison
       const dateA = new Date(a.sent_at).getTime();
       const dateB = new Date(b.sent_at).getTime();
-      
+
       // Sort in descending order (most recent first)
       return dateB - dateA;
     });
@@ -334,17 +335,20 @@ export default function Messages() {
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              <SplittrLogo />
+            </Typography>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>
-        
+
         <Drawer
           variant="permanent"
           classes={{
@@ -357,7 +361,7 @@ export default function Messages() {
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
-        
+
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
@@ -386,7 +390,7 @@ export default function Messages() {
             </Grid>
           </Container>
         </main>
-        
+
         <Fab
           color="primary"
           className={classes.fabButton}
