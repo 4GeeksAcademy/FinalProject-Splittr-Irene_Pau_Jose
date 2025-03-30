@@ -417,7 +417,7 @@ def send_invitation():
     try:
         # Create temporary placeholder user with the generated password
         temp_user = User(
-            name=f"Invited-{username}",
+            name=f"Invited - {username}",
             email=contact_email,
             password=temp_password,  # Store the generated password
             birthday=None
