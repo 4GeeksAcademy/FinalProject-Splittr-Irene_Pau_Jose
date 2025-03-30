@@ -46,7 +46,7 @@ export default function LogoutButton() {
 
   return (
     <>
-      {/* Tooltip and Button */}
+
       <Tooltip title="Log out" arrow>
         <IconButton 
           className={classes.logoutButton} 
@@ -57,7 +57,7 @@ export default function LogoutButton() {
         </IconButton>
       </Tooltip>
 
-      {/* Confirmation Dialog */}
+   
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}

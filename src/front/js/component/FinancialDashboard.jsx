@@ -135,7 +135,7 @@ export default function FinancialDashboard() {
                     </Paper>
                 </Grid>
 
-                {/* Summary Cards */}
+          
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
                         <Typography variant="h6" className={classes.title}>

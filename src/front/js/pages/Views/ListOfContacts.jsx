@@ -336,7 +336,7 @@ export default function ListOfContacts() {
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
             <Grid container spacing={2} className={classes.contactGrid}>
-              {/* Regular Contacts Section */}
+           
               {regularContacts.length > 0 && (
                 <>
                   <Typography variant="h6" className={classes.categoryTitle}>
@@ -348,7 +348,7 @@ export default function ListOfContacts() {
                 </>
               )}
               
-              {/* Invited Contacts Section */}
+            
               {invitedContacts.length > 0 && (
                 <>
                   {regularContacts.length > 0 && <Divider className={classes.categoryDivider} />}
@@ -361,10 +361,10 @@ export default function ListOfContacts() {
                 </>
               )}
               
-              {/* Show loading message if contacts aren't loaded yet */}
+        
               {!contacts || !contacts.contacts && <div>Cargando contactos...</div>}
               
-              {/* Show empty state if there are no contacts */}
+        
               {contacts && contacts.contacts && contacts.contacts.length === 0 && (
                 <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
                   No contacts found. Add a contact using the + button.
@@ -378,7 +378,7 @@ export default function ListOfContacts() {
           <AddIcon />
         </Fab>
 
-        {/* Add Contact Dialog */}
+
         <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
           <DialogTitle>Add Contact</DialogTitle>
           <DialogContent>

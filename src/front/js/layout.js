@@ -74,7 +74,7 @@ const Layout = () => {
 
 
                     </Routes>
-                    <Footer />
+                    
                 </ScrollToTop>
             </BrowserRouter>
         </div>

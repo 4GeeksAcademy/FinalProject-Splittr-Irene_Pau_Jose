@@ -18,8 +18,7 @@ export const Demo = () => {
 							<Link to={"/single/" + index}>
 								<span>Link to: {item.title}</span>
 							</Link>
-							{// Conditional render example
-							// Check to see if the background is orange, if so, display the message
+				
 							item.background === "orange" ? (
 								<p style={{ color: item.initial }}>
 									Check store/flux.js scroll to the actions to see the code

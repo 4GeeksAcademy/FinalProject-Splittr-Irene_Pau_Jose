@@ -191,7 +191,7 @@ export default function About() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            {/* Show MenuIcon when the drawer is closed */}
+
             {!open && (
               <IconButton
                 edge="start"
@@ -204,7 +204,7 @@ export default function About() {
               </IconButton>
             )}
 
-            {/* Show ChevronLeftIcon when the drawer is open */}
+
             {open && (
               <IconButton
                 edge="start"
