@@ -8,20 +8,20 @@ import CloseIcon from '@material-ui/icons/Close';
 import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
-  card: {
-    display: "flex",
-    width: "100%",
-    minHeight: 70,
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing(1),
-    backgroundColor: "#2C2F33",
-    marginBottom: theme.spacing(1),
-    borderRadius: 4,
-    [theme.breakpoints.down('sm')]: {
+    card: {
+        display: "flex",
+        width: "100%",
+        minHeight: 70,
+        alignItems: "center",
+        justifyContent: "space-between",
         padding: theme.spacing(1),
+        backgroundColor: "#2C2F33",
+        marginBottom: theme.spacing(1),
+        borderRadius: 4,
+        [theme.breakpoints.down('sm')]: {
+            padding: theme.spacing(1),
+        },
     },
-},
     iconButton: {
         color: "#ffffff",
         padding: theme.spacing(0.5),
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
         [theme.breakpoints.down('sm')]: {
             fontSize: '0.875rem',
-        }, 
+        },
     },
     initial: {
         width: 40,
@@ -53,6 +53,12 @@ const useStyles = makeStyles((theme) => ({
             width: 30,
             height: 30,
             fontSize: '0.8rem',
+        },
+        link: {
+            textDecoration: "none",
+            display: "block",
+            width: "100%",
+            marginBottom: theme.spacing(1),
         },
     },
 }));
@@ -76,19 +82,22 @@ const ContactCard = ({ contact }) => {
 
     return (
         <>
-            <Link to={`/singlecontact/${contact.contact_id}`}>
+            <Link
+                to={`/singlecontact/${contact.contact_id}`}
+                style={{ textDecoration: 'none' }}
+            >
                 <Paper className={classes.card}>
                     <div className={classes.name}>
                         <div className={classes.initial}>{contact.contact_initial}</div>
                         <Typography variant="h6" style={{ fontSize: '1rem' }}>{contact.contact_name}</Typography>
                     </div>
                     <div>
-                        
+
                         <IconButton className={classes.iconButton}>
                             <MailIcon fontSize="small" />
                         </IconButton>
-                        
-                
+
+
                     </div>
                     <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
                         <DialogTitle>Delete contact</DialogTitle>

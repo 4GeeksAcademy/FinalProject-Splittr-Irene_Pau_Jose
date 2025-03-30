@@ -44,7 +44,11 @@ const darkTheme = createMuiTheme({
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
-    root: { display: 'flex' },
+    root: { 
+        display: 'flex',
+        height: '100vh',       
+        overflow: 'hidden'     
+    },
     toolbar: { paddingRight: 20, minHeight: 70 },
     toolbarIcon: { display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px' },
     appBar: { zIndex: theme.zIndex.drawer + 1, transition: theme.transitions.create(['width', 'margin'], { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen }), backgroundColor: '#000000', color: theme.palette.text.primary },
@@ -55,22 +59,24 @@ const useStyles = makeStyles((theme) => ({
     drawerPaperClose: { overflowX: 'hidden', transition: theme.transitions.create('width', { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen }), width: theme.spacing(7), [theme.breakpoints.up('sm')]: { width: theme.spacing(9) }, top: 30 },
     container: {
         paddingTop: theme.spacing(4),
-        paddingBottom: theme.spacing(4),
+        
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        minHeight: '100vh',
-    },
+          },
     card: {
         width: "90%",
-        maxWidth: "1200px",
-        height: "90vh",
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'auto',
+    maxWidth: "1200px",
+    height: "90vh", 
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden'
     },
-    cardContent: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
+    cardContent: { display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+        overflow: 'hidden' },
     avatar: { width: 60, height: 60, fontSize: '2rem' },
     messages: {
         display: 'flex',
@@ -226,7 +232,7 @@ export default function TextMessages() {
                 <CssBaseline />
                 <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
                     <Toolbar className={classes.toolbar}>
-                        {/* ... (keep your existing AppBar code) ... */}
+             
                     </Toolbar>
                 </AppBar>
                 <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>

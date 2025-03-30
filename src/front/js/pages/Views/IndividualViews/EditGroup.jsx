@@ -315,7 +315,7 @@ export default function EditGroup() {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            {/* Show MenuIcon when the drawer is closed */}
+     
             {!open && (
               <IconButton
                 edge="start"
@@ -328,7 +328,7 @@ export default function EditGroup() {
               </IconButton>
             )}
 
-            {/* Show ChevronLeftIcon when the drawer is open */}
+   
             {open && (
               <IconButton
                 edge="start"
@@ -439,8 +439,8 @@ export default function EditGroup() {
                             <Typography>Loading contacts...</Typography>
                         ) : (
                             nonGroupMembers.map((contact) => (
-                                <Grid item xs={12} sm={6} md={4} key={contact.contact_id}> {/* Cambiar key a contact.contact_id */}
-                                    {/* Cambios aquí: Añadir user_id al objeto contact */}
+                                <Grid item xs={12} sm={6} md={4} key={contact.contact_id}> 
+                               
                                     <AddContactCardInEditGroup
                                         contact={{
                                             ...contact,
