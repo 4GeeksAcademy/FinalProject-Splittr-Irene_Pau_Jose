@@ -33,6 +33,8 @@ import Button from '@material-ui/core/Button';
 
 import { Context } from '../../store/appContext.js';
 import { submitFeedback } from '../../component/callToApi.js';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 
 function Copyright() {
@@ -149,14 +151,14 @@ export default function Feedback() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const { store, actions } = useContext(Context);
   const [user, setUser] = useState(store.userInfo);
-  const updatedData = { email: user.email};
-  
-    useEffect(() => {
-      const getUser = async () => {
-          const data = await actions.getUser();
-          if (data) setUser(data); 
-      };
-      getUser();
+  const updatedData = { email: user.email };
+
+  useEffect(() => {
+    const getUser = async () => {
+      const data = await actions.getUser();
+      if (data) setUser(data);
+    };
+    getUser();
   }, []);
 
   const handleSendFeedback = async () => {
@@ -210,13 +212,16 @@ export default function Feedback() {
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              <SplittrLogo />
+            </Typography>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>

@@ -24,6 +24,8 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 function Copyright() {
   return (
@@ -216,13 +218,16 @@ export default function About() {
             )}
 
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              <SplittrLogo />
+            </Typography>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>
@@ -238,26 +243,26 @@ export default function About() {
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
-        
+
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
             <Typography component="h1" variant="h4" className={classes.aboutTitle}>
               About Splittr
             </Typography>
-            
+
             <Paper className={classes.paper}>
               <Typography variant="h6" className={classes.sectionTitle}>
                 Our Mission
               </Typography>
               <Typography variant="body1" paragraph>
-                Splittr was born from a simple idea: make sharing expenses with friends, family, and colleagues 
-                as easy and stress-free as possible. We believe that money matters shouldn't get in the way of 
-                relationships, which is why we've created a comprehensive platform that helps you manage shared 
+                Splittr was born from a simple idea: make sharing expenses with friends, family, and colleagues
+                as easy and stress-free as possible. We believe that money matters shouldn't get in the way of
+                relationships, which is why we've created a comprehensive platform that helps you manage shared
                 expenses effortlessly.
               </Typography>
             </Paper>
-            
+
             <Paper className={classes.paper}>
               <Typography variant="h6" className={classes.sectionTitle}>
                 Key Features
@@ -290,7 +295,7 @@ export default function About() {
                 </li>
               </ul>
             </Paper>
-            
+
             <Paper className={classes.paper}>
               <Typography variant="h6" className={classes.sectionTitle}>
                 The Team Behind Splittr
@@ -298,7 +303,7 @@ export default function About() {
               <Typography variant="body1" paragraph>
                 Splittr was created by two passionate developers committed to solving everyday financial challenges through technology.
               </Typography>
-              
+
               <div className={classes.creatorsContainer}>
                 <div className={classes.creatorCard}>
                   <Avatar className={classes.avatar}>JR</Avatar>
@@ -309,7 +314,7 @@ export default function About() {
                     Co-Founder & Lead Developer
                   </Typography>
                 </div>
-                
+
                 <div className={classes.creatorCard}>
                   <Avatar className={classes.avatar}>IB</Avatar>
                   <Typography variant="h6" className={classes.creatorName}>
@@ -321,7 +326,7 @@ export default function About() {
                 </div>
               </div>
             </Paper>
-            
+
             <Box pt={4}>
               <Copyright />
             </Box>

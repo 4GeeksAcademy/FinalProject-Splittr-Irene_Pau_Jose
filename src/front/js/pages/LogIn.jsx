@@ -118,11 +118,21 @@ const handleSubmit = async (e) =>{
   return (
     <ThemeProvider theme={darkTheme}>
       <div className="d-flex flex-column justify-content-center align-items-center bg-dark text-white">
-        <h1 className="display-3 ">
-          <span className="text-white fw-bold">S </span>PLI <br />
-          <span className="text-white ms-3">TTR</span>
-        </h1>
-      </div>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    fontFamily: "'Roboto', sans-serif",
+    fontWeight: 700,
+    letterSpacing: 1,
+    fontSize: '2rem'
+  }}>
+    <span style={{ fontSize: '3rem', marginRight: '2px' }}>S</span>
+    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.9 }}>
+      <span>PLI</span>
+      <span>TTR</span>
+    </div>
+  </div>
+</div>
 
 
       <Container component="main" maxWidth="xs">

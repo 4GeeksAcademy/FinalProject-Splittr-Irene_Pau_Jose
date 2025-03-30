@@ -40,6 +40,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { mapContacts, addUserContactByEmail, sendInvitation } from '../../component/callToApi.js';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 
 const darkTheme = createMuiTheme({
@@ -150,6 +152,14 @@ const useStyles = makeStyles((theme) => ({
     bottom: theme.spacing(3),
     right: theme.spacing(3),
   },
+  categoryDivider: {
+    width: '100%',
+    margin: theme.spacing(2, 0),
+  },
+  categoryTitle: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 export default function ListOfContacts() {
@@ -166,6 +176,8 @@ export default function ListOfContacts() {
   const { store, actions } = useContext(Context);
 
   const [contacts, setContacts] = useState([]);
+  const [regularContacts, setRegularContacts] = useState([]);
+  const [invitedContacts, setInvitedContacts] = useState([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [email, setEmail] = useState('');
   const [invitationDialog, setInvitationDialog] = useState(false);
@@ -187,6 +199,45 @@ export default function ListOfContacts() {
       isMounted = false;
     };
   }, []);
+
+  // When contacts are loaded, sort them into regular and invited contacts
+  useEffect(() => {
+    if (contacts?.contacts && Array.isArray(contacts.contacts)) {
+      console.log("Original contacts:", contacts.contacts);
+      
+      // Separate regular and invited contacts (note the hyphen)
+      const regular = contacts.contacts.filter(contact => 
+        !contact.contact_name?.startsWith('Invited-')
+      );
+      
+      const invited = contacts.contacts.filter(contact => 
+        contact.contact_name?.startsWith('Invited-')
+      );
+      
+      console.log("Regular contacts before sort:", regular);
+      console.log("Invited contacts before sort:", invited);
+      
+      // Sort regular contacts alphabetically by contact_name
+      regular.sort((a, b) => {
+        const nameA = a.contact_name?.toUpperCase() || '';
+        const nameB = b.contact_name?.toUpperCase() || '';
+        return nameA.localeCompare(nameB);
+      });
+      
+      // Sort invited contacts alphabetically by contact_name
+      invited.sort((a, b) => {
+        const nameA = a.contact_name?.toUpperCase() || '';
+        const nameB = b.contact_name?.toUpperCase() || '';
+        return nameA.localeCompare(nameB);
+      });
+      
+      console.log("Regular contacts after sort:", regular);
+      console.log("Invited contacts after sort:", invited);
+      
+      setRegularContacts(regular);
+      setInvitedContacts(invited);
+    }
+  }, [contacts]);
 
   const handleSendInvitation = async () => {
     try {
@@ -257,14 +308,17 @@ export default function ListOfContacts() {
               </IconButton>
             )}
 
+<Typography component="h1" variant="h6" noWrap className={classes.title}>
+              <SplittrLogo />
+            </Typography>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
 
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+
+              <LogoutButton />
+
             </IconButton>
           </Toolbar>
         </AppBar>
@@ -282,10 +336,40 @@ export default function ListOfContacts() {
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
             <Grid container spacing={2} className={classes.contactGrid}>
-              {contacts && contacts.contacts && Array.isArray(contacts.contacts) && contacts.contacts.map((contact) => (
-                <ContactCard key={contact.id} contact={contact} />
-              ))}
-              {!contacts && <div>Cargando contactos...</div>}
+              {/* Regular Contacts Section */}
+              {regularContacts.length > 0 && (
+                <>
+                  <Typography variant="h6" className={classes.categoryTitle}>
+                    Contacts
+                  </Typography>
+                  {regularContacts.map((contact) => (
+                    <ContactCard key={contact.id} contact={contact} />
+                  ))}
+                </>
+              )}
+              
+              {/* Invited Contacts Section */}
+              {invitedContacts.length > 0 && (
+                <>
+                  {regularContacts.length > 0 && <Divider className={classes.categoryDivider} />}
+                  <Typography variant="h6" className={classes.categoryTitle}>
+                    Pending Invitations
+                  </Typography>
+                  {invitedContacts.map((contact) => (
+                    <ContactCard key={contact.id} contact={contact} />
+                  ))}
+                </>
+              )}
+              
+              {/* Show loading message if contacts aren't loaded yet */}
+              {!contacts || !contacts.contacts && <div>Cargando contactos...</div>}
+              
+              {/* Show empty state if there are no contacts */}
+              {contacts && contacts.contacts && contacts.contacts.length === 0 && (
+                <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
+                  No contacts found. Add a contact using the + button.
+                </Typography>
+              )}
             </Grid>
           </Container>
         </main>
@@ -320,7 +404,6 @@ export default function ListOfContacts() {
           </DialogActions>
         </Dialog>
 
-       
         <Dialog open={invitationDialog} onClose={() => {
           setInvitationDialog(false);
           setInvitationEmail("");
