@@ -84,7 +84,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -116,8 +115,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
-
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -127,28 +124,28 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
-  },
-  appBarSpacer: {
-    minHeight: theme.spacing(4),
   },
   container: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(4)
-
   },
-  contactGrid: {
+  content: {
+    width: '100%',
+    height: '100%',
     display: 'flex',
-
+    flexDirection: 'column',
   },
   fabButton: {
     position: 'fixed',
     bottom: theme.spacing(3),
     right: theme.spacing(3),
-    borderRadius: '50%',
-    width: theme.spacing(7),
-    height: theme.spacing(7),
   },
+  paper: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  }
 }));
 
 export default function Groups() {
@@ -160,30 +157,20 @@ export default function Groups() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const navigate = useNavigate();
-
   const { store, actions } = useContext(Context);
-
   const [groups, setGroups] = useState([]);
-
   const { userid } = useParams();
-  console.log(userid);
-
 
   useEffect(() => {
-
     mapGroups(setGroups, userid)
-
   }, [])
-
-
 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
             {!open && (
               <IconButton
@@ -196,8 +183,6 @@ export default function Groups() {
                 <MenuIcon />
               </IconButton>
             )}
-
-
             {open && (
               <IconButton
                 edge="start"
@@ -209,49 +194,49 @@ export default function Groups() {
                 <ChevronLeftIcon />
               </IconButton>
             )}
-<Typography component="h1" variant="h6" noWrap className={classes.title}>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
               <SplittrLogo />
             </Typography>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
-
             <IconButton color="inherit">
-
               <LogoutButton />
-
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
-          <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-
-            <Grid container spacing={3} justifyContent="center" >
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+             <Grid container spacing={3} justifyContent="center"  style={{ marginTop: 2 }} >
               {Array.isArray(groups) && groups.map((group, index) => (
                 <GroupCard key={group.id || index} group={group} />
               ))}
             </Grid>
-          </Container>
-        </main>
-
-        <Fab variant="contained" className={classes.fabButton}
-          color="primary"
+              <Box pt={4}>
+                <Copyright />
+              </Box>
+            </Container>
+          </main>
+        </div>
+        <Fab 
+          color="primary" 
+          className={classes.fabButton}
           onClick={() => navigate(`/group/create/${userid}`)}
-          style={{ marginTop: '10px' }}
         >
           <AddIcon />
         </Fab>
@@ -259,4 +244,3 @@ export default function Groups() {
     </ThemeProvider>
   );
 }
-

@@ -15,8 +15,7 @@ import Container from '@material-ui/core/Container';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { signUpUser } from '../component/callToApi';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
 
 function Copyright() {
   return (
@@ -40,16 +39,32 @@ const useStyles = makeStyles((theme) => ({
   input: {
     backgroundColor: '#222',
     color: '#ffffff',
+    marginBottom: theme.spacing(3),
     '& .MuiOutlinedInput-root': {
       '& fieldset': { borderColor: '#555' },
       '&:hover fieldset': { borderColor: '#aaa' },
       '&.Mui-focused fieldset': { borderColor: '#ffffff' },
     },
   },
+  form: {
+    marginTop: theme.spacing(4),
+  },
   submit: {
     backgroundColor: '#ffffff',
     color: '#111',
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(2),
     '&:hover': { backgroundColor: '#dddddd' },
+  },
+  title: {
+    marginBottom: theme.spacing(4),
+  },
+  checkbox: {
+    marginTop: theme.spacing(1),
+  },
+  message: {
+    marginBottom: theme.spacing(2),
+    textAlign: 'center',
   },
 }));
 
@@ -80,14 +95,49 @@ export default function SignUp() {
     password: ''
   });
 
+  const [displayPassword, setDisplayPassword] = useState("");
+  const [passwordTimeout, setPasswordTimeout] = useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
-  // Maneja el cambio en los inputs
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "password") {
+      // Update the actual password immediately
+      setFormData({
+        ...formData, 
+        [e.target.name]: e.target.value
+      });
+      
+      // Clear any existing timeout
+      if (passwordTimeout) {
+        clearTimeout(passwordTimeout);
+      }
+      
+      // Show the actual character briefly before masking
+      setDisplayPassword(e.target.value);
+      
+      // Set a timeout to mask the character after 500ms
+      const timeout = setTimeout(() => {
+        setDisplayPassword('•'.repeat(e.target.value.length));
+      }, 500);
+      
+      setPasswordTimeout(timeout);
+    } else {
+      setFormData({
+        ...formData, 
+        [e.target.name]: e.target.value
+      });
+    }
   };
 
+  // Clean up timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (passwordTimeout) {
+        clearTimeout(passwordTimeout);
+      }
+    };
+  }, [passwordTimeout]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,41 +150,53 @@ export default function SignUp() {
       setError(response.msg || "Something went wrong");
     } else {
       setSuccessMessage("User created successfully!");
-      setTimeout(() => navigate('/login'), 2000); // Redirigir tras 2s
+      setTimeout(() => navigate('/login'), 2000);
     }
   };
 
   return (
     <ThemeProvider theme={darkTheme}>
-     <div className="d-flex flex-column justify-content-center align-items-center bg-dark text-white">
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    fontFamily: "'Roboto', sans-serif",
-    fontWeight: 700,
-    letterSpacing: 1,
-    fontSize: '2rem'
-  }}>
-    <span style={{ fontSize: '3rem', marginRight: '2px' }}>S</span>
-    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.9 }}>
-      <span>PLI</span>
-      <span>TTR</span>
-    </div>
-  </div>
-</div>
+      <div className="d-flex flex-column justify-content-center align-items-center bg-dark text-white">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontFamily: "'Roboto', sans-serif",
+          fontWeight: 700,
+          letterSpacing: 1,
+          fontSize: '2rem',
+          marginBottom: '2rem'
+        }}>
+          <span style={{ fontSize: '3rem', marginRight: '2px' }}>S</span>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.9 }}>
+            <span>PLI</span>
+            <span>TTR</span>
+          </div>
+        </div>
+      </div>
+
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <Typography component="h1" variant="h5" style={{ marginBottom: "16px" }} >
+          <Typography component="h1" variant="h5" className={classes.title} align="center">
             Sign up
           </Typography>
-          {error && <Typography color="error">{error}</Typography>}
-          {successMessage && <Typography color="primary">{successMessage}</Typography>}
+          
+          {error && (
+            <Typography color="error" className={classes.message}>
+              {error}
+            </Typography>
+          )}
+          {successMessage && (
+            <Typography color="primary" className={classes.message}>
+              {successMessage}
+            </Typography>
+          )}
+          
           <form className={classes.form} noValidate onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
+            <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextField
-                  className={classes.form}
+                  className={classes.input}
                   variant="outlined"
                   required
                   fullWidth
@@ -144,12 +206,11 @@ export default function SignUp() {
                   value={formData.name}
                   onChange={handleChange}
                   autoComplete="name"
-                  InputLabelProps={{ style: { color: '#cccccc' } }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  className={classes.form}
+                  className={classes.input}
                   variant="outlined"
                   required
                   fullWidth
@@ -159,40 +220,36 @@ export default function SignUp() {
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="email"
-                  InputLabelProps={{ style: { color: '#cccccc' } }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  className={classes.form}
+                  className={classes.input}
                   variant="outlined"
                   required
                   fullWidth
                   name="password"
                   label="Password"
-                  type="password"
+                  type="password" // This ensures the browser's native password masking doesn't interfere
                   id="password"
-                  value={formData.password}
                   onChange={handleChange}
-                  autoComplete="current-password"
-                  InputLabelProps={{ style: { color: '#cccccc' } }}
+                  value={displayPassword}
+                  autoComplete="new-password"
                 />
               </Grid>
-              <Grid item xs={12}>
-              </Grid>
-              </Grid>
+            </Grid>
             
             <Button
-               type="submit"
-               fullWidth
-               variant="contained"
-               color="primary"
-               className={classes.submit}
-               style={{ marginTop: "10px" }}
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
             >
               Sign Up
             </Button>
-            <Grid container justifyContent="flex-end">
+            
+            <Grid container justifyContent="center" spacing={2}>
               <Grid item>
                 <Link href="/login" variant="body2">
                   Already have an account? Sign in
@@ -201,7 +258,7 @@ export default function SignUp() {
             </Grid>
           </form>
         </div>
-        <Box mt={5}>
+        <Box mt={8}>
           <Copyright />
         </Box>
       </Container>

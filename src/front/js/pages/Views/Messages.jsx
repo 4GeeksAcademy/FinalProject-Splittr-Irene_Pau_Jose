@@ -94,7 +94,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -104,7 +103,6 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
@@ -134,7 +132,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(2, 0),
   },
   categoryTitle: {
-    marginTop: theme.spacing(2),
+    
     marginBottom: theme.spacing(1),
   },
   sectionHeader: {
@@ -226,7 +224,6 @@ export default function Messages() {
     }
   }, [userid]);
 
-  // Separate conversations into regular and invited when data is loaded
   useEffect(() => {
     if (mappedConversations.length > 0) {
       const regular = [];
@@ -261,7 +258,6 @@ export default function Messages() {
     }
   }, [mappedConversations]);
 
-  // Sort contacts into members and non-members when contacts change
   useEffect(() => {
     if (contacts?.contacts && Array.isArray(contacts.contacts)) {
       const regular = contacts.contacts.filter(contact => 
@@ -288,7 +284,7 @@ export default function Messages() {
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
             {!open && (
               <IconButton
@@ -301,7 +297,6 @@ export default function Messages() {
                 <MenuIcon />
               </IconButton>
             )}
-
             {open && (
               <IconButton
                 edge="start"
@@ -313,86 +308,85 @@ export default function Messages() {
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               <SplittrLogo />
             </Typography>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
-
             <IconButton color="inherit">
               <LogoutButton />
             </IconButton>
           </Toolbar>
         </AppBar>
-
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-          <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
-
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Grid container spacing={2} className={classes.contactGrid}>
-              {loading ? (
-                <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
-                  Loading conversations...
-                </Typography>
-              ) : error ? (
-                <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
-                  Error: {error}
-                </Typography>
-              ) : (
-                <>
-                  {regularConversations.length > 0 && (
-                    <>
-                      <Typography variant="h6" className={classes.categoryTitle}>
-                        Active Conversations
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+              <Grid container spacing={2} className={classes.contactGrid}>
+                {loading ? (
+                  <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
+                    Loading conversations...
+                  </Typography>
+                ) : error ? (
+                  <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
+                    Error: {error}
+                  </Typography>
+                ) : (
+                  <>
+                    {regularConversations.length > 0 && (
+                      <>
+                        <Typography variant="h6" className={classes.categoryTitle}>
+                          Active Conversations
+                        </Typography>
+                        {regularConversations.map((conversation, index) => (
+                          <MessageCard
+                            key={`regular-${conversation.from_user_id}-${index}`}
+                            message={conversation}
+                          />
+                        ))}
+                      </>
+                    )}
+                    
+                    {invitedConversations.length > 0 && (
+                      <>
+                        {regularConversations.length > 0 && <Divider className={classes.categoryDivider} />}
+                        <Typography variant="h6" className={classes.categoryTitle}>
+                          Pending Invitations
+                        </Typography>
+                        {invitedConversations.map((conversation, index) => (
+                          <MessageCard
+                            key={`invited-${conversation.from_user_id}-${index}`}
+                            message={conversation}
+                          />
+                        ))}
+                      </>
+                    )}
+                    
+                    {regularConversations.length === 0 && invitedConversations.length === 0 && !loading && !error && (
+                      <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
+                        No conversations found. Start a conversation using the + button.
                       </Typography>
-                      {regularConversations.map((conversation, index) => (
-                        <MessageCard
-                          key={`regular-${conversation.from_user_id}-${index}`}
-                          message={conversation}
-                        />
-                      ))}
-                    </>
-                  )}
-                  
-                  {invitedConversations.length > 0 && (
-                    <>
-                      {regularConversations.length > 0 && <Divider className={classes.categoryDivider} />}
-                      <Typography variant="h6" className={classes.categoryTitle}>
-                        Pending Invitations
-                      </Typography>
-                      {invitedConversations.map((conversation, index) => (
-                        <MessageCard
-                          key={`invited-${conversation.from_user_id}-${index}`}
-                          message={conversation}
-                        />
-                      ))}
-                    </>
-                  )}
-                  
-                  {regularConversations.length === 0 && invitedConversations.length === 0 && !loading && !error && (
-                    <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
-                      No conversations found. Start a conversation using the + button.
-                    </Typography>
-                  )}
-                </>
-              )}
-            </Grid>
-          </Container>
-        </main>
+                    )}
+                  </>
+                )}
+              </Grid>
+            </Container>
+          </main>
+        </div>
 
         <Fab
           color="primary"
@@ -403,81 +397,81 @@ export default function Messages() {
         </Fab>
 
         <Dialog
-  open={openContactDialog}
-  onClose={() => setOpenContactDialog(false)}
-  maxWidth="xs"
-  fullWidth
-  PaperProps={{
-    className: classes.dialog,
-  }}
->
-  <DialogTitle className={classes.dialogTitle}>Start a Conversation</DialogTitle>
-  <DialogContent dividers className={classes.dialogContent}>
-  
-    {regularContacts.length > 0 && (
-      <>
-        <Typography className={classes.sectionHeader}>Members</Typography>
-        <List>
-          {regularContacts.map((contact) => (
-            <ListItem
-              button
-              key={contact.contact_id}
-              onClick={() => handleStartConversation(contact.contact_id)}
-              className={classes.listItem}
-            >
-              <ListItemAvatar>
-                <Avatar className={classes.avatar}>{contact.contact_initial}</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={contact.contact_name}
-                secondary={contact.contact_email}
-                primaryTypographyProps={{ style: { color: '#FFFFFF' } }}
-                secondaryTypographyProps={{ style: { color: '#B9BBBE' } }}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </>
-    )}
+          open={openContactDialog}
+          onClose={() => setOpenContactDialog(false)}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{
+            className: classes.dialog,
+          }}
+        >
+          <DialogTitle className={classes.dialogTitle}>Start a Conversation</DialogTitle>
+          <DialogContent dividers className={classes.dialogContent}>
+          
+            {regularContacts.length > 0 && (
+              <>
+                <Typography className={classes.sectionHeader}>Members</Typography>
+                <List>
+                  {regularContacts.map((contact) => (
+                    <ListItem
+                      button
+                      key={contact.contact_id}
+                      onClick={() => handleStartConversation(contact.contact_id)}
+                      className={classes.listItem}
+                    >
+                      <ListItemAvatar>
+                        <Avatar className={classes.avatar}>{contact.contact_initial}</Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={contact.contact_name}
+                        secondary={contact.contact_email}
+                        primaryTypographyProps={{ style: { color: '#FFFFFF' } }}
+                        secondaryTypographyProps={{ style: { color: '#B9BBBE' } }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </>
+            )}
 
-    {invitedContacts.length > 0 && (
-      <>
-        <Typography className={classes.sectionHeader}>Pending Members</Typography>
-        <List>
-          {invitedContacts.map((contact) => (
-            <ListItem
-              button
-              key={contact.contact_id}
-              onClick={() => handleStartConversation(contact.contact_id)}
-              className={`${classes.listItem} ${classes.fadedItem}`}
-            >
-              <ListItemAvatar>
-                <Avatar className={classes.avatar}>{contact.contact_initial}</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={contact.contact_name.replace('Invited-', '')}
-                secondary={contact.contact_email}
-                primaryTypographyProps={{ style: { color: '#B9BBBE' } }}
-                secondaryTypographyProps={{ style: { color: '#72767D' } }}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </>
-    )}
+            {invitedContacts.length > 0 && (
+              <>
+                <Typography className={classes.sectionHeader}>Pending Members</Typography>
+                <List>
+                  {invitedContacts.map((contact) => (
+                    <ListItem
+                      button
+                      key={contact.contact_id}
+                      onClick={() => handleStartConversation(contact.contact_id)}
+                      className={`${classes.listItem} ${classes.fadedItem}`}
+                    >
+                      <ListItemAvatar>
+                        <Avatar className={classes.avatar}>{contact.contact_initial}</Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={contact.contact_name.replace('Invited-', '')}
+                        secondary={contact.contact_email}
+                        primaryTypographyProps={{ style: { color: '#B9BBBE' } }}
+                        secondaryTypographyProps={{ style: { color: '#72767D' } }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </>
+            )}
 
-    {regularContacts.length === 0 && invitedContacts.length === 0 && (
-      <Typography align="center" style={{ padding: '16px', color: '#B9BBBE' }}>
-        No contacts found
-      </Typography>
-    )}
-  </DialogContent>
-  <DialogActions style={{ backgroundColor: '#23272A' }}>
-    <Button onClick={() => setOpenContactDialog(false)} className={classes.button}>
-      Cancel
-    </Button>
-  </DialogActions>
-</Dialog>
+            {regularContacts.length === 0 && invitedContacts.length === 0 && (
+              <Typography align="center" style={{ padding: '16px', color: '#B9BBBE' }}>
+                No contacts found
+              </Typography>
+            )}
+          </DialogContent>
+          <DialogActions style={{ backgroundColor: '#23272A' }}>
+            <Button onClick={() => setOpenContactDialog(false)} className={classes.button}>
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </ThemeProvider>
   );

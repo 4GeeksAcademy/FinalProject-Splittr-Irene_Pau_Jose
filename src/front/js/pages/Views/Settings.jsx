@@ -10,30 +10,18 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems, SecondaryListItems } from '../Dashboard/listitems.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-
-import { Home } from '../Home.jsx';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
 import { Context } from '../../store/appContext.js';
 import { updateUser } from '../../component/callToApi.js';
-import { useParams } from 'react-router-dom';
 import { SplittrLogo } from '../../component/SplittrLogo.jsx';
 import LogoutButton from '../../component/LogOutButton.jsx';
+import Container from '@material-ui/core/Container';
 
-// Copyright component
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -47,7 +35,6 @@ function Copyright() {
   );
 }
 
-// Dark theme configuration
 const darkTheme = createMuiTheme({
   palette: {
     type: 'dark',
@@ -58,13 +45,28 @@ const darkTheme = createMuiTheme({
   overrides: {
     MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
     MuiToolbar: { root: { color: '#ffffff' } },
-    MuiTypography: { root: { color: '#ffffff' } },
+    MuiTypography: { 
+      root: { color: '#ffffff' },
+      h4: {
+        fontSize: '2.125rem',
+        '@media (max-width:600px)': {
+          fontSize: '1.25rem',
+        }
+      },
+      h6: {
+        fontSize: '1rem',
+        '@media (max-width:600px)': {
+          fontSize: '1rem',
+        }
+      }
+    },
     MuiIconButton: { root: { color: '#ffffff !important' } },
     MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
   },
 });
 
-// Styles
+const drawerWidth = 240;
+
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
   toolbar: {
@@ -81,8 +83,8 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
   },
   appBarShift: {
-    marginLeft: 240,
-    width: `calc(100% - 240px)`,
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -96,73 +98,143 @@ const useStyles = makeStyles((theme) => ({
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: 240,
+    width: drawerWidth,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
+  },
+  drawerPaperClose: {
+    overflowX: 'hidden',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    width: theme.spacing(7),
+    [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
+  },
+  appBarSpacer: {
+    minHeight: theme.spacing(4),
+  },
+  content: {
+    flexGrow: 1,
+    overflow: 'auto',
+    width: '100%',
   },
   container: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(4),
   },
+  settingsContainer: {
+    width: '100%',
+    maxWidth: 600,
+    margin: '0 auto',
+    padding: theme.spacing(2),
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(1),
+    },
+  },
+  settingsTitle: {
+    marginBottom: theme.spacing(4),
+    '@media (max-width:600px)': {
+      marginBottom: theme.spacing(2),
+    }
+  },
+  settingField: {
+    marginBottom: theme.spacing(4),
+    display: 'flex',
+    flexDirection: 'column',
+    [theme.breakpoints.up('md')]: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+  },
+  textField: {
+    flexGrow: 1,
+    marginBottom: theme.spacing(2),
+    [theme.breakpoints.up('md')]: {
+      marginBottom: 0,
+      marginRight: theme.spacing(2),
+    },
+  },
+  actionButton: {
+    minWidth: 120,
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+    },
+  },
 }));
 
 export default function Settings() {
   const classes = useStyles();
-  const [open, setOpen] = useState(true);
-  const [state, setState] = useState({ Language: 'English' });
-
-  // Added missing states to fix the error
+  const [open, setOpen] = useState(false);
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
+  
   const { store, actions } = useContext(Context);
   const [user, setUser] = useState(store.userInfo);
-  const [loading, setLoading] = useState(false); 
-  const [message, setMessage] = useState(""); 
-  const updatedData = { birthday: user.birthday };
-  
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
   useEffect(() => {
     const getUser = async () => {
-        const data = await actions.getUser();
-        if (data) setUser(data); 
+      const data = await actions.getUser();
+      if (data) setUser(data);
     };
     getUser();
-}, []);
-
-  console.log(user);
+  }, []);
 
   const handleUpdateUser = async () => {
     setLoading(true);
     setMessage("");
 
     const updatedData = {
-        name: user.name,
-        email: user.email,
-        password: user.password,
-        birthday: user.birthday
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      birthday: user.birthday
     };
 
-    const result = await updateUser(updatedData, store.token);  
+    const result = await updateUser(updatedData, store.token);
 
     if (result.error) {
-        setMessage("Failed to update user");
+      setMessage("Failed to update user");
     } else {
-        setMessage("User updated successfully!");
-        actions.getUser();  
+      setMessage("User updated successfully!");
+      actions.getUser();
     }
 
     setLoading(false);
-};
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            <IconButton edge="start" color="inherit" aria-label="toggle drawer" onClick={() => setOpen(!open)} className={classes.menuButton}>
-              {open ? <ChevronLeftIcon /> : <MenuIcon />}
-            </IconButton>
+            {!open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            {open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               <SplittrLogo />
             </Typography>
@@ -170,83 +242,121 @@ export default function Settings() {
               Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
             <IconButton color="inherit">
-
               <LogoutButton />
-
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
-          <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+              <Box className={classes.settingsContainer}>
+                <Typography variant="h4" className={classes.settingsTitle}>User Settings</Typography>
 
+                <Box className={classes.settingField}>
+                  <TextField
+                    className={classes.textField}
+                    label="Change Name"
+                    variant="outlined"
+                    fullWidth
+                    value={user?.name || ""}
+                    onChange={(e) => setUser({ ...user, name: e.target.value })}
+                  />
+                  <Button
+                    className={classes.actionButton}
+                    variant="contained"
+                    onClick={handleUpdateUser}
+                    disabled={loading}
+                  >
+                    {loading ? "Updating..." : "Change"}
+                  </Button>
+                </Box>
 
-        <Box sx={{ width: "50%", padding: "0 16px", marginTop: "80px", margin: "0 auto", display: "flex", flexDirection: "column" }}>
-          <h3>Settings</h3>
-          <h5>User</h5>
+                <Box className={classes.settingField}>
+                  <TextField
+                    className={classes.textField}
+                    label="Change Email"
+                    variant="outlined"
+                    fullWidth
+                    value={user?.email || ""}
+                    onChange={(e) => setUser({ ...user, email: e.target.value })}
+                  />
+                  <Button
+                    className={classes.actionButton}
+                    variant="contained"
+                    onClick={handleUpdateUser}
+                    disabled={loading}
+                  >
+                    {loading ? "Updating..." : "Change"}
+                  </Button>
+                </Box>
 
-          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-            <TextField
-              label="Change Name"
-              variant="outlined"
-              fullWidth
-              value={user?.name || ""}
-              onChange={(e) => setUser({ ...user, name: e.target.value })}
-            />
-            <Box sx={{ marginLeft: "40px" }}>
-              <Button onClick={handleUpdateUser} disabled={loading}>
-                {loading ? "Updating..." : "Change"}
-              </Button>
-            </Box>
-          </Box>
+                <Box className={classes.settingField}>
+                  <TextField
+                    className={classes.textField}
+                    label="Change Password"
+                    type="password"
+                    variant="outlined"
+                    fullWidth
+                    value={user?.password || ""}
+                    onChange={(e) => setUser({ ...user, password: e.target.value })}
+                  />
+                  <Button
+                    className={classes.actionButton}
+                    variant="contained"
+                    onClick={handleUpdateUser}
+                    disabled={loading}
+                  >
+                    {loading ? "Updating..." : "Change"}
+                  </Button>
+                </Box>
 
-          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-            <TextField label="Change email" variant="outlined" fullWidth value={user?.email || ""} onChange={(e) => setUser({ ...user, email: e.target.value })} />
-            <Box sx={{ marginLeft: "40px" }}>
-              <Button onClick={handleUpdateUser} disabled={loading}>
-                {loading ? "Updating..." : "Change"}
-              </Button>
-            </Box>
-          </Box>
+                <Box className={classes.settingField}>
+                  <TextField
+                    className={classes.textField}
+                    label="Birthday"
+                    type="date"
+                    variant="outlined"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={user?.birthday || ""}
+                    onChange={(e) => setUser({ ...user, birthday: e.target.value })}
+                  />
+                  <Button
+                    className={classes.actionButton}
+                    variant="contained"
+                    onClick={handleUpdateUser}
+                    disabled={loading}
+                  >
+                    {loading ? "Updating..." : "Change"}
+                  </Button>
+                </Box>
 
-          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-            <TextField
-              label="Change Password"
-              type="password"
-              variant="outlined"
-              fullWidth
-              value={user?.password || ""}
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
-            />
-            <Box sx={{ marginLeft: "40px" }}>
-              <Button onClick={handleUpdateUser} disabled={loading}>
-                {loading ? "Updating..." : "Change"}
-              </Button>
-            </Box>
-          </Box>
-
-          <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-            <TextField
-              label="Birthday"
-              type="date"
-              variant="outlined"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              value={user?.birthday || ""}
-              onChange={(e) => setUser({ ...user, birthday: e.target.value })}
-            />
-            <Box sx={{ marginLeft: "40px" }}>
-              <Button onClick={handleUpdateUser} disabled={loading}>
-                {loading ? "Updating..." : "Change"}
-              </Button>
-            </Box>
-          </Box>
-
-          {message && <Typography color={message.includes("Failed") ? "error" : "primary"}>{message}</Typography>}
-        </Box>
+                {message && (
+                  <Typography 
+                    color={message.includes("Failed") ? "error" : "primary"}
+                    style={{ marginTop: 16 }}
+                  >
+                    {message}
+                  </Typography>
+                )}
+              </Box>
+            </Container>
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );
