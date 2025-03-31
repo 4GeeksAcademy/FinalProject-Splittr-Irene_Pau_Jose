@@ -33,9 +33,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { Chip } from '@material-ui/core';
-
-
-
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
@@ -45,12 +42,13 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
 import Button from '@material-ui/core/Button';
 import { mapContacts } from '../../component/callToApi.js';
 import AddContactCard from './IndividualViews/AddContactCard.jsx';
 import { useNavigate } from 'react-router-dom';
 import { createObjective } from '../../component/callToApi.js';
+import LogoutButton from '../../component/LogOutButton.jsx';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -75,12 +73,36 @@ const useStyles = makeStyles((theme) => ({
     toolbar: {
         paddingRight: 20,
         minHeight: 70,
+        [theme.breakpoints.down('sm')]: {  // Mobile styles
+            paddingRight: 10,
+            minHeight: 56,
+        },
     },
     toolbarIcon: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end',
         padding: '0 8px',
+    },
+    title: {
+        flexGrow: 1,
+        [theme.breakpoints.down('xs')]: {  // Extra small screens
+            '&:last-child': {  // Target the welcome message specifically
+                display: 'none',  // Hide welcome message on very small screens
+            },
+        },
+    },
+    logoTitle: {
+        flexGrow: 1,
+        [theme.breakpoints.down('xs')]: {
+            fontSize: '1rem',  // Reduce logo size on mobile
+        },
+    },
+    menuButton: {
+        marginRight: 36,
+        [theme.breakpoints.down('sm')]: {
+            marginRight: 12,  // Reduce spacing on mobile
+        },
     },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
@@ -101,9 +123,6 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: '#000000',
         color: theme.palette.text.primary,
     },
-    menuButton: { marginRight: 36 },
-    menuButtonHidden: { display: 'none' },
-    title: { flexGrow: 1 },
     drawerPaper: {
         position: 'relative',
         whiteSpace: 'nowrap',
@@ -112,7 +131,6 @@ const useStyles = makeStyles((theme) => ({
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
         }),
-        top: 30,
     },
     drawerPaperClose: {
         overflowX: 'hidden',
@@ -122,47 +140,22 @@ const useStyles = makeStyles((theme) => ({
         }),
         width: theme.spacing(7),
         [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-        top: 30,
-    },
-    appBarSpacer: {
-        minHeight: theme.spacing(4),
     },
     container: {
         paddingTop: theme.spacing(1),
         paddingBottom: theme.spacing(4),
     },
     content: {
-        flexGrow: 1,
-        overflow: 'auto',
         width: '100%',
-    },
-    contactGrid: {
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        width: '100%',
-        padding: theme.spacing(1),
     },
-    fabButton: {
-        position: 'fixed',
-        bottom: theme.spacing(3),
-        right: theme.spacing(3),
-    },
-    addMembersTitle: {
-        fontSize: '1.5rem',
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: theme.spacing(2),
-    },
-    createObjectiveButton: {
-        marginLeft: theme.spacing(2),
-        '&:hover': {
-        },
-    }
 }));
 
 export default function CreateObjective() {
     const classes = useStyles();
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
     const navigate = useNavigate();
     const user_id = sessionStorage.getItem("user_id")
     const handleDrawerOpen = () => {
@@ -171,8 +164,6 @@ export default function CreateObjective() {
     const handleDrawerClose = () => {
         setOpen(false);
     };
-
-
 
     const handleAddMemberToObjective = (contact) => {
         const isAlreadySelected = selectedMembers.some(
@@ -193,19 +184,19 @@ export default function CreateObjective() {
             alert("Please fill in all the fields");
             return;
         }
-    
+
         try {
- 
-            const userId = store.userInfo.id; 
-    
+
+            const userId = store.userInfo.id;
+
             const objectiveMembersWithCreator = [...selectedMembers, { id: userId }];
-    
+
             const response = await createObjective(
                 values.objectiveName,
                 values.objectiveTargetAmount,
                 objectiveMembersWithCreator
             );
-    
+
             if (response.error) {
                 alert(response.error);
             } else {
@@ -219,8 +210,6 @@ export default function CreateObjective() {
             alert("An error occurred while creating the objective.");
         }
     };
-    
-    
 
 
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
@@ -228,7 +217,7 @@ export default function CreateObjective() {
     const { store, actions } = useContext(Context);
     const [values, setValues] = useState({ objectiveName: '', objectiveTargetAmount: '' });
     const [contacts, setContacts] = useState([]);
-
+    const [user, setUser] = useState(store.userInfo);
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [email, setEmail] = useState('');
     const [selectedMembers, setSelectedMembers] = useState([]);
@@ -237,17 +226,22 @@ export default function CreateObjective() {
     console.log("User ID:", userid);
 
 
+    useEffect(() => {
+        let isMounted = true;
 
+        const getUser = async () => {
+            const data = await actions.getUser()
+            setUser(data)
+            console.log(data);
+        }
+        getUser();
 
-        useEffect(() => {
-            let isMounted = true;
-            
-            mapContacts(setContacts, userid);
-    
-            return () => {
-                isMounted = false;
-            };
-        }, [userid]);
+        mapContacts(setContacts, userid);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [userid]);
 
 
     useEffect(() => {
@@ -255,12 +249,11 @@ export default function CreateObjective() {
     }, [contacts]);
 
 
-
     return (
         <ThemeProvider theme={darkTheme}>
             <div className={classes.root}>
                 <CssBaseline />
-                <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+                <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
                     <Toolbar className={classes.toolbar}>
                         {!open && (
                             <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} className={classes.menuButton}>
@@ -274,103 +267,108 @@ export default function CreateObjective() {
                             </IconButton>
                         )}
 
+                        <Typography component="h1" variant="h6" noWrap className={classes.logoTitle}>
+                            <SplittrLogo />
+                        </Typography>
                         <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                            Welcome, Pepito!
+                            Create Objective
                         </Typography>
 
-                        <IconButton color="inherit">
-                            <Badge badgeContent={4} color="secondary">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton>
+                      
+                        <LogoutButton />
                     </Toolbar>
                 </AppBar>
-                <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
-                    <Divider />
-
-                    <List>
-                        <MainListItems user={store.userInfo} />
-                    </List>
-                    <Divider />
-                    <List>
-                        <SecondaryListItems user={store.userInfo} />
-                    </List>
-                </Drawer>
-                <main className={classes.content}>
-                    <div className={classes.appBarSpacer} />
-                    <Container maxWidth="lg" className={classes.container}>
-                        <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+                    <Drawer
+                        variant="permanent"
+                        classes={{
+                            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+                        }}
+                        open={open}
+                        style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+                    >
+                        <Divider />
+                        <List>
+                            <MainListItems user={store.userInfo} />
+                        </List>
+                        <Divider />
+                        <List>
+                            <SecondaryListItems user={store.userInfo} />
+                        </List>
+                    </Drawer>
+                    <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+                        <Container maxWidth="lg" className={classes.container}>
                             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-                                <TextField
-                                    label="Objective name"
-                                    variant="outlined"
-                                    fullWidth
-                                    style={{ flex: 2 }}
-                                    value={values.objectiveName}
-                                    onChange={(e) => setValues({ ...values, objectiveName: e.target.value })}
-                                />
-
-                                <FormControl fullWidth className={classes.margin} variant="outlined" style={{ flex: 1 }}>
-                                    <InputLabel htmlFor="outlined-adornment-amount">Target amount</InputLabel>
-                                    <OutlinedInput
-                                        id="outlined-adornment-amount"
-                                        value={values.objectiveTargetAmount}
-                                        onChange={(e) => setValues({ ...values, objectiveTargetAmount: e.target.value })}
-                                        endAdornment={<InputAdornment position="end">€</InputAdornment>}
-                                    />
-                                </FormControl>
-
-
-
-                                <Button
-                                    className={classes.createObjectiveButton}
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleCreateObjective}
-                                >
-                                    Create Objective
-                                </Button>
-                            </Box>
-                        </Box>
-            <Typography variant="h6" className={classes.addMembersTitle}>
-                Add members
-            </Typography>
-            <Grid container spacing={2} className={classes.contactGrid}>
-                {!contacts.contacts ? (
-                    <Typography>Loading contacts...</Typography>
-                ) : contacts.contacts.length === 0 ? (
-                    <Typography>No contacts found</Typography>
-                ) : (
-                    contacts.contacts.map((contact) => (
-                        <Grid item xs={12} sm={6} md={4} key={contact.id}>
-                            <AddContactCard
-                                contact={contact}
-                                onAddContact={handleAddMemberToObjective}
-                                isSelected={selectedMembers.some(
-                                    member => member.id === contact.id
-                                )}
-                            />
-                        </Grid>
-                    ))
-                )}
-            </Grid>
-                        {selectedMembers.length > 0 && (
-                            <Box sx={{ marginTop: "20px" }}>
-                                <Typography variant="h6">Selected Members:</Typography>
-                                {selectedMembers.map((member) => (
-                                    <Chip
-                                        key={member.id}
-                                        label={member.name}
-                                        onDelete={() => handleAddMemberToObjective(member)}
-                                        color="primary"
+                                <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                                    <TextField
+                                        label="Objective name"
                                         variant="outlined"
-                                        style={{ margin: "5px" }}
+                                        fullWidth
+                                        style={{ flex: 2 }}
+                                        value={values.objectiveName}
+                                        onChange={(e) => setValues({ ...values, objectiveName: e.target.value })}
                                     />
-                                ))}
+
+                                    <FormControl fullWidth className={classes.margin} variant="outlined" style={{ flex: 1 }}>
+                                        <InputLabel htmlFor="outlined-adornment-amount">Target amount</InputLabel>
+                                        <OutlinedInput
+                                            id="outlined-adornment-amount"
+                                            value={values.objectiveTargetAmount}
+                                            onChange={(e) => setValues({ ...values, objectiveTargetAmount: e.target.value })}
+                                            endAdornment={<InputAdornment position="end">€</InputAdornment>}
+                                        />
+                                    </FormControl>
+
+                                    <Button
+                                        className={classes.createObjectiveButton}
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleCreateObjective}
+                                    >
+                                        Create Objective
+                                    </Button>
+                                </Box>
                             </Box>
-                        )}
-                    </Container>
-                </main>
+                            <Typography variant="h6" className={classes.addMembersTitle}>
+                                Add members
+                            </Typography>
+                            <Grid container spacing={2} className={classes.contactGrid}>
+                                {!contacts.contacts ? (
+                                    <Typography>Loading contacts...</Typography>
+                                ) : contacts.contacts.length === 0 ? (
+                                    <Typography>No contacts found</Typography>
+                                ) : (
+                                    contacts.contacts.map((contact) => (
+                                        <Grid item xs={12} sm={6} md={4} key={contact.id}>
+                                            <AddContactCard
+                                                contact={contact}
+                                                onAddContact={handleAddMemberToObjective}
+                                                isSelected={selectedMembers.some(
+                                                    member => member.id === contact.id
+                                                )}
+                                            />
+                                        </Grid>
+                                    ))
+                                )}
+                            </Grid>
+                            {selectedMembers.length > 0 && (
+                                <Box sx={{ marginTop: "20px" }}>
+                                    <Typography variant="h6">Selected Members:</Typography>
+                                    {selectedMembers.map((member) => (
+                                        <Chip
+                                            key={member.id}
+                                            label={member.name}
+                                            onDelete={() => handleAddMemberToObjective(member)}
+                                            color="primary"
+                                            variant="outlined"
+                                            style={{ margin: "5px" }}
+                                        />
+                                    ))}
+                                </Box>
+                            )}
+                        </Container>
+                    </main>
+                </div>
             </div>
         </ThemeProvider>
     );

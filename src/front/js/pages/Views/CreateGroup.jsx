@@ -28,7 +28,6 @@ import ContactCard from './IndividualViews/ContactCard.jsx';
 import { Link as MuiLink } from "@material-ui/core";
 import { Home } from '../Home.jsx';
 import TextField from '@material-ui/core/TextField';
-
 import { useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { Context } from '../../store/appContext.js';
@@ -38,12 +37,13 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
 import Button from '@material-ui/core/Button';
 import { mapContacts } from '../../component/callToApi.js';
 import AddContactCard from './IndividualViews/AddContactCard.jsx';
 import { useNavigate } from 'react-router-dom';
 import { createGroup } from '../../component/callToApi.js';
+import LogoutButton from '../../component/LogOutButton.jsx';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -60,20 +60,42 @@ const darkTheme = createMuiTheme({
         MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
     },
 });
-
 const drawerWidth = 240;
-
 const useStyles = makeStyles((theme) => ({
     root: { display: 'flex' },
     toolbar: {
         paddingRight: 20,
         minHeight: 70,
-    },
-    toolbarIcon: {
+        [theme.breakpoints.down('sm')]: {  
+          paddingRight: 10,
+          minHeight: 56,
+        },
+      },
+      toolbarIcon: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end',
         padding: '0 8px',
+      },
+    title: {
+        flexGrow: 1,
+        [theme.breakpoints.down('xs')]: {  // Extra small screens
+            '&:last-child': {  // Target the welcome message specifically
+                display: 'none',  // Hide welcome message on very small screens
+            },
+        },
+    },
+    logoTitle: {
+        flexGrow: 1,
+        [theme.breakpoints.down('xs')]: {
+            fontSize: '1rem',  // Reduce logo size on mobile
+        },
+    },
+    menuButton: {
+        marginRight: 36,
+        [theme.breakpoints.down('sm')]: {
+            marginRight: 12,  // Reduce spacing on mobile
+        },
     },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
@@ -94,9 +116,6 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: '#000000',
         color: theme.palette.text.primary,
     },
-    menuButton: { marginRight: 36 },
-    menuButtonHidden: { display: 'none' },
-    title: { flexGrow: 1 },
     drawerPaper: {
         position: 'relative',
         whiteSpace: 'nowrap',
@@ -105,7 +124,6 @@ const useStyles = makeStyles((theme) => ({
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
         }),
-        top: 30,
     },
     drawerPaperClose: {
         overflowX: 'hidden',
@@ -115,49 +133,23 @@ const useStyles = makeStyles((theme) => ({
         }),
         width: theme.spacing(7),
         [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-        top: 30,
-    },
-    appBarSpacer: {
-        minHeight: theme.spacing(4),
     },
     container: {
         paddingTop: theme.spacing(1),
         paddingBottom: theme.spacing(4),
     },
     content: {
-        flexGrow: 1,
-        overflow: 'auto',
         width: '100%',
-    },
-    contactGrid: {
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        width: '100%',
-        padding: theme.spacing(1),
     },
-    fabButton: {
-        position: 'fixed',
-        bottom: theme.spacing(3),
-        right: theme.spacing(3),
-    },
-    addMembersTitle: {
-        fontSize: '1.5rem',
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: theme.spacing(2),
-    },
-    createGroupButton: {
-        marginLeft: theme.spacing(2),
-        '&:hover': {
-        },
-    }
 }));
-
 export default function CreateGroup() {
     const classes = useStyles();
     const navigate = useNavigate();
     const user_id = sessionStorage.getItem("user_id")
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
         setOpen(true);
     };
@@ -201,25 +193,20 @@ export default function CreateGroup() {
             setSelectedMembers([]);
 
         } catch (error) {
-
+            console.error("Error creating group:", error);
         }
     };
-
-    
-
-
-
 
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
     const { store, actions } = useContext(Context);
-
+    const [user, setUser] = useState(store.userInfo);
     const [contacts, setContacts] = useState([]);
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [email, setEmail] = useState('');
     const [groupName, setGroupName] = useState('');
     const [selectedMembers, setSelectedMembers] = useState([]);
-    const [values, setValues] = useState({ groupName: '' });  
+    const [values, setValues] = useState({ groupName: '' });
 
     const { userid } = useParams();
     console.log("User ID:", userid);
@@ -235,6 +222,13 @@ export default function CreateGroup() {
     useEffect(() => {
         let isMounted = true;
 
+        const getUser = async () => {
+            const data = await actions.getUser()
+            setUser(data)
+            console.log(data);
+        }
+        getUser();
+
         mapContacts(setContacts, userid).then(() => {
             if (isMounted) {
             }
@@ -249,7 +243,7 @@ export default function CreateGroup() {
         <ThemeProvider theme={darkTheme}>
             <div className={classes.root}>
                 <CssBaseline />
-                <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+                <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
                     <Toolbar className={classes.toolbar}>
                         {!open && (
                             <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} className={classes.menuButton}>
@@ -263,41 +257,48 @@ export default function CreateGroup() {
                             </IconButton>
                         )}
 
+                        <Typography component="h1" variant="h6" noWrap className={classes.logoTitle}>
+                            <SplittrLogo />
+                        </Typography>
                         <Typography component="h1" variant="h6" noWrap className={classes.title}>
-                            Welcome, Pepito!
+                            Create Group
                         </Typography>
 
                         <IconButton color="inherit">
-                            <Badge badgeContent={4} color="secondary">
-                                <NotificationsIcon />
-                            </Badge>
+                           
                         </IconButton>
+                        <LogoutButton />
                     </Toolbar>
                 </AppBar>
-                <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
-                    <Divider />
-
-                    <List>
-                        <MainListItems user={store.userInfo} />
-                    </List>
-                    <Divider />
-                    <List>
-                        <SecondaryListItems user={store.userInfo} />
-                    </List>
-                </Drawer>
-                <main className={classes.content}>
-                    <div className={classes.appBarSpacer} />
-                    <Container maxWidth="lg" className={classes.container}>
-                        <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+                    <Drawer
+                        variant="permanent"
+                        classes={{
+                            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+                        }}
+                        open={open}
+                        style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+                    >
+                        <Divider />
+                        <List>
+                            <MainListItems user={store.userInfo} />
+                        </List>
+                        <Divider />
+                        <List>
+                            <SecondaryListItems user={store.userInfo} />
+                        </List>
+                    </Drawer>
+                    <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+                        <Container maxWidth="lg" className={classes.container}>
                             <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-                            <TextField
-                    label="Group name"
-                    variant="outlined"
-                    name="groupName"  
-                    value={values.groupName} 
-                    onChange={handleInputChange} 
-                    fullWidth
-                />
+                                <TextField
+                                    label="Group name"
+                                    variant="outlined"
+                                    name="groupName"
+                                    value={values.groupName}
+                                    onChange={handleInputChange}
+                                    fullWidth
+                                />
                                 <Button
                                     className={classes.createGroupButton}
                                     onClick={handleCreateGroup}
@@ -306,32 +307,31 @@ export default function CreateGroup() {
                                 </Button>
                             </Box>
 
-
-                        </Box>
-                        <Typography variant="h6" className={classes.addMembersTitle}>
-                            Add members
-                        </Typography>
-                        <Grid container spacing={2} className={classes.contactGrid}>
-                            {!contacts.contacts ? (
-                                <Typography>Loading contacts...</Typography>
-                            ) : contacts.contacts.length === 0 ? (
-                                <Typography>No contacts found</Typography>
-                            ) : (
-                                contacts.contacts.map((contact) => (
-                                    <Grid item xs={12} sm={6} md={4} key={contact.id}>
-                                        <AddContactCard
-                                            contact={contact}
-                                            onAddContact={handleAddMemberToGroup}
-                                            isSelected={selectedMembers.some(
-                                                member => member.id === contact.id
-                                            )}
-                                        />
-                                    </Grid>
-                                ))
-                            )}
-                        </Grid>
-                    </Container>
-                </main>
+                            <Typography variant="h6" className={classes.addMembersTitle}>
+                                Add members
+                            </Typography>
+                            <Grid container spacing={2} className={classes.contactGrid}>
+                                {!contacts.contacts ? (
+                                    <Typography>Loading contacts...</Typography>
+                                ) : contacts.contacts.length === 0 ? (
+                                    <Typography>No contacts found</Typography>
+                                ) : (
+                                    contacts.contacts.map((contact) => (
+                                        <Grid item xs={12} sm={6} md={4} key={contact.id}>
+                                            <AddContactCard
+                                                contact={contact}
+                                                onAddContact={handleAddMemberToGroup}
+                                                isSelected={selectedMembers.some(
+                                                    member => member.id === contact.id
+                                                )}
+                                            />
+                                        </Grid>
+                                    ))
+                                )}
+                            </Grid>
+                        </Container>
+                    </main>
+                </div>
             </div>
         </ThemeProvider>
     );

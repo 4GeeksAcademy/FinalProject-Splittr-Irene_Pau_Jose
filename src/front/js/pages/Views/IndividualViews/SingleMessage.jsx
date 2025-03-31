@@ -20,10 +20,11 @@ import Avatar from '@material-ui/core/Avatar';
 import { Box, TextField, InputAdornment } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
 import { Card, CardContent } from '@material-ui/core';
-
 import { getInfoConversation, sendMessage, fetchUserInfo } from '../../../component/callToApi.js';
 import { useParams } from 'react-router-dom';
 import { Context } from '../../../store/appContext.js';
+import LogoutButton from '../../../component/LogOutButton.jsx';
+import { SplittrLogo } from '../../../component/SplittrLogo.jsx';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -44,39 +45,65 @@ const darkTheme = createMuiTheme({
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
-    root: { 
+    root: {
         display: 'flex',
-        height: '100vh',       
-        overflow: 'hidden'     
+        height: '100vh',
+        overflow: 'hidden'
     },
-    toolbar: { paddingRight: 20, minHeight: 70 },
+    toolbar: {
+        paddingRight: 20,
+        minHeight: 70,
+        [theme.breakpoints.down('sm')]: {  // Mobile styles
+            paddingRight: 10,
+            minHeight: 56,
+        },
+    },
     toolbarIcon: { display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px' },
     appBar: { zIndex: theme.zIndex.drawer + 1, transition: theme.transitions.create(['width', 'margin'], { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen }), backgroundColor: '#000000', color: theme.palette.text.primary },
     appBarShift: { marginLeft: drawerWidth, width: `calc(100% - ${drawerWidth}px)`, transition: theme.transitions.create(['width', 'margin'], { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen }), backgroundColor: '#000000', color: theme.palette.text.primary },
-    menuButton: { marginRight: 36 },
-    title: { flexGrow: 1 },
-    drawerPaper: { position: 'relative', whiteSpace: 'nowrap', width: drawerWidth, transition: theme.transitions.create('width', { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen }), top: 30 },
-    drawerPaperClose: { overflowX: 'hidden', transition: theme.transitions.create('width', { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen }), width: theme.spacing(7), [theme.breakpoints.up('sm')]: { width: theme.spacing(9) }, top: 30 },
+    menuButton: {
+        marginRight: 36,
+        [theme.breakpoints.down('sm')]: {
+            marginRight: 12,  // Reduce spacing on mobile
+        },
+    },
+    title: {
+        flexGrow: 1,
+        [theme.breakpoints.down('xs')]: {  // Extra small screens
+            '&:last-child': {  // Target the welcome message specifically
+                display: 'none',  // Hide welcome message on very small screens
+            },
+        },
+    },
+    logoTitle: {
+        flexGrow: 1,
+        [theme.breakpoints.down('xs')]: {
+            fontSize: '1rem',  // Reduce logo size on mobile
+        },
+    },
+    drawerPaper: { position: 'relative', whiteSpace: 'nowrap', width: drawerWidth, transition: theme.transitions.create('width', { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen }) },
+    drawerPaperClose: { overflowX: 'hidden', transition: theme.transitions.create('width', { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen }), width: theme.spacing(7), [theme.breakpoints.up('sm')]: { width: theme.spacing(9) } },
     container: {
         paddingTop: theme.spacing(4),
-        
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-          },
+    },
     card: {
         width: "90%",
-    maxWidth: "1200px",
-    height: "90vh", 
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden'
+        maxWidth: "1200px",
+        height: "90vh",
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
     },
-    cardContent: { display: 'flex',
+    cardContent: {
+        display: 'flex',
         flexDirection: 'column',
         flexGrow: 1,
-        overflow: 'hidden' },
+        overflow: 'hidden'
+    },
     avatar: { width: 60, height: 60, fontSize: '2rem' },
     messages: {
         display: 'flex',
@@ -128,7 +155,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function TextMessages() {
     const classes = useStyles();
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
 
@@ -181,11 +208,11 @@ export default function TextMessages() {
 
     const handleSendMessage = async () => {
         if (!newMessage.trim() || isSending || !currentUserId) return;
-        
+
         setIsSending(true);
         try {
             const result = await sendMessage(otheruserid, newMessage);
-            
+
             if (result.success) {
                 // Optimistically update the UI
                 const optimisticMessage = {
@@ -203,7 +230,7 @@ export default function TextMessages() {
 
                 setConversation(prev => [...prev, optimisticMessage]);
                 setNewMessage('');
-                
+
                 // Refresh conversation data from server
                 if (currentUserId) {
                     await getInfoConversation(setConversation, otheruserid, currentUserId);
@@ -230,70 +257,101 @@ export default function TextMessages() {
         <ThemeProvider theme={darkTheme}>
             <div className={classes.root}>
                 <CssBaseline />
-                <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+                <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
                     <Toolbar className={classes.toolbar}>
-             
+                        {!open && (
+                            <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} className={classes.menuButton}>
+                                <MenuIcon />
+                            </IconButton>
+                        )}
+
+                        {open && (
+                            <IconButton edge="start" color="inherit" aria-label="close drawer" onClick={handleDrawerClose} className={classes.menuButton}>
+                                <ChevronLeftIcon />
+                            </IconButton>
+                        )}
+
+                        <Typography component="h1" variant="h6" noWrap className={classes.logoTitle}>
+                            <SplittrLogo />
+                        </Typography>
+                        <Typography component="h1" variant="h6" noWrap className={classes.title}>
+                            {otherUser.name}
+                        </Typography>
+
+                        <IconButton color="inherit">
+                           
+                        </IconButton>
+                        <LogoutButton />
                     </Toolbar>
                 </AppBar>
-                <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
-                    <Divider />
-                    <List><MainListItems user={store.userInfo} /></List>
-                    <Divider />
-                    <List><SecondaryListItems user={store.userInfo} /></List>
-                </Drawer>
+                <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+                    <Drawer
+                        variant="permanent"
+                        classes={{
+                            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+                        }}
+                        open={open}
+                        style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+                    >
+                        <Divider />
+                        <List><MainListItems user={store.userInfo} /></List>
+                        <Divider />
+                        <List><SecondaryListItems user={store.userInfo} /></List>
+                    </Drawer>
 
-                <div className={classes.container}>
-                    <Card className={classes.card} variant="outlined">
-                        <CardContent className={classes.cardContent}>
-                            <Box display="flex" className={classes.header} alignItems="center" marginBottom={2}>
-                                <Avatar className={classes.avatar}>{otherUser.initial}</Avatar>
-                                <Box ml={2}>
-                                    <Typography variant="h6">{otherUser.name}</Typography>
+                    <div className={classes.container} style={{ marginLeft: open ? drawerWidth : 64, width: '100%', marginTop: 0 }}> {/* Adjust marginTop */}
+                        <Card className={classes.card} variant="outlined">
+                            <CardContent className={classes.cardContent}>
+                                <Box display="flex" className={classes.header} alignItems="center" marginBottom={2}>
+                                    <Avatar className={classes.avatar}>{otherUser.initial}</Avatar>
+                                    <Box ml={2}>
+                                        <Typography variant="h6">{otherUser.name}</Typography>
+                                    </Box>
                                 </Box>
-                            </Box>
-                            <div className={classes.messages}>
-                                {conversation.length > 0 ? (
-                                    conversation.map((message) => (
-                                        <div
-                                            key={message.id}
-                                            className={clsx(
-                                                classes.messageBubble,
-                                                message.from_user_id === currentUserId ? classes.sent : classes.received
-                                            )}
-                                        >
-                                            <Typography>{message.message}</Typography>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <Typography color="textSecondary">No messages yet...</Typography>
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
-                            <div className={classes.messageInput}>
-                                <TextField
-                                    fullWidth
-                                    variant="outlined"
-                                    placeholder="Write a message..."
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                    disabled={isSending}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton 
-                                                    onClick={handleSendMessage}
-                                                    disabled={!newMessage.trim() || isSending}
-                                                >
-                                                    <SendIcon />
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
+                                <div className={classes.messages}>
+                                    {conversation.length > 0 ? (
+                                        conversation.map((message) => (
+                                            <div
+                                                key={message.id}
+                                                className={clsx(
+                                                    classes.messageBubble,
+                                                    message.from_user_id === currentUserId ? classes.sent : classes.received
+                                                )}
+                                            >
+                                                <Typography>{message.message}</Typography>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <Typography color="textSecondary">No messages yet...</Typography>
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
+                                <div className={classes.messageInput}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        placeholder="Write a message..."
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onKeyPress={handleKeyPress}
+                                        disabled={isSending}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        onClick={handleSendMessage}
+                                                        disabled={!newMessage.trim() || isSending}
+                                                    >
+                                                        <SendIcon />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </ThemeProvider>

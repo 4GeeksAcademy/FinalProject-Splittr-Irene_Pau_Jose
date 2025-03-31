@@ -730,20 +730,29 @@ export const submitFeedback = async (email, message) => {
 
 export const updateUser = async (updatedData, token) => {
     try {
-        const response = await fetch(urlBackend + "/user/update", {
+        // Filter out empty values if you want (optional)
+        const payload = Object.fromEntries(
+            Object.entries(updatedData).filter(([_, v]) => v !== null && v !== '')
+        );
+
+        const response = await fetch(`${urlBackend}/user/update`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
             },
-            body: JSON.stringify(updatedData)
+            body: JSON.stringify(payload),
         });
 
-        const data = await response.json();
-        return data;
+        if (!response.ok) {
+            const errorData = await response.json();
+            return { error: errorData.msg || "Failed to update user" };
+        }
+
+        return await response.json();
     } catch (error) {
-        console.error("Error updating user:", error);
-        return { error: "Something went wrong" };
+        console.error("Update error:", error);
+        return { error: "Network error. Please try again." };
     }
 };
 

@@ -122,34 +122,51 @@ def delete_user(user_id):
 @api.route('/user/update', methods=['PUT'])
 @jwt_required()
 def update_user():
-    current_user_id = get_jwt_identity()  
-    user = User.query.get(current_user_id)  
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
 
-    if user is None:
-        return jsonify({"msg": "User not found"}), 404  
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
 
-    request_body = request.get_json()
-    if not request_body:
+    data = request.get_json()
+    if not data:
         return jsonify({"msg": "No data provided"}), 400
 
-  
-    if "name" in request_body:
-        user.name = request_body["name"]
-    if "email" in request_body:
-        existing_user = User.query.filter_by(email=request_body["email"]).first()
-        if existing_user and existing_user.user_id != current_user_id:
-            return jsonify({"msg": "Email already in use"}), 400
-        user.email = request_body["email"]
-    if "password" in request_body:
-        user.password = request_body["password"]
-    if "birthday" in request_body: 
-        try:
-            user.birthday = datetime.strptime(request_body["birthday"], "%Y-%m-%d").date()
-        except ValueError:
-            return jsonify({"msg": "Invalid date format. Use YYYY-MM-DD."}), 400
+    # Check if email is being changed and validate
+    if "email" in data:
+        if not data["email"]:
+            return jsonify({"msg": "Email cannot be empty"}), 422
+        if data["email"] != user.email:
+            existing_user = User.query.filter_by(email=data["email"]).first()
+            if existing_user:
+                return jsonify({"msg": "Email already in use"}), 422
+            user.email = data["email"]
+
+    # Update name if provided
+    if "name" in data:
+        if data["name"]:  # Only update if not empty
+            user.name = data["name"]
+        else:
+            return jsonify({"msg": "Name cannot be empty"}), 422
+
+    # Update password if provided
+    if "password" in data:
+        if data["password"]:  # Only update if not empty
+            user.password = data["password"]
+        else:
+            return jsonify({"msg": "Password cannot be empty"}), 422
+
+    # Update birthday if provided
+    if "birthday" in data:
+        if data["birthday"]:  # Only update if not empty
+            try:
+                user.birthday = datetime.strptime(data["birthday"], "%Y-%m-%d").date()
+            except ValueError:
+                return jsonify({"msg": "Invalid date format (use YYYY-MM-DD)"}), 422
+        else:
+            user.birthday = None  # Allow clearing birthday by sending empty string/null
 
     db.session.commit()
-
     return jsonify({"msg": "User updated", "user": user.serialize()}), 200
 
 

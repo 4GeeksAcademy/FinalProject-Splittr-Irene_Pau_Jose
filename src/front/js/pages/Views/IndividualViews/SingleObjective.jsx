@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
-import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
@@ -19,10 +18,10 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems } from '../../Dashboard/listitems.jsx';
 import { SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import { useMemo } from 'react';
-
+import Button from '@material-ui/core/Button';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { Card, Avatar, Tooltip, Button } from "@material-ui/core";
-import { Star, Mail, Edit, Close } from "@material-ui/icons";
+import { Card, Box } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
 import { PieChart, Pie, Cell, Label } from "recharts";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -39,6 +38,8 @@ import { Context } from '../../../store/appContext.js';
 import { formatDate } from '../../../utilities/formatDate.js';
 import { getObjectiveContributions } from '../../../component/callToApi.js';
 import FloatingMenuObjective from '../../../component/FloatingMenuObjective.jsx';
+import LogoutButton from '../../../component/LogOutButton.jsx';
+import { SplittrLogo } from '../../../component/SplittrLogo.jsx';
 
 function Copyright() {
   return (
@@ -76,13 +77,36 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 20,
     minHeight: 70,
+    [theme.breakpoints.down('sm')]: {  // Mobile styles
+      paddingRight: 10,
+      minHeight: 56,
+    },
   },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-
+  },
+  title: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {  // Extra small screens
+      '&:last-child': {  // Target the welcome message specifically
+        display: 'none',  // Hide welcome message on very small screens
+      },
+    },
+  },
+  logoTitle: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {
+      fontSize: '1rem',  // Reduce logo size on mobile
+    },
+  },
+  menuButton: {
+    marginRight: 36,
+    [theme.breakpoints.down('sm')]: {
+      marginRight: 12,  // Reduce spacing on mobile
+    },
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -103,9 +127,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#000000',
     color: theme.palette.text.primary,
   },
-  menuButton: { marginRight: 36 },
   menuButtonHidden: { display: 'none' },
-  title: { flexGrow: 1 },
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
@@ -114,8 +136,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
-
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -125,7 +145,6 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
@@ -137,16 +156,13 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     width: 'auto',
     marginTop: "40px",
-
   },
   contactGrid: {
     display: 'flex',
-
   },
   scrollableTable: {
-    maxHeight: '200px', 
-    overflowY: 'auto', 
- 
+    maxHeight: '200px',
+    overflowY: 'auto',
   },
 }));
 
@@ -154,34 +170,27 @@ function createData(id, date, name, amount) {
   return { id, date, name, amount };
 }
 
-
-
 function preventDefault(event) {
   event.preventDefault();
 }
 
 export default function SingleObjective() {
-  
-  
-
-  
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
   const handleDrawerClose = () => {
     setOpen(false);
   };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const { store, actions } = useContext(Context);
 
   const [singleObjectiveInfo, setSingleObjectiveInfo] = useState([]);
   const [objectiveContributions, setObjectiveContributions] = useState([]);
   const { objectiveid } = useParams();
- console.log(objectiveid);
- 
+  console.log(objectiveid);
+
 
   const price = singleObjectiveInfo.target_amount
   const totalPriceEur = new Intl.NumberFormat("de-DE", {
@@ -201,15 +210,14 @@ export default function SingleObjective() {
     });
 
     return Object.keys(userContributions)
-    .map((userName) => ({
-      user_name: userName,
-      total_contributed: userContributions[userName],
-    }))
-    .sort((a, b) => b.total_contributed - a.total_contributed);
-}, [objectiveContributions]);
+      .map((userName) => ({
+        user_name: userName,
+        total_contributed: userContributions[userName],
+      }))
+      .sort((a, b) => b.total_contributed - a.total_contributed);
+  }, [objectiveContributions]);
 
   useEffect(() => {
-  
     getObjectiveContributions(setObjectiveContributions, objectiveid);
     getInfoSharedObjective(setSingleObjectiveInfo, objectiveid);
   }, [objectiveid]);
@@ -246,57 +254,49 @@ export default function SingleObjective() {
   ];
 
 
-  const participants = singleObjectiveInfo.participants || [];
-  const visibleParticipants = participants.slice(0, 5); // Mostrar máximo 5 participantes
-  const remainingCount = Math.max(0, participants.length - 5);
-
-  const sortedContributions = useMemo(() => 
+  const sortedContributions = useMemo(() =>
     [...objectiveContributions].sort((a, b) => new Date(b.contributed_at) - new Date(a.contributed_at)), [objectiveContributions]
   );
 
-  const [showAllContributions, setShowAllContributions] = useState(false);
-  const visibleContributions = showAllContributions ? groupedContributions : groupedContributions.slice(0, 4);
-
   const [currentPage, setCurrentPage] = useState(0);
-const recentContributionsPerPage = 4;
-const totalPages = Math.ceil(sortedContributions.length / recentContributionsPerPage);
+  const recentContributionsPerPage = 4;
+  const totalPages = Math.ceil(sortedContributions.length / recentContributionsPerPage);
 
-const handleNextPage = () => {
-  setCurrentPage((prev) => (prev + 1 < totalPages ? prev + 1 : 0));
-};
+  const handleNextPage = () => {
+    setCurrentPage((prev) => (prev + 1 < totalPages ? prev + 1 : 0));
+  };
 
-const handlePrevPage = () => {
-  setCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : totalPages - 1));
-};
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : totalPages - 1));
+  };
 
-const paginatedContributions = sortedContributions.slice(
-  currentPage * recentContributionsPerPage,
-  (currentPage + 1) * recentContributionsPerPage
-);
+  const paginatedContributions = sortedContributions.slice(
+    currentPage * recentContributionsPerPage,
+    (currentPage + 1) * recentContributionsPerPage
+  );
 
-const [groupedCurrentPage, setGroupedCurrentPage] = useState(0);
-const contributionsPerPage = 4; 
-const groupedTotalPages = Math.ceil(groupedContributions.length / contributionsPerPage);
+  const [groupedCurrentPage, setGroupedCurrentPage] = useState(0);
+  const contributionsPerPage = 4;
+  const groupedTotalPages = Math.ceil(groupedContributions.length / contributionsPerPage);
 
-const handleNextGroupedPage = () => {
-  setGroupedCurrentPage((prev) => (prev + 1 < groupedTotalPages ? prev + 1 : 0));
-};
+  const handleNextGroupedPage = () => {
+    setGroupedCurrentPage((prev) => (prev + 1 < groupedTotalPages ? prev + 1 : 0));
+  };
 
-const handlePrevGroupedPage = () => {
-  setGroupedCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : groupedTotalPages - 1));
-};
+  const handlePrevGroupedPage = () => {
+    setGroupedCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : groupedTotalPages - 1));
+  };
 
-const paginatedGroupedContributions = groupedContributions.slice(
-  groupedCurrentPage * contributionsPerPage,
-  (groupedCurrentPage + 1) * contributionsPerPage
-);
+  const paginatedGroupedContributions = groupedContributions.slice(
+    groupedCurrentPage * contributionsPerPage,
+    (groupedCurrentPage + 1) * contributionsPerPage
+  );
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-
             {!open && (
               <IconButton
                 edge="start"
@@ -308,8 +308,6 @@ const paginatedGroupedContributions = groupedContributions.slice(
                 <MenuIcon />
               </IconButton>
             )}
-
-
             {open && (
               <IconButton
                 edge="start"
@@ -321,160 +319,145 @@ const paginatedGroupedContributions = groupedContributions.slice(
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
-            <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+            <Typography component="h1" variant="h6" noWrap className={classes.logoTitle}>
+              <SplittrLogo />
             </Typography>
-
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
+            </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
+              <Badge badgeContent={0} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+            <LogoutButton />
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container} style={{ overflow: 'visible' }}>
+              <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
+                <div className="title" style={{ display: "flex", alignItems: "center" }}>
+                  <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
+                    <IconButton>
+                      <Edit style={{ color: "#fff" }} />
+                    </IconButton>
+                  </Link>
+                  <Typography variant="h6" style={{ marginLeft: 5 }}> {singleObjectiveInfo.name} </Typography>
+                </div>
+                <Box display="flex" justifyContent="space-around" gap={2}>
+                  <Box width={120} alignContent="center" >
+                    <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur}</Typography>
+                    <Box display="flex" justifyContent="center" alignItems="center">
+                      <PieChart width={150} height={150}>
+                        <Pie
+                          data={pieData}
+                          dataKey="value"
+                          innerRadius={50}
+                          outerRadius={60}
+                          startAngle={90}
+                          endAngle={-270}
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                          <Label
+                            value={`${percentageCompleted}%`}
+                            position="center"
+                            fill="white"
+                            fontSize={18}
+                            fontWeight="bold"
+                          />
+                        </Pie>
+                      </PieChart>
+                    </Box>
+                    <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
+                    <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed: {contributedAmountFormatted} </Typography>
 
-          <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
+                    <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
+                  </Box>
+                  <Box display="block" justifyContent="center" alignItems="center"  >
+                    <Typography gap={2}>Recent Contributions</Typography>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Date</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell align="right">Amount</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {paginatedContributions.map((contribution, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{formatDate(contribution.contributed_at)}</TableCell>
+                              <TableCell>{contribution.user_name}</TableCell>
+                              <TableCell align="right">
+                                {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(contribution.amount_contributed)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
+                      <Button onClick={handlePrevPage} variant="outlined" style={{ marginRight: 10 }}>Previous</Button>
+                      <Typography>{currentPage + 1} / {totalPages}</Typography>
+                      <Button onClick={handleNextPage} variant="outlined" style={{ marginLeft: 10 }}>Next</Button>
+                    </Box>
+                    <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:</Typography>
 
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container} style={{ overflow: 'visible' }}>
+                    <Table size="small" style={{ marginTop: '16px' }}>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Name</TableCell>
+                          <TableCell align="right">Total amount</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {paginatedGroupedContributions.map((contribution, index) => (
+                          <TableRow key={contribution.id || index}>
+                            <TableCell>{contribution.user_name}</TableCell>
+                            <TableCell align="right">
+                              {new Intl.NumberFormat("de-DE", {
+                                style: "currency",
+                                currency: "EUR",
+                              }).format(contribution.total_contributed)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
 
-
-          <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "700px", minWidth: "250px" }}>
-            <div className="title" style={{ display: "flex", alignItems: "center" }}>
-              <Link href={`/objective/update/${singleObjectiveInfo.id}`}>
-
-                <IconButton>
-                  <Edit style={{ color: "#fff" }} />
-                </IconButton>
-
-              </Link>
-              <Typography variant="h6" style={{ marginLeft: 5 }}> {singleObjectiveInfo.name} </Typography>
-            </div>
-            <Box display="flex" justifyContent="space-around" gap={2}>
-              <Box width={120} alignContent="center" >
-                <Typography variant="body2" style={{ marginTop: 10 }}>Total: {totalPriceEur}</Typography>
-                <Box display="flex" justifyContent="center" alignItems="center">
-                  <PieChart width={150} height={150}>
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      innerRadius={50}
-                      outerRadius={60}
-                      startAngle={90}
-                      endAngle={-270}
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                      <Label
-                        value={`${percentageCompleted}%`}
-                        position="center"
-                        fill="white"
-                        fontSize={18}
-                        fontWeight="bold"
-                      />
-                    </Pie>
-                  </PieChart>
+                    {groupedContributions.length > contributionsPerPage && (
+                      <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
+                        <Button onClick={handlePrevGroupedPage} variant="outlined" style={{ marginRight: 10 }}>Previous</Button>
+                        <Typography>{groupedCurrentPage + 1} / {groupedTotalPages}</Typography>
+                        <Button onClick={handleNextGroupedPage} variant="outlined" style={{ marginLeft: 10 }}>Next</Button>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Description: </Typography>
-                <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed: {contributedAmountFormatted} </Typography>
-               
-                <Typography variant="body2" style={{ marginTop: 30 }}>Created at: {formatDate(singleObjectiveInfo.created_at)} </Typography>
-              </Box>
-              <Box display="block" justifyContent="center" alignItems="center"  >
-              <Typography gap={2}>Recent Contributions</Typography>
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell align="right">Amount</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {paginatedContributions.map((contribution, index) => (
-            <TableRow key={index}>
-              <TableCell>{formatDate(contribution.contributed_at)}</TableCell>
-              <TableCell>{contribution.user_name}</TableCell>
-              <TableCell align="right">
-                {new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(contribution.amount_contributed)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-    <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-      <Button onClick={handlePrevPage} variant="outlined" style={{ marginRight: 10 }}>Previous</Button>
-      <Typography>{currentPage + 1} / {totalPages}</Typography>
-      <Button onClick={handleNextPage} variant="outlined" style={{ marginLeft: 10 }}>Next</Button>
-    </Box>
-    <Typography variant="body2" style={{ marginTop: 30 }}>Already contributed:</Typography>
-
-<Table size="small" style={{ marginTop: '16px' }}>
-  <TableHead>
-    <TableRow>
-      <TableCell>Name</TableCell>
-      <TableCell align="right">Total amount</TableCell>
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {paginatedGroupedContributions.map((contribution, index) => (
-      <TableRow key={contribution.id || index}>
-        <TableCell>{contribution.user_name}</TableCell>
-        <TableCell align="right">
-          {new Intl.NumberFormat("de-DE", {
-            style: "currency",
-            currency: "EUR",
-          }).format(contribution.total_contributed)}
-        </TableCell>
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-
-{groupedContributions.length > contributionsPerPage && (
-  <Box display="flex" justifyContent="center" alignItems="center" marginTop={2}>
-    <Button onClick={handlePrevGroupedPage} variant="outlined" style={{ marginRight: 10 }}>Previous</Button>
-    <Typography>{groupedCurrentPage + 1} / {groupedTotalPages}</Typography>
-    <Button onClick={handleNextGroupedPage} variant="outlined" style={{ marginLeft: 10 }}>Next</Button>
-  </Box>
-)}
-
-                <Box display="flex" justifyContent="center" alignItems="center" gap={1} marginTop={4}>
-                  {visibleParticipants.map((participant, index) => (
-                    <Avatar
-                      key={participant.id || index}
-                      style={{ backgroundColor: "#b19cd9", marginRight: 5 }}
-                    >
-                      {participant.initial || "?"}
-                    </Avatar>
-                  ))}
-                  {remainingCount > 0 && (
-                    <Typography>+{remainingCount} </Typography>
-                  )}
-                </Box>
-              </Box>
-            </Box>
-          </Card>
-<FloatingMenuObjective objectiveid={objectiveid} />
-        </Container>
-
+              </Card>
+              <FloatingMenuObjective objectiveid={objectiveid} />
+            </Container>
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );
 }
-
