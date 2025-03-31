@@ -117,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
+  
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -127,25 +127,24 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
+   
   },
-  appBarSpacer: {
-    minHeight: theme.spacing(4),
-  },
+
   container: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(4),
   },
   content: {
-    flexGrow: 1,
-    overflow: 'auto',
     width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   contactGrid: {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    padding: theme.spacing(1),
+   
   },
   fabButton: {
     position: 'fixed',
@@ -200,12 +199,12 @@ export default function ListOfContacts() {
     };
   }, []);
 
-  // When contacts are loaded, sort them into regular and invited contacts
+ 
   useEffect(() => {
     if (contacts?.contacts && Array.isArray(contacts.contacts)) {
       console.log("Original contacts:", contacts.contacts);
       
-      // Separate regular and invited contacts (note the hyphen)
+ 
       const regular = contacts.contacts.filter(contact => 
         !contact.contact_name?.startsWith('Invited-')
       );
@@ -217,14 +216,14 @@ export default function ListOfContacts() {
       console.log("Regular contacts before sort:", regular);
       console.log("Invited contacts before sort:", invited);
       
-      // Sort regular contacts alphabetically by contact_name
+     
       regular.sort((a, b) => {
         const nameA = a.contact_name?.toUpperCase() || '';
         const nameB = b.contact_name?.toUpperCase() || '';
         return nameA.localeCompare(nameB);
       });
       
-      // Sort invited contacts alphabetically by contact_name
+    
       invited.sort((a, b) => {
         const nameA = a.contact_name?.toUpperCase() || '';
         const nameB = b.contact_name?.toUpperCase() || '';
@@ -244,7 +243,7 @@ export default function ListOfContacts() {
       const response = await sendInvitation(invitationEmail);
       if (response.msg === "Invitation sent successfully") {
         alert("Invitation sent successfully!");
-        // Close both dialogs and clear the email
+     
         setInvitationDialog(false);
         setOpenAddDialog(false);
         setInvitationEmail("");
@@ -273,7 +272,7 @@ export default function ListOfContacts() {
         setEmail("");
         setOpenAddDialog(false);
       } else if (response.msg === "Contact not found") {
-        // User doesn't exist, show invitation dialog
+        
         setInvitationEmail(email);
         setOpenAddDialog(false);
         setInvitationDialog(true);
@@ -294,86 +293,116 @@ export default function ListOfContacts() {
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
             {!open && (
-              <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} className={classes.menuButton}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
                 <MenuIcon />
               </IconButton>
             )}
-
             {open && (
-              <IconButton edge="start" color="inherit" aria-label="close drawer" onClick={handleDrawerClose} className={classes.menuButton}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
-<Typography component="h1" variant="h6" noWrap className={classes.title}>
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
               <SplittrLogo />
             </Typography>
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, {store.userInfo?.name || 'User'}!
             </Typography>
-
             <IconButton color="inherit">
-
               <LogoutButton />
-
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" classes={{ paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose) }} open={open}>
-          <Divider />
-          <List>
-            <MainListItems user={store.userInfo} />
-          </List>
-          <Divider />
-          <List>
-            <SecondaryListItems user={store.userInfo} />
-          </List>
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Grid container spacing={2} className={classes.contactGrid}>
-           
-              {regularContacts.length > 0 && (
-                <>
-                  <Typography variant="h6" className={classes.categoryTitle}>
-                    Contacts
-                  </Typography>
-                  {regularContacts.map((contact) => (
-                    <ContactCard key={contact.id} contact={contact} />
-                  ))}
-                </>
-              )}
-              
-            
-              {invitedContacts.length > 0 && (
-                <>
-                  {regularContacts.length > 0 && <Divider className={classes.categoryDivider} />}
-                  <Typography variant="h6" className={classes.categoryTitle}>
-                    Pending Invitations
-                  </Typography>
-                  {invitedContacts.map((contact) => (
-                    <ContactCard key={contact.id} contact={contact} />
-                  ))}
-                </>
-              )}
-              
-        
-              {!contacts || !contacts.contacts && <div>Cargando contactos...</div>}
-              
-        
-              {contacts && contacts.contacts && contacts.contacts.length === 0 && (
-                <Typography variant="body1" align="center" style={{ marginTop: '2rem' }}>
-                  No contacts found. Add a contact using the + button.
-                </Typography>
-              )}
-            </Grid>
-          </Container>
-        </main>
-
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List>
+              <MainListItems user={store.userInfo} />
+            </List>
+            <Divider />
+            <List>
+              <SecondaryListItems user={store.userInfo} />
+            </List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+              <Grid container spacing={3} className={classes.contactGrid}>
+                {regularContacts.length > 0 && (
+                  <Grid item xs={12}>
+                    <Typography variant="h6" className={classes.categoryTitle}>
+                      Contacts
+                    </Typography>
+                    <Paper className={classes.paper}>
+                      {regularContacts.map((contact) => (
+                        <ContactCard key={contact.id} contact={contact} />
+                      ))}
+                    </Paper>
+                  </Grid>
+                )}
+                
+                {invitedContacts.length > 0 && (
+                  <Grid item xs={12}>
+                    {regularContacts.length > 0 && <Divider className={classes.categoryDivider} />}
+                    <Typography variant="h6" className={classes.categoryTitle}>
+                      Pending Invitations
+                    </Typography>
+                    <Paper className={classes.paper}>
+                      {invitedContacts.map((contact) => (
+                        <ContactCard key={contact.id} contact={contact} />
+                      ))}
+                    </Paper>
+                  </Grid>
+                )}
+                
+                {(!contacts || !contacts.contacts) && (
+                  <Grid item xs={12}>
+                    <Paper className={classes.paper}>
+                      <Typography variant="body1" align="center">
+                        Loading contacts...
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
+                
+                {contacts && contacts.contacts && contacts.contacts.length === 0 && (
+                  <Grid item xs={12}>
+                    <Paper className={classes.paper}>
+                      <Typography variant="body1" align="center">
+                        No contacts found. Add a contact using the + button.
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
+              </Grid>
+              <Box pt={4}>
+                <Copyright />
+              </Box>
+            </Container>
+          </main>
+        </div>
         <Fab color="primary" className={classes.fabButton} onClick={() => setOpenAddDialog(true)}>
           <AddIcon />
         </Fab>

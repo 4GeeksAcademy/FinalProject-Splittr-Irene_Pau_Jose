@@ -110,7 +110,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
+  
 
   },
   drawerPaperClose: {
@@ -121,11 +121,10 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
+
   },
-  appBarSpacer: {
-    minHeight: theme.spacing(4),
-  },
+
+  
   container: {
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(4)
@@ -149,6 +148,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+
 export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
@@ -171,19 +171,16 @@ export default function Dashboard() {
       const data = await actions.getUser()
       setUser(data)
       console.log(data);
-
     }
     getUser();
   }, [])
-
 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-
             {!open && (
               <IconButton
                 edge="start"
@@ -195,8 +192,6 @@ export default function Dashboard() {
                 <MenuIcon />
               </IconButton>
             )}
-
-
             {open && (
               <IconButton
                 edge="start"
@@ -208,59 +203,52 @@ export default function Dashboard() {
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               <SplittrLogo />
             </Typography>
-
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               Welcome, {user?.name}!
             </Typography>
-
             <IconButton color="inherit">
-
               <LogoutButton />
-
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
-          <Divider />
-          <List><MainListItems user={user} /> </List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Grid container spacing={3}>
-
-
-              <Grid item xs={12} style={{ display: "flex", width: "100%" }}>
-                <Paper className={fixedHeightPaper}>
-                  <FinancialDashboard />
-                </Paper>
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}> {/* Added marginTop to account for AppBar height */}
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }} // Set fixed height accounting for AppBar
+          >
+            <Divider />
+            <List><MainListItems user={user} /> </List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} style={{ display: "flex", width: "100%" }}>
+                  <Paper className={fixedHeightPaper}>
+                    <FinancialDashboard />
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                  <Paper className={classes.paper} style={{ flexGrow: 1 }}>
+                    <Orders />
+                  </Paper>
+                </Grid>
               </Grid>
-
-
-              <Grid item xs={12} style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-                <Paper className={classes.paper} style={{ flexGrow: 1 }}>
-                  <Orders />
-                </Paper>
-              </Grid>
-            </Grid>
-            <Box pt={4}>
-              <Copyright />
-            </Box>
-          </Container>
-        </main>
+              <Box pt={4}>
+                <Copyright />
+              </Box>
+            </Container>
+          </main>
+        </div>
         <FloatingActionButtonMenu />
       </div>
     </ThemeProvider>
