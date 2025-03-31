@@ -3,13 +3,13 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
-import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
+import Container from '@material-ui/core/Container';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { MainListItems, SecondaryListItems } from '../Dashboard/listitems.jsx';
@@ -21,19 +21,6 @@ import { submitFeedback } from '../../component/callToApi.js';
 import { SplittrLogo } from '../../component/SplittrLogo.jsx';
 import LogoutButton from '../../component/LogOutButton.jsx';
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
 const darkTheme = createMuiTheme({
   palette: {
     type: 'dark',
@@ -44,16 +31,9 @@ const darkTheme = createMuiTheme({
   overrides: {
     MuiAppBar: { colorPrimary: { backgroundColor: '#000000', color: '#ffffff' } },
     MuiToolbar: { root: { color: '#ffffff' } },
-    MuiTypography: { 
-      root: { color: '#ffffff' },
-      h6: {
-        fontSize: '1.25rem',
-        '@media (max-width:600px)': {
-          fontSize: '1rem',
-        }
-      }
-    },
+    MuiTypography: { root: { color: '#ffffff' } },
     MuiIconButton: { root: { color: '#ffffff !important' } },
+    MuiBadge: { colorSecondary: { backgroundColor: '#ff0000' } },
   },
 });
 
@@ -64,9 +44,6 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 20,
     minHeight: 70,
-    '@media (max-width:600px)': {
-      minHeight: 56,
-    }
   },
   toolbarIcon: {
     display: 'flex',
@@ -95,12 +72,7 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: { marginRight: 36 },
   menuButtonHidden: { display: 'none' },
-  title: { 
-    flexGrow: 1,
-    '@media (max-width:960px)': {
-      display: 'none' // Hide welcome message on smaller screens
-    }
-  },
+  title: { flexGrow: 1 },
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
@@ -109,7 +81,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -119,46 +90,61 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
+  },
+  appBarSpacer: {
+    minHeight: theme.spacing(4),
+  },
+  container: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(4),
+  },
+  content: {
+    flexGrow: 1,
+    overflow: 'auto',
+    width: '100%',
   },
   feedbackContainer: {
     width: '100%',
     maxWidth: 600,
     padding: theme.spacing(3),
-    marginTop: 70,
     marginLeft: 'auto',
     marginRight: 'auto',
-    '@media (max-width:600px)': {
-      padding: theme.spacing(2),
-      marginTop: 56,
-    }
   },
   feedbackTitle: {
     marginBottom: theme.spacing(4),
     fontSize: '1.5rem',
-    '@media (max-width:600px)': {
-      fontSize: '1.25rem',
-      marginBottom: theme.spacing(2),
-    }
   },
   inputField: {
     marginBottom: theme.spacing(3),
-    '@media (max-width:600px)': {
-      marginBottom: theme.spacing(2),
-    }
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: '#36393F',
+      },
+      '&:hover fieldset': {
+        borderColor: 'white',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#7289DA',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: '#b9bbbe',
+    },
+    '& .MuiOutlinedInput-input': {
+      color: '#white',
+    },
   },
   submitButton: {
     marginTop: theme.spacing(2),
-    width: '100%',
-    '@media (min-width:600px)': {
-      width: 'auto',
-    }
   }
 }));
 
 export default function Feedback() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
+  
   const { store, actions } = useContext(Context);
   const [user, setUser] = useState(store.userInfo);
   const [message, setMessage] = useState('');
@@ -194,17 +180,30 @@ export default function Feedback() {
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label={open ? "close drawer" : "open drawer"}
-              onClick={() => setOpen(!open)}
-              className={classes.menuButton}
-            >
-              {open ? <ChevronLeftIcon /> : <MenuIcon />}
-            </IconButton>
+            {!open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            {open && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="close drawer"
+                onClick={handleDrawerClose}
+                className={classes.menuButton}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            )}
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
               <SplittrLogo />
             </Typography>
@@ -216,56 +215,64 @@ export default function Feedback() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-          <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
-        <main className={classes.feedbackContainer}>
-          <Typography variant="h4" className={classes.feedbackTitle}>
-            We'd love to hear from you!
-          </Typography>
-          
-          <div className={classes.inputField}>
-            <TextField
-              id="feedback-email"
-              label="Email"
-              variant="outlined"
-              fullWidth
-              value={user?.email || ""}
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
-            />
-          </div>
-
-          <div className={classes.inputField}>
-            <TextField
-              id="feedback-message"
-              label="Your Feedback"
-              variant="outlined"
-              multiline
-              rows={6}
-              fullWidth
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-          </div>
-
-          <Button
-            className={classes.submitButton}
-            variant="contained"
-            color="primary"
-            onClick={handleSendFeedback}
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
           >
-            Send Feedback
-          </Button>
-        </main>
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Container maxWidth="lg" className={classes.container}>
+              <div className={classes.feedbackContainer}>
+                <Typography variant="h4" className={classes.feedbackTitle}>
+                  We'd love to hear from you!
+                </Typography>
+                
+                <div className={classes.inputField}>
+                  <TextField
+                    id="feedback-email"
+                    label="Email"
+                    variant="outlined"
+                    fullWidth
+                    value={user?.email || ""}
+                    onChange={(e) => setUser({ ...user, email: e.target.value })}
+                  />
+                </div>
+
+                <div className={classes.inputField}>
+                  <TextField
+                    id="feedback-message"
+                    label="Your Feedback"
+                    variant="outlined"
+                    multiline
+                    rows={6}
+                    fullWidth
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                </div>
+
+                <Button
+                  className={classes.submitButton}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSendFeedback}
+                >
+                  Send Feedback
+                </Button>
+              </div>
+            </Container>
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );
