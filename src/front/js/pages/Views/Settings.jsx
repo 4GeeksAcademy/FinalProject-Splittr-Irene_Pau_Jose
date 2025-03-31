@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
-import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
@@ -21,19 +20,6 @@ import { updateUser } from '../../component/callToApi.js';
 import { SplittrLogo } from '../../component/SplittrLogo.jsx';
 import LogoutButton from '../../component/LogOutButton.jsx';
 import Container from '@material-ui/core/Container';
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -172,39 +158,63 @@ export default function Settings() {
   const handleDrawerClose = () => setOpen(false);
   
   const { store, actions } = useContext(Context);
-  const [user, setUser] = useState(store.userInfo);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    birthday: ''
+  });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: '', isError: false });
 
   useEffect(() => {
-    const getUser = async () => {
-      const data = await actions.getUser();
-      if (data) setUser(data);
-    };
-    getUser();
-  }, []);
+    if (store.userInfo) {
+      setFormData({
+        name: store.userInfo.name || '',
+        email: store.userInfo.email || '',
+        password: '',
+        birthday: store.userInfo.birthday || ''
+      });
+    }
+  }, [store.userInfo]);
 
-  const handleUpdateUser = async () => {
-    setLoading(true);
-    setMessage("");
+  const handleFieldChange = (field) => (e) => {
+    setFormData({ ...formData, [field]: e.target.value });
+  };
 
-    const updatedData = {
-      name: user.name,
-      email: user.email,
-      password: user.password,
-      birthday: user.birthday
-    };
-
-    const result = await updateUser(updatedData, store.token);
-
-    if (result.error) {
-      setMessage("Failed to update user");
-    } else {
-      setMessage("User updated successfully!");
-      actions.getUser();
+  const handleUpdateField = async (field) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage({ text: "Please login again", isError: true });
+      return;
     }
 
-    setLoading(false);
+    if (!formData[field] && field !== 'birthday') {
+      setMessage({ text: `${field} cannot be empty`, isError: true });
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ text: '', isError: false });
+
+    try {
+      const updatePayload = { [field]: formData[field] };
+      const result = await updateUser(updatePayload, token);
+
+      if (result.error) {
+        setMessage({ text: result.error, isError: true });
+      } else {
+        setMessage({ text: `${field} updated successfully!`, isError: false });
+        if (field === 'password') {
+          setFormData({ ...formData, password: '' });
+        }
+        await actions.getUser();
+      }
+    } catch (error) {
+      setMessage({ text: "Failed to update. Please try again.", isError: true });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -263,68 +273,71 @@ export default function Settings() {
           <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
             <div className={classes.appBarSpacer} />
             <Container maxWidth="lg" className={classes.container}>
-              <Box className={classes.settingsContainer}>
+              <div className={classes.settingsContainer}>
                 <Typography variant="h4" className={classes.settingsTitle}>User Settings</Typography>
 
-                <Box className={classes.settingField}>
+                <div className={classes.settingField}>
                   <TextField
                     className={classes.textField}
-                    label="Change Name"
+                    label="Name"
                     variant="outlined"
                     fullWidth
-                    value={user?.name || ""}
-                    onChange={(e) => setUser({ ...user, name: e.target.value })}
+                    value={formData.name}
+                    onChange={handleFieldChange('name')}
                   />
                   <Button
                     className={classes.actionButton}
                     variant="contained"
-                    onClick={handleUpdateUser}
+                    color="primary"
+                    onClick={() => handleUpdateField('name')}
                     disabled={loading}
                   >
-                    {loading ? "Updating..." : "Change"}
+                    Update
                   </Button>
-                </Box>
+                </div>
 
-                <Box className={classes.settingField}>
+                <div className={classes.settingField}>
                   <TextField
                     className={classes.textField}
-                    label="Change Email"
+                    label="Email"
                     variant="outlined"
                     fullWidth
-                    value={user?.email || ""}
-                    onChange={(e) => setUser({ ...user, email: e.target.value })}
+                    value={formData.email}
+                    onChange={handleFieldChange('email')}
                   />
                   <Button
                     className={classes.actionButton}
                     variant="contained"
-                    onClick={handleUpdateUser}
+                    color="primary"
+                    onClick={() => handleUpdateField('email')}
                     disabled={loading}
                   >
-                    {loading ? "Updating..." : "Change"}
+                    Update
                   </Button>
-                </Box>
+                </div>
 
-                <Box className={classes.settingField}>
+                <div className={classes.settingField}>
                   <TextField
                     className={classes.textField}
-                    label="Change Password"
+                    label="New Password"
                     type="password"
                     variant="outlined"
                     fullWidth
-                    value={user?.password || ""}
-                    onChange={(e) => setUser({ ...user, password: e.target.value })}
+                    value={formData.password}
+                    onChange={handleFieldChange('password')}
                   />
                   <Button
                     className={classes.actionButton}
                     variant="contained"
-                    onClick={handleUpdateUser}
+                    color="primary"
+                    onClick={() => handleUpdateField('password')}
                     disabled={loading}
                   >
-                    {loading ? "Updating..." : "Change"}
+                    Update
                   </Button>
-                </Box>
+                </div>
 
-                <Box className={classes.settingField}>
+                <div className={classes.settingField}>
                   <TextField
                     className={classes.textField}
                     label="Birthday"
@@ -332,28 +345,29 @@ export default function Settings() {
                     variant="outlined"
                     fullWidth
                     InputLabelProps={{ shrink: true }}
-                    value={user?.birthday || ""}
-                    onChange={(e) => setUser({ ...user, birthday: e.target.value })}
+                    value={formData.birthday}
+                    onChange={handleFieldChange('birthday')}
                   />
                   <Button
                     className={classes.actionButton}
                     variant="contained"
-                    onClick={handleUpdateUser}
+                    color="primary"
+                    onClick={() => handleUpdateField('birthday')}
                     disabled={loading}
                   >
-                    {loading ? "Updating..." : "Change"}
+                    Update
                   </Button>
-                </Box>
+                </div>
 
-                {message && (
+                {message.text && (
                   <Typography 
-                    color={message.includes("Failed") ? "error" : "primary"}
+                    color={message.isError ? "error" : "primary"}
                     style={{ marginTop: 16 }}
                   >
-                    {message}
+                    {message.text}
                   </Typography>
                 )}
-              </Box>
+              </div>
             </Container>
           </main>
         </div>
