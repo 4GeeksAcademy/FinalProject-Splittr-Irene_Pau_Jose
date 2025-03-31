@@ -24,6 +24,11 @@ import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
 import { getInfoSharedObjective, deleteObjective, updateObjective } from '../../../component/callToApi.js'; 
 import { useNavigate } from 'react-router-dom';
+import { Grid } from '@material-ui/core';
+import { mapContacts } from '../../../component/callToApi.js';
+import { getObjectiveMembers } from '../../../component/callToApi.js';
+import { getNonObjectiveMembers} from '../../../component/callToApi.js';
+import AddContactCardInEditObjective from './AddContactCardInEditObjective.jsx';
 
 function Copyright() {
   return (
@@ -145,11 +150,69 @@ export default function EditObjective() {
   const { store, actions } = useContext(Context);
   const { objectiveid } = useParams();
   const[singleObjective, setSingleObjective]= useState({});
+  const [contacts, setContacts] = useState({ contacts: [] });
+  const userid = sessionStorage.getItem("user_id");
+  const [allContacts, setAllContacts] = useState([]);
+  const [objectiveMembers, setObjectiveMembers] = useState([]);
+    const [members, setMembers] = useState([]);
+    const [nonObjectiveMembers, setNonObjectiveMembers] = useState([]);
+    const [objective, setObjective] = useState(null);
 
-  useEffect(()=>{
+    const fetchObjectiveDetails = async () => {
+      try {
+        const response = await fetch(urlBackend + `/objectives/${objectiveid}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          }
+        });
+        const data = await response.json();
+        setObjective(data);
+      } catch (error) {
+        console.error("Error fetching objective details:", error);
+      }
+    };
 
+    useEffect(() => {
+      if (objectiveid) {
+          getInfoSharedObjective(setObjective, objectiveid);
+      }
+  }, [objectiveid]);
+  
+  
+
+    useEffect(() => {
+      if (userid) {
+        mapContacts(setAllContacts, userid);
+        console.log("Contactos obtenidos:", allContacts);
+      }
+    }, [userid]);
+  
+  useEffect(() => {
+    if (!objectiveid) return;
     getInfoSharedObjective(setSingleObjective, objectiveid)
-  },[])
+      .then(objectiveData => {
+        console.log("Datos del objetivo recibidos:", objectiveData);
+        if (objectiveData && Array.isArray(objectiveData.members)) {
+          setObjectiveMembers(objectiveData.members);
+        } else if (objectiveData) {
+          console.error("Error: La propiedad 'members' no es un array:", objectiveData);
+          setObjectiveMembers([]);
+        } else {
+          console.error("Error: No se pudo obtener la información del objetivo o no hay datos.");
+          setObjectiveMembers([]);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching objective info:", error);
+        setObjectiveMembers([]);
+      });
+  }, [objectiveid]);
+
+  useEffect(() => {
+    fetchObjectiveDetails();
+  }, [objectiveid]);
+
+
   console.log(singleObjective);
   const handleUpdate = async (field) => {
     try {
@@ -174,6 +237,84 @@ export default function EditObjective() {
       }
     }
   };
+
+    const handleUpdateObjective = async (field) => {
+      try {
+        let updatedData = {};
+  
+        switch (field) {
+          case 'objective_name':
+            updatedData = { objective_name: singleObjective.objective_name };
+            break;
+          case 'target_amount':
+            updatedData = { total_amount: singleObjective.target_amount };
+            break;
+  
+        }
+  
+        await updateObjective(objectiveid, updatedData);
+        alert("Objective updated successfully!");
+      } catch (error) {
+        console.error("Error updating Objective:", error);
+        alert("Error updating Objective : ${error.message}");
+      }
+    };
+
+      const handleMemberRemoved = () => {
+    
+        if (objectiveid) {
+          getInfoSharedObjective(setSingleObjective, objectiveid)
+            .then(objectiveData => {
+              if (objectiveData && Array.isArray(objectiveData.members)) {
+                setObjectiveMembers(objectiveData.members);
+              } else {
+                setObjectiveMembers([]);
+                console.error("Error al actualizar la lista de miembros después de la eliminación.");
+              }
+            })
+            .catch(error => {
+              console.error("Error al obtener la información del objetivo después de la eliminación:", error);
+            });
+        }
+      };
+
+  useEffect(() => {
+    if (objectiveid) {
+      getObjectiveMembers(objectiveid)
+        .then(members => {
+          console.log("Miembros del objetivo recibidos:", members);
+          if (Array.isArray(members)) {
+            setObjectiveMembers(members);
+          } else if (members && Array.isArray(members.members)) {
+            setObjectiveMembers(members.members);
+          } else {
+            console.error("Error: miembros del objetivo no son un array:", members);
+            setObjectiveMembers([]);
+          }
+        })
+        .catch(error => {
+          console.error("Error al obtener miembros del objetivo:", error);
+          setObjectiveMembers([]);
+        });
+    }
+  }, [objectiveid]);
+
+    useEffect(() => {
+      console.log("allContacts antes del filtrado:", allContacts);
+      console.log("objectiveMembers antes del filtrado:", objectiveMembers);
+  
+      if (allContacts.contacts && allContacts.contacts.length > 0 && objectiveMembers.length > 0) {
+        const filteredNonMembers = allContacts.contacts.filter(contact => {
+          console.log("Comparando contacto:", contact, "con miembros:", objectiveMembers);
+          return !objectiveMembers.some(member => member.id === contact.id);
+        });
+        console.log("nonObjectiveMembers después del filtrado:", filteredNonMembers);
+        setNonObjectiveMembers(filteredNonMembers);
+      } else {
+        console.log("No se realiza el filtrado porque allContacts.contacts o ObjectiveMembers están vacíos.");
+        setNonObjectiveMembers([]);
+      }
+    }, [allContacts, objectiveMembers]);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -276,8 +417,52 @@ export default function EditObjective() {
               </Box>
               
             </Box>            
+            
+            <Box sx={{ marginTop: "20px" }}>
+                <h3>Members</h3>
+                {objectiveMembers.length === 0 ? (
+                  <Typography>No members in this objective yet.</Typography>
+                ) : (
+                  <Grid container spacing={2}>
+                    {objectiveMembers.map((member) => (
+                      <Grid item xs={12} sm={6} md={4} key={member.id}>
+                        <MemberCard
+                          member={member}
+                          obectiveid={obectiveid}
+                          onMemberRemoved={handleMemberRemoved}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+              </Box>
+                          <Typography variant="h6" className={classes.addMembersTitle}>
+              Add members
+            </Typography>
+            <Grid container spacing={2} className={classes.contactGrid}>
+              {nonObjectiveMembers.length === 0 && objectiveMembers.length > 0 ? (
+                <Typography>No contacts available to add.</Typography>
+              ) : nonObjectiveMembers.length === 0 && objectiveMembers.length === 0 ? (
+                <Typography>Loading contacts...</Typography>
+              ) : (
+                nonObjectiveMembers.map((contact) => (
+                  <Grid item xs={12} sm={6} md={4} key={contact.contact_id}>
+                    <AddContactCardInEditObjective
+                      contact={{
+                        ...contact,
+                        user_id: contact.contact_id,
+                      }}
+                      objectiveId={objectiveid}
+                      onAddContact={updateContactsAfterAddingMember} 
+                    />
+                  </Grid>
+                ))
+              )}
+            </Grid>
+
+            
             <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
-              
+            
               <Button variant="outlined" color="secondary" onClick={handleDelete} >Delete Objective</Button>
             </Box>
 

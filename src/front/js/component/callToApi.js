@@ -284,24 +284,32 @@ export const mapSharedObjective = async (setSharedObjective, userid) => {
 }
 
 export const getInfoSharedObjective = async (setInfoSharedObjective, objectiveid) => {
-
     try {
         const response = await fetch(urlBackend + "/objective/" + objectiveid, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
                 "Content-Type": "application/json"
-            }
-            ,
-        })
-        const data = await response.json()
-        setInfoSharedObjective(data)
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al obtener objetivo: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data || Object.keys(data).length === 0) {
+            throw new Error("No se recibieron datos del objetivo.");
+        }
+
+        console.log("Datos del objetivo recibidos:", data);
+        setInfoSharedObjective(data);
 
     } catch (error) {
-        console.log(error);
-
+        console.error("Error en getInfoSharedObjective:", error);
+        setInfoSharedObjective(null);  
     }
-
-}
+};
 
 
 
@@ -388,6 +396,133 @@ export const createObjective = async (objectiveName, objectiveTargetAmount, obje
 };
 
 
+export const addContactToObjective = async (userId, objectiveId) => {
+    try {
+        console.log("Datos enviados:", { userId, objectiveId });
+        
+        if (!userId || !objectiveId) {
+            throw new Error("userId o objectiveId faltante");
+        }
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            throw new Error("Token no encontrado");
+        }
+
+        const response = await fetch(urlBackend + "/objective_user", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                objective_id: objectiveId
+            })
+        });
+
+        console.log("Respuesta del servidor:", response);
+        const data = await response.json();
+        console.log("Datos recibidos:", data);
+        return data;
+
+    } catch (error) {
+        console.error("Error agregando contacto al objetivo:", error);
+        throw error;
+    }
+};
+
+
+export const getObjectiveMembers = async (objectiveId) => {
+    try {
+        const response = await fetch(urlBackend + "/objective/" + objectiveId, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error fetching objective members:", errorData);
+            throw new Error(`Error fetching objective members: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data || !Array.isArray(data.members)) {
+            console.warn("La respuesta de miembros está vacía o no es un array:", data);
+            return [];
+        }
+
+        return data.members;
+    } catch (error) {
+        console.error("Error in getObjectiveMembers:", error);
+        return [];
+    }
+};
+
+
+export const getNonObjectiveMembers = async (setNonMembers, userId, objectiveId) => {
+    try {
+        const allContacts = await mapContacts(null, userId);
+
+        if (!Array.isArray(allContacts)) {
+            console.error("Error: 'allContacts' is not an array or is null", allContacts);
+            return;
+        }
+
+        console.log("All contacts:", allContacts);
+
+        const objectiveMembers = await getObjectiveMembers(objectiveId);
+
+        if (!Array.isArray(objectiveMembers)) {
+            console.error("Error: 'objectiveMembers' is not an array or is null", objectiveMembers);
+            return;
+        }
+
+        console.log("Objective members:", objectiveMembers);
+
+        const memberIds = new Set(objectiveMembers.map(member => member.id));
+
+        const nonMembers = allContacts.filter(contact => contact && !memberIds.has(contact.id));
+
+        setNonMembers(nonMembers);
+
+        console.log("Non-members:", nonMembers);
+    } catch (error) {
+        console.error("Error in getNonObjectiveMembers:", error);
+    }
+};
+
+export const removeUserFromObjective = async (userId, objectiveId) => {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(urlBackend + "/objective_user/delete", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                objective_id: objectiveId
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Error details:", errorText);
+            throw new Error(`Failed to remove user from objective: ${errorText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error removing user from objective:", error);
+        throw error;
+    }
+};
 
 
 export const mapContacts = async (setContacts, userid) => {

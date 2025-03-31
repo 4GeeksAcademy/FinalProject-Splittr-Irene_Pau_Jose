@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Paper, Typography, CardContent } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CheckIcon from "@material-ui/icons/Check";
 import Button from '@material-ui/core/Button';
+import { addContactToObjective } from "../../../component/callToApi";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -52,22 +53,44 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const AddContactCard = ({ 
+const AddContactCardInEditObjective = ({ 
     contact, 
-    onAddContact, 
-    isSelected = false 
+    objectiveId,
+    onAddContact,
+    isSelected = false
 }) => {
     const classes = useStyles();
+    const [isAdded, setIsAdded] = useState(isSelected); 
 
-    const handleClick = () => {
-        if (onAddContact) {
-            onAddContact(contact);
+    const handleAddContact = async () => {
+        try {
+            if (!contact || !contact.user_id) {
+                throw new Error("Invalid contact object or missing user_id.");
+            }
+            if (!objectiveId) {
+                throw new Error("Missing objectiveId.");
+            }
+
+            const result = await addContactToObjective(contact.user_id, objectiveId);
+
+            if (result.msg === 'User added to objective successfully') {
+                setIsAdded(true);
+                if (onAddContact) {
+                    onAddContact(contact);
+                }
+                alert("Contact added successfully to the objective.");
+            } else {
+                throw new Error(result.msg || "Unknown error.");
+            }
+        } catch (error) {
+            console.error("Error adding contact to objective:", error);
+            alert("Error adding contact to objective: " + (error.message || "Unknown error."));
         }
     };
 
     return (
         <Paper 
-            className={`${classes.card} ${isSelected ? classes.selectedCard : ''}`} 
+            className={`${classes.card} ${isAdded ? classes.selectedCard : ''}`} 
             style={{ width: '100%' }}
         >
             <div className={classes.name}>
@@ -85,8 +108,9 @@ const AddContactCard = ({
                 }}>
                     <Button
                         variant="contained"
-                        color={isSelected ? "secondary" : "primary"}
-                        onClick={handleClick}
+                        color={isAdded ? "secondary" : "primary"}
+                        onClick={handleAddContact}
+                        disabled={isAdded}
                         style={{
                             marginTop: '10px',
                             borderRadius: '50%',
@@ -99,7 +123,7 @@ const AddContactCard = ({
                             justifyContent: 'center',
                         }}
                     >
-                        {isSelected ? <CheckIcon /> : <AddIcon />}
+                        {isAdded ? <CheckIcon /> : <AddIcon />}
                     </Button>
                 </CardContent>
             </div>
@@ -107,4 +131,4 @@ const AddContactCard = ({
     );
 };
 
-export default AddContactCard;
+export default AddContactCardInEditObjective;

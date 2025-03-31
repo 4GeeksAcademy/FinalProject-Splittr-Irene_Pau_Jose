@@ -6,54 +6,64 @@ import CheckIcon from "@material-ui/icons/Check";
 import Button from '@material-ui/core/Button';
 import { addContactToGroup } from "../../../component/callToApi";
 
-
 const useStyles = makeStyles((theme) => ({
     card: {
-      padding: theme.spacing(2),
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.spacing(1),
-      borderRadius: theme.shape.borderRadius,
-      border: '1px solid #ccc',
+        display: "flex",
+        width: "100%",
+        height: 70,
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: theme.spacing(1),
+        backgroundColor: "#2C2F33",
+        marginBottom: theme.spacing(1),
+        borderRadius: 4,
+        transition: 'background-color 0.3s ease',
+        [theme.breakpoints.down('sm')]: {
+            padding: theme.spacing(1),
+        },
     },
     selectedCard: {
-      backgroundColor: theme.palette.success.light, // Puedes definir tus propios colores
+        backgroundColor: '#3f51b5',
     },
     name: {
-      display: 'flex',
-      alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
+        color: "#ffffff",
+        flexGrow: 1,
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '0.875rem',
+        },
     },
     initial: {
-      width: 36,
-      height: 36,
-      borderRadius: '50%',
-      backgroundColor: theme.palette.primary.main, // O el color que desees
-      color: theme.palette.common.white,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: theme.spacing(1),
-      fontSize: '1rem',
+        width: 40,
+        height: 40,
+        borderRadius: "50%",
+        backgroundColor: "#6c63ff",
+        color: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold",
+        marginRight: theme.spacing(1),
+        [theme.breakpoints.down('sm')]: {
+            width: 30,
+            height: 30,
+            fontSize: '0.8rem',
+        },
     },
-  }));
-
+}));
 
 const AddContactCardInEditGroup = ({ 
     contact, 
     groupId,
-    onAddContact 
+    onAddContact,
+    isSelected = false
 }) => {
     const classes = useStyles();
-    const [isAdded, setIsAdded] = useState(false);
-
+    const [isAdded, setIsAdded] = useState(isSelected); 
 
     const handleAddContact = async () => {
         try {
-            console.log("Contact object:", contact);
-            console.log("Group ID:", groupId);
-            console.log("Contact user_id:", contact.user_id); // Agrega este console.log
-            
             if (!contact || !contact.user_id) {
                 throw new Error("Invalid contact object or missing user_id.");
             }
@@ -62,7 +72,6 @@ const AddContactCardInEditGroup = ({
             }
 
             const result = await addContactToGroup(contact.user_id, groupId);
-            console.log("API result:", result);
 
             if (result.msg === 'User added to group successfully') {
                 setIsAdded(true);
@@ -78,8 +87,6 @@ const AddContactCardInEditGroup = ({
             alert("Error al agregar el contacto al grupo: " + (error.message || "Error desconocido."));
         }
     };
-    
-
 
     return (
         <Paper 
