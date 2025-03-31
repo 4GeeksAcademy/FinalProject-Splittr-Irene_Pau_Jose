@@ -13,43 +13,22 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { MainListItems, SecondaryListItems } from '../../Dashboard/listitems.jsx';
 import { useParams } from 'react-router-dom';
-import AddContactCard from './AddContactCard.jsx';
-import Deposits from '../../Dashboard/Deposits.jsx';
-import Orders from '../../Dashboard/Orders.jsx';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { getNonGroupMembers } from '../../../component/callToApi.js';
-
-import { Link as MuiLink } from "@material-ui/core";
-import { Home } from '../../Home.jsx';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
-import Icon from '@material-ui/core/Icon';
-import SendIcon from '@material-ui/icons/Save';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
-import { getInfoGroup } from '../../../component/callToApi.js';
-import { LibraryMusic } from '@material-ui/icons';
-import { updateGroup } from '../../../component/callToApi.js';
-import { mapContacts } from '../../../component/callToApi.js';
-import { getGroupMembers } from '../../../component/callToApi.js';
+import { getInfoGroup, updateGroup, mapContacts, getGroupMembers } from '../../../component/callToApi.js';
 import MemberCard from './MemberCard.jsx';
 import AddContactCardInEditGroup from './AddContactCardInEditGroup.jsx';
-
+import { SplittrLogo } from '../../../component/SplittrLogo.jsx';
+import LogoutButton from '../../../component/LogOutButton.jsx';
 
 function Copyright() {
   return (
@@ -87,13 +66,36 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 20,
     minHeight: 70,
+    [theme.breakpoints.down('sm')]: {  // Mobile styles
+      paddingRight: 10,
+      minHeight: 56,
+    },
   },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-
+  },
+  title: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {  // Extra small screens
+      '&:last-child': {  // Target the welcome message specifically
+        display: 'none',  // Hide welcome message on very small screens
+      },
+    },
+  },
+  logoTitle: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {
+      fontSize: '1rem',  // Reduce logo size on mobile
+    },
+  },
+  menuButton: {
+    marginRight: 36,
+    [theme.breakpoints.down('sm')]: {
+      marginRight: 12,  // Reduce spacing on mobile
+    },
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -114,9 +116,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#000000',
     color: theme.palette.text.primary,
   },
-  menuButton: { marginRight: 36 },
   menuButtonHidden: { display: 'none' },
-  title: { flexGrow: 1 },
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
@@ -125,8 +125,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
-
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -136,61 +134,50 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
   },
   container: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4)
-
+    paddingBottom: theme.spacing(4),
+  },
+  content: {
+    flexGrow: 1,
+    overflow: 'auto',
+    width: '100%',
   },
   contactGrid: {
     display: 'flex',
     flexWrap: 'wrap',
   },
+  addMembersTitle: {
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 export default function EditGroup() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
   const handleDrawerClose = () => {
     setOpen(false);
   };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const handleChange = (event) => {
-    setSingleGroup({ ...singleGroup, [event.target.name]: event.target.value })
+    setSingleGroup({ ...singleGroup, [event.target.name]: event.target.value });
   };
-
 
   const { store, actions } = useContext(Context);
   const { groupid } = useParams();
   const [singleGroup, setSingleGroup] = useState({});
-  const [contacts, setContacts] = useState({ contacts: [] });
-  const userid = sessionStorage.getItem("user_id");
   const [allContacts, setAllContacts] = useState([]);
-
-  console.log(userid)
-
-  const fetchGroupDetails = async () => {
-    try {
-      const response = await fetch(urlBackend + `/groups/${groupId}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        }
-      });
-      const data = await response.json();
-      setGroup(data);
-    } catch (error) {
-      console.error("Error fetching group details:", error);
-    }
-  };
-
+  const userid = sessionStorage.getItem("user_id");
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [nonGroupMembers, setNonGroupMembers] = useState([]);
 
   useEffect(() => {
     getInfoGroup(setSingleGroup, groupid);
@@ -222,18 +209,9 @@ export default function EditGroup() {
       });
   }, [groupid]);
 
-  useEffect(() => {
-    fetchGroupDetails();
-  }, [groupid]);
-
-
-  const [members, setMembers] = useState([]);
-  const [nonGroupMembers, setNonGroupMembers] = useState([]);
-
   const handleUpdateGroup = async (field) => {
     try {
       let updatedData = {};
-
       switch (field) {
         case 'group_name':
           updatedData = { group_name: singleGroup.group_name };
@@ -241,19 +219,18 @@ export default function EditGroup() {
         case 'total_amount':
           updatedData = { total_amount: singleGroup.total_amount };
           break;
-
+        default:
+          break;
       }
-
       await updateGroup(groupid, updatedData);
       alert("Group updated successfully!");
     } catch (error) {
       console.error("Error updating Group:", error);
-      alert("Error updating Group : ${error.message}");
+      alert(`Error updating Group : ${error.message}`);
     }
   };
 
   const handleMemberRemoved = () => {
-
     if (groupid) {
       getInfoGroup(setSingleGroup, groupid)
         .then(groupData => {
@@ -269,8 +246,6 @@ export default function EditGroup() {
         });
     }
   };
-
-  const [groupMembers, setGroupMembers] = useState([]);
 
   useEffect(() => {
     if (groupid) {
@@ -293,18 +268,12 @@ export default function EditGroup() {
   }, [groupid]);
 
   useEffect(() => {
-    console.log("allContacts antes del filtrado:", allContacts);
-    console.log("groupMembers antes del filtrado:", groupMembers);
-
     if (allContacts.contacts && allContacts.contacts.length > 0 && groupMembers.length > 0) {
       const filteredNonMembers = allContacts.contacts.filter(contact => {
-        console.log("Comparando contacto:", contact, "con miembros:", groupMembers);
         return !groupMembers.some(member => member.id === contact.id);
       });
-      console.log("nonGroupMembers después del filtrado:", filteredNonMembers);
       setNonGroupMembers(filteredNonMembers);
     } else {
-      console.log("No se realiza el filtrado porque allContacts.contacts o groupMembers están vacíos.");
       setNonGroupMembers([]);
     }
   }, [allContacts, groupMembers]);
@@ -313,9 +282,8 @@ export default function EditGroup() {
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-     
             {!open && (
               <IconButton
                 edge="start"
@@ -327,8 +295,6 @@ export default function EditGroup() {
                 <MenuIcon />
               </IconButton>
             )}
-
-   
             {open && (
               <IconButton
                 edge="start"
@@ -340,127 +306,126 @@ export default function EditGroup() {
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
-            <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+            <Typography component="h1" variant="h6" noWrap className={classes.logoTitle}>
+              <SplittrLogo />
             </Typography>
-
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
+            </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
+              <Badge badgeContent={0} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+            <LogoutButton />
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
-          <Divider />
-          <List><MainListItems user={store.userInfo} /></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
-        <Box
-          sx={{
-            width: "50%",
-            padding: "0 16px",
-            marginTop: "80px",
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-
-          }}
-        >
-          <Box sx={{ marginBottom: "20px" }}>
-            <h3>Modify Group</h3>
-
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <TextField
-                  id="outlined-textarea"
-                  variant="outlined"
-                  fullWidth
-                  placeholder="Current name"
-                  value={singleGroup.group_name || ""}
-                  onChange={handleChange}
-                  name="group_name"
-                />
-                <Box sx={{ marginLeft: "40px" }}>
-                  <Button onClick={() => handleUpdateGroup("group_name")}>Change</Button>
-                </Box>
-              </Box>
-              <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-                <TextField
-                  id="outlined-textarea"
-                  variant="outlined"
-                  fullWidth
-                  placeholder="Current amount"
-                  value={singleGroup.total_amount || ""}
-                  onChange={handleChange}
-                  name="total_amount"
-                />
-                <Box sx={{ marginLeft: "40px" }}>
-                  <Button onClick={() => handleUpdateGroup("total_amount")}>Change</Button>
-                </Box>
-
-              </Box>
-              <Box sx={{ marginTop: "20px" }}>
-                <h3>Members</h3>
-                {groupMembers.length === 0 ? (
-                  <Typography>No members in this group yet.</Typography>
-                ) : (
-                  <Grid container spacing={2}>
-                    {groupMembers.map((member) => (
-                      <Grid item xs={12} sm={6} md={4} key={member.id}>
-                        <MemberCard
-                          member={member}
-                          groupId={groupid}
-                          onMemberRemoved={handleMemberRemoved}
-                        />
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <Box
+              sx={{
+                width: "50%",
+                padding: "0 16px",
+                marginTop: "20px",
+                margin: "0 auto",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box sx={{ marginBottom: "20px" }}>
+                <h3>Modify Group</h3>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <TextField
+                      id="outlined-textarea"
+                      variant="outlined"
+                      fullWidth
+                      placeholder="Current name"
+                      value={singleGroup.group_name || ""}
+                      onChange={handleChange}
+                      name="group_name"
+                    />
+                    <Box sx={{ marginLeft: "40px" }}>
+                      <Button variant="contained" color="primary" onClick={() => handleUpdateGroup("group_name")}>Change</Button>
+                    </Box>
+                  </Box>
+                  <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+                    <TextField
+                      id="outlined-textarea"
+                      variant="outlined"
+                      fullWidth
+                      placeholder="Current amount"
+                      value={singleGroup.total_amount || ""}
+                      onChange={handleChange}
+                      name="total_amount"
+                    />
+                    <Box sx={{ marginLeft: "40px" }}>
+                      <Button variant="contained" color="primary" onClick={() => handleUpdateGroup("total_amount")}>Change</Button>
+                    </Box>
+                  </Box>
+                  <Box sx={{ marginTop: "20px" }}>
+                    <h3>Members</h3>
+                    {groupMembers.length === 0 ? (
+                      <Typography>No members in this group yet.</Typography>
+                    ) : (
+                      <Grid container spacing={2}>
+                        {groupMembers.map((member) => (
+                          <Grid item xs={12} sm={6} md={4} key={member.id}>
+                            <MemberCard
+                              member={member}
+                              groupId={groupid}
+                              onMemberRemoved={handleMemberRemoved}
+                            />
+                          </Grid>
+                        ))}
                       </Grid>
-                    ))}
+                    )}
+                  </Box>
+                  <Typography variant="h6" className={classes.addMembersTitle}>
+                    Add members
+                  </Typography>
+                  <Grid container spacing={2} className={classes.contactGrid}>
+                    {allContacts.length === 0 && groupMembers.length > 0 ? (
+                      <Typography>No contacts available to add.</Typography>
+                    ) : allContacts.length === 0 && groupMembers.length === 0 ? (
+                      <Typography>Loading contacts...</Typography>
+                    ) : (
+                      nonGroupMembers.map((contact) => (
+                        <Grid item xs={12} sm={6} md={4} key={contact.contact_id}>
+                          <AddContactCardInEditGroup
+                            contact={{
+                              ...contact,
+                              user_id: contact.contact_id
+                            }}
+                            groupId={groupid}
+                          />
+                        </Grid>
+                      ))
+                    )}
                   </Grid>
-                )}
-              </Box>
-              <Typography variant="h6" className={classes.addMembersTitle}>
-                Add members
-              </Typography>
-              <Grid container spacing={2} className={classes.contactGrid}>
-                        {allContacts.length === 0 && groupMembers.length > 0 ? (
-                            <Typography>No contacts available to add.</Typography>
-                        ) : allContacts.length === 0 && groupMembers.length === 0 ? (
-                            <Typography>Loading contacts...</Typography>
-                        ) : (
-                            nonGroupMembers.map((contact) => (
-                                <Grid item xs={12} sm={6} md={4} key={contact.contact_id}> 
-                               
-                                    <AddContactCardInEditGroup
-                                        contact={{
-                                            ...contact,
-                                            user_id: contact.contact_id
-                                        }}
-                                        groupId={groupid}
-                                    />
-                                </Grid>
-                            ))
-                        )}
-                    </Grid>
-
-              <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
-                <Button variant="outlined" color="secondary">Delete Group</Button>
+                  <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
+                    <Button variant="outlined" color="secondary">Delete Group</Button>
+                  </Box>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        </Box>
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );
 }
-

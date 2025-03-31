@@ -93,9 +93,7 @@ const ContactCard = ({ contact }) => {
                     </div>
                     <div>
 
-                        <IconButton className={classes.iconButton}>
-                            <MailIcon fontSize="small" />
-                        </IconButton>
+                      
 
 
                     </div>

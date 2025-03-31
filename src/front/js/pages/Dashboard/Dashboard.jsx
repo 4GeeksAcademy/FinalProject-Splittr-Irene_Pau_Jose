@@ -72,13 +72,36 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 20,
     minHeight: 70,
+    [theme.breakpoints.down('sm')]: {  // Mobile styles
+      paddingRight: 10,
+      minHeight: 56,
+    },
   },
-  toolbarIcon: {
+  rIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    padding: '0 8px',
-
+    patoolbadding: '0 8px',
+  },
+  title: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {  // Extra small screens
+      '&:last-child': {  // Target the welcome message specifically
+        display: 'none',  // Hide welcome message on very small screens
+      },
+    },
+  },
+  logoTitle: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {
+      fontSize: '1rem',  // Reduce logo size on mobile
+    },
+  },
+  menuButton: {
+    marginRight: 36,
+    [theme.breakpoints.down('sm')]: {
+      marginRight: 12,  // Reduce spacing on mobile
+    },
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,

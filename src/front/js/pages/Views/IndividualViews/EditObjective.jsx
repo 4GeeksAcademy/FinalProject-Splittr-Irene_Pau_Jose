@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
-import Box from '@material-ui/core/Box';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
@@ -22,8 +21,10 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { useContext } from 'react';
 import { Context } from '../../../store/appContext.js';
-import { getInfoSharedObjective, deleteObjective, updateObjective } from '../../../component/callToApi.js'; 
+import { getInfoSharedObjective, deleteObjective, updateObjective } from '../../../component/callToApi.js';
 import { useNavigate } from 'react-router-dom';
+import { SplittrLogo } from '../../../component/SplittrLogo.jsx';
+import LogoutButton from '../../../component/LogOutButton.jsx';
 
 function Copyright() {
   return (
@@ -61,13 +62,36 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 20,
     minHeight: 70,
+    [theme.breakpoints.down('sm')]: {  // Mobile styles
+      paddingRight: 10,
+      minHeight: 56,
+    },
   },
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
-
+  },
+  title: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {  // Extra small screens
+      '&:last-child': {  // Target the welcome message specifically
+        display: 'none',  // Hide welcome message on very small screens
+      },
+    },
+  },
+  logoTitle: {
+    flexGrow: 1,
+    [theme.breakpoints.down('xs')]: {
+      fontSize: '1rem',  // Reduce logo size on mobile
+    },
+  },
+  menuButton: {
+    marginRight: 36,
+    [theme.breakpoints.down('sm')]: {
+      marginRight: 12,  // Reduce spacing on mobile
+    },
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -88,9 +112,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#000000',
     color: theme.palette.text.primary,
   },
-  menuButton: { marginRight: 36 },
   menuButtonHidden: { display: 'none' },
-  title: { flexGrow: 1 },
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
@@ -99,8 +121,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    top: 30,
-
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -110,46 +130,43 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
-    top: 30,
   },
   appBarSpacer: {
     minHeight: theme.spacing(4),
   },
   container: {
     paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(4)
-
+    paddingBottom: theme.spacing(4),
   },
-  contactGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
+  content: {
+    flexGrow: 1,
+    overflow: 'auto',
+    width: '100%',
   },
 }));
 
 export default function EditObjective() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
-  const user_id = sessionStorage.getItem("user_id")
+  const user_id = sessionStorage.getItem("user_id");
   const handleDrawerOpen = () => {
     setOpen(true);
   };
   const handleDrawerClose = () => {
     setOpen(false);
   };
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
- 
+
   const handleChange = (event) => {
-    setSingleObjective({...singleObjective, [event.target.name]: event.target.value})
+    setSingleObjective({ ...singleObjective, [event.target.name]: event.target.value });
   };
   const { store, actions } = useContext(Context);
   const { objectiveid } = useParams();
-  const[singleObjective, setSingleObjective]= useState({});
+  const [singleObjective, setSingleObjective] = useState({});
 
-  useEffect(()=>{
-
-    getInfoSharedObjective(setSingleObjective, objectiveid)
-  },[])
+  useEffect(() => {
+    getInfoSharedObjective(setSingleObjective, objectiveid);
+  }, []);
   console.log(singleObjective);
   const handleUpdate = async (field) => {
     try {
@@ -162,8 +179,6 @@ export default function EditObjective() {
   };
 
   const handleDelete = async () => {
-   
-    
     if (window.confirm("Are you sure you want to delete this objective?")) {
       try {
         await deleteObjective(objectiveid);
@@ -179,9 +194,8 @@ export default function EditObjective() {
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-      
             {!open && (
               <IconButton
                 edge="start"
@@ -193,8 +207,6 @@ export default function EditObjective() {
                 <MenuIcon />
               </IconButton>
             )}
-
-      
             {open && (
               <IconButton
                 edge="start"
@@ -206,90 +218,84 @@ export default function EditObjective() {
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
-            <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+            <Typography component="h1" variant="h6" noWrap className={classes.logoTitle}>
+              <SplittrLogo />
             </Typography>
-
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+              Welcome, {store.userInfo?.name || 'User'}!
+            </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
+              <Badge badgeContent={0} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+            <LogoutButton />
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-
-          <Divider />
-          <List><MainListItems user={store.userInfo}/></List>
-          <Divider />
-          <List><SecondaryListItems user={store.userInfo} /></List>
-        </Drawer>
-        <Box
-          sx={{
-            width: "50%",
-            padding: "0 16px",
-            marginTop: "80px",
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-
-          }}
-        >
-          <Box sx={{ marginBottom: "20px" }}>
-            <h3>Modify Objective</h3>
-
-
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="outlined-textarea"
-                variant="outlined"
-                fullWidth
-                placeholder="Current name"
-                value={singleObjective.name}
-                onChange={handleChange}
-                name='name'
-
-              />{objectiveid.name}
-              <Box sx={{ marginLeft: "40px" }}>
-              <Button onClick={() => handleUpdate("name")}>Change</Button>
-              </Box>
-            </Box>
-            <Box sx={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
-              <TextField
-                id="outlined-textarea"
-                variant="outlined"
-                fullWidth
-                placeholder="Current amount"
-                value={singleObjective.target_amount}
-                onChange={handleChange}
-                name='target_amount'
-              />
-              <Box sx={{ marginLeft: "40px" }}>
-                <Button onClick={() => handleUpdate("target_amount")}>Change</Button>
-              </Box>
-              
-            </Box>            
-            <Box sx={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
-              
-              <Button variant="outlined" color="secondary" onClick={handleDelete} >Delete Objective</Button>
-            </Box>
-
-
-
-          </Box>
-        </Box>
-
-
-
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
+            <Divider />
+            <List><MainListItems user={store.userInfo} /></List>
+            <Divider />
+            <List><SecondaryListItems user={store.userInfo} /></List>
+          </Drawer>
+          <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
+            <div className={classes.appBarSpacer} />
+            <div
+              style={{
+                width: "50%",
+                padding: "0 16px",
+                marginTop: "20px", // Adjusted marginTop
+                margin: "0 auto",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div style={{ marginBottom: "20px" }}>
+                <h3>Modify Objective</h3>
+                <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+                  <TextField
+                    id="outlined-textarea"
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Current name"
+                    value={singleObjective.name}
+                    onChange={handleChange}
+                    name='name'
+                  />{objectiveid.name}
+                  <div style={{ marginLeft: "40px" }}>
+                    <Button variant="contained" color="primary" onClick={() => handleUpdate("name")}>Change</Button>
+                  </div>
+                </div>
+                <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: 2 }}>
+                  <TextField
+                    id="outlined-textarea"
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Current amount"
+                    value={singleObjective.target_amount}
+                    onChange={handleChange}
+                    name='target_amount'
+                  />
+                  <div style={{ marginLeft: "40px" }}>
+                    <Button variant="contained" color="primary" onClick={() => handleUpdate("target_amount")}>Change</Button>
+                  </div>
+                </div>
+                <div style={{ marginBottom: "20px", marginTop: "60px", display: "flex", justifyContent: "center", gap: 2 }}>
+                  <Button variant="outlined" color="secondary" onClick={handleDelete} >Delete Objective</Button>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   );
 }
-
