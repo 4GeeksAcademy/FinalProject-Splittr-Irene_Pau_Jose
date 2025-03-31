@@ -32,7 +32,7 @@ const SharedObjectiveCard = ({ sharedObjective }) => {
 
 
   return (
-    <Link to={`/singleobjective/${sharedObjective.id}`}>  
+    <Link to={`/singleobjective/${sharedObjective.id}`} style={{ textDecoration: 'none' }}>  
       <Card style={{ backgroundColor: "#2C2F33", color: "#fff", padding: 16, textAlign: "center", borderRadius: 10, width: "auto", minWidth: "250px" }}>
         <Typography variant="h6" style={{ marginBottom: 10 }}>{sharedObjective.name} </Typography>
         <Typography variant="body2" style={{ marginTop: 10 }}>Target: {totalAmountFormatted} </Typography>
