@@ -13,16 +13,16 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-
 import { useNavigate } from "react-router-dom";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-      Splittr      </Link>{' '}
+        Splittr
+      </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
     </Typography>
@@ -38,23 +38,32 @@ const useStyles = makeStyles((theme) => ({
   input: {
     backgroundColor: '#222',
     color: '#ffffff',
+    marginBottom: theme.spacing(2), 
     '& .MuiOutlinedInput-root': {
       '& fieldset': { borderColor: '#555' },
       '&:hover fieldset': { borderColor: '#aaa' },
       '&.Mui-focused fieldset': { borderColor: '#ffffff' },
     },
   },
+  form: {
+    marginTop: theme.spacing(4), 
+  },
   submit: {
     backgroundColor: '#ffffff',
     color: '#111',
+    marginTop: theme.spacing(2), 
+    marginBottom: theme.spacing(2), 
     '&:hover': { backgroundColor: '#dddddd' },
+  },
+  title: {
+    marginBottom: theme.spacing(4), 
+  },
+  checkbox: {
+    marginTop: theme.spacing(1), 
   },
 }));
 
-
-
 export const LogIn = () => {
-
   const darkTheme = createMuiTheme({
     palette: {
       type: "dark",
@@ -72,79 +81,106 @@ export const LogIn = () => {
     },
   });
 
-  const navigate = useNavigate()
-  const[data,setData]= useState({
-      "email":"",
-      "password":"",
-  })
+  const navigate = useNavigate();
+  const [data, setData] = useState({
+    "email": "",
+    "password": "",
+  });
+  const [displayPassword, setDisplayPassword] = useState("");
+  const [passwordTimeout, setPasswordTimeout] = useState(null);
 
   const handleChange = (e) => {
-    setData({
-        ...data, [e.target.name]: e.target.value
-    })
-}
-const handleSubmit = async (e) =>{
-    e.preventDefault()
-    try {
-        const response = await fetch(`${process.env.BACKEND_URL}/login`, {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: {
-                "Content-Type": "application/json",
-                
-
-            }
-        }) 
-        if (!response.ok){
-            alert("Incorrect login details")
-            return
-        }
-        const responseData = await response.json()
-        localStorage.setItem("token", responseData.token)
-        sessionStorage.setItem("user_id", responseData.user_id)
-        navigate("/dashboard")
-
-
-    } catch (error) {
-        console.log(error);
-        
-
+    if (e.target.name === "password") {
+   
+      setData({
+        ...data, 
+        [e.target.name]: e.target.value
+      });
+      
+     
+      if (passwordTimeout) {
+        clearTimeout(passwordTimeout);
+      }
+      
+     
+      setDisplayPassword(e.target.value);
+  
+      const timeout = setTimeout(() => {
+        setDisplayPassword('•'.repeat(e.target.value.length));
+      }, 500);
+      
+      setPasswordTimeout(timeout);
+    } else {
+      setData({
+        ...data, 
+        [e.target.name]: e.target.value
+      });
     }
-        
-}
+  };
+
+
+  useEffect(() => {
+    return () => {
+      if (passwordTimeout) {
+        clearTimeout(passwordTimeout);
+      }
+    };
+  }, [passwordTimeout]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${process.env.BACKEND_URL}/login`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        }
+      }) 
+      if (!response.ok) {
+        alert("Incorrect login details");
+        return;
+      }
+      const responseData = await response.json();
+      localStorage.setItem("token", responseData.token);
+      sessionStorage.setItem("user_id", responseData.user_id);
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const classes = useStyles();
 
   return (
     <ThemeProvider theme={darkTheme}>
       <div className="d-flex flex-column justify-content-center align-items-center bg-dark text-white">
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    fontFamily: "'Roboto', sans-serif",
-    fontWeight: 700,
-    letterSpacing: 1,
-    fontSize: '2rem'
-  }}>
-    <span style={{ fontSize: '3rem', marginRight: '2px' }}>S</span>
-    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.9 }}>
-      <span>PLI</span>
-      <span>TTR</span>
-    </div>
-  </div>
-</div>
-
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontFamily: "'Roboto', sans-serif",
+          fontWeight: 700,
+          letterSpacing: 1,
+          fontSize: '2rem',
+          marginBottom: '2rem' 
+        }}>
+          <span style={{ fontSize: '3rem', marginRight: '2px' }}>S</span>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.9 }}>
+            <span>PLI</span>
+            <span>TTR</span>
+          </div>
+        </div>
+      </div>
 
       <Container component="main" maxWidth="xs">
-
         <CssBaseline />
         <div className={classes.paper}>
-
-          <Typography component="h1" variant="h5">
+          <Typography component="h1" variant="h5" className={classes.title} align="center">
             Sign in
           </Typography>
           <form className={classes.form} noValidate onSubmit={handleSubmit}>
             <TextField
+              className={classes.input}
               variant="outlined"
               margin="normal"
               required
@@ -158,7 +194,7 @@ const handleSubmit = async (e) =>{
               value={data.email}
             />
             <TextField
-              className={classes.form}
+              className={classes.input}
               variant="outlined"
               margin="normal"
               required
@@ -166,27 +202,22 @@ const handleSubmit = async (e) =>{
               id="password"
               label="Password"
               name="password"
-              autoComplete="password"
-              autoFocus
+              type="password" 
+              autoComplete="current-password"
               onChange={handleChange}
-              value={data.password}
-              
+              value={displayPassword}
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
+            
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-              
             >
               Sign In
             </Button>
-            <Grid container>
+            <Grid container spacing={2}> 
               <Grid item xs>
                 <Link href="#" variant="body2">
                   Forgot password?
@@ -205,6 +236,5 @@ const handleSubmit = async (e) =>{
         </Box>
       </Container>
     </ThemeProvider>
-
   );
 };
