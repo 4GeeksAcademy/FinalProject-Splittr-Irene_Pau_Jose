@@ -363,7 +363,7 @@ export default function ListOfContacts() {
                     <Typography variant="h6" className={classes.categoryTitle}>
                       Contacts
                     </Typography>
-                    <Paper className={classes.paper}>
+                    <Paper className={classes.paper} >
                       {regularContacts.map((contact) => (
                         <ContactCard key={contact.id} contact={contact} />
                       ))}
@@ -419,17 +419,18 @@ export default function ListOfContacts() {
         <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
           <DialogTitle>Add Contact</DialogTitle>
           <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="email"
-              label="Email Address"
-              type="email"
-              fullWidth
-              variant="outlined"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          <TextField
+  autoFocus
+  margin="dense"
+  id="email"
+  label="Email Address"
+  type="email"
+  fullWidth
+  variant="outlined"
+  value={email}
+  onChange={(e) => setEmail(e.target.value.toLowerCase())} 
+/>
+
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenAddDialog(false)} color="primary">
