@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     selectedCard: {
-        backgroundColor: '#3f51b5', // Color when selected
+        backgroundColor: '#3f51b5', 
     },
     name: {
         display: "flex",

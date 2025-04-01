@@ -33,6 +33,20 @@ import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import { SplittrLogo } from '../../component/SplittrLogo.jsx';
 import LogoutButton from '../../component/LogOutButton.jsx';
+import { Link } from 'react-router-dom';
+
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © '}
+      <Link color="inherit" href="https://mui.com/">
+        Splittr
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -429,8 +443,11 @@ export default function Messages() {
                         secondaryTypographyProps={{ style: { color: '#B9BBBE' } }}
                       />
                     </ListItem>
+                    
                   ))}
+                
                 </List>
+                
               </>
             )}
 
@@ -464,6 +481,7 @@ export default function Messages() {
               <Typography align="center" style={{ padding: '16px', color: '#B9BBBE' }}>
                 No contacts found
               </Typography>
+              
             )}
           </DialogContent>
           <DialogActions style={{ backgroundColor: '#23272A' }}>
@@ -472,7 +490,9 @@ export default function Messages() {
             </Button>
           </DialogActions>
         </Dialog>
+        
       </div>
+
     </ThemeProvider>
   );
 }

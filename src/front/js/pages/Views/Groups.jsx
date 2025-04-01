@@ -46,7 +46,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Splittr
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -145,6 +145,14 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+  }, 
+  footer: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
   }
 }));
 
@@ -227,9 +235,9 @@ export default function Groups() {
                 <GroupCard key={group.id || index} group={group} />
               ))}
             </Grid>
-              <Box pt={4}>
-                <Copyright />
-              </Box>
+            <Box className={classes.footer}>
+    <Copyright />
+  </Box>
             </Container>
           </main>
         </div>

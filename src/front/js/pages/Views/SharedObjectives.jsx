@@ -44,13 +44,14 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Splittr
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
     </Typography>
   );
 }
+
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -142,6 +143,14 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+  },
+  footer: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
   }
 }));
 
@@ -219,21 +228,26 @@ export default function SharedObjectives() {
           <main className={classes.content} style={{ marginLeft: open ? drawerWidth : 64, width: '100%' }}>
             <div className={classes.appBarSpacer} />
             <Container maxWidth="lg" className={classes.container}>
-              <Grid container spacing={3}  style={{ marginTop: 2 }} >
+              <Grid container spacing={3} style={{ marginTop: 2 }} >
                 {Array.isArray(sharedObjectives) && sharedObjectives.map((sharedObjective, index) => (
                   <SharedObjectiveCard key={sharedObjective.id || index} sharedObjective={sharedObjective} />
                 ))}
               </Grid>
+              <Box className={classes.footer}>
+    <Copyright />
+  </Box>
             </Container>
+
           </main>
         </div>
-        <Fab 
-          color="primary" 
+        <Fab
+          color="primary"
           className={classes.fabButton}
           onClick={() => navigate(`/objective/create/${userid}`)}
         >
           <AddIcon />
         </Fab>
+
       </div>
     </ThemeProvider>
   );

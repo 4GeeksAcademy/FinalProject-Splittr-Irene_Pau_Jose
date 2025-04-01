@@ -65,7 +65,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Splittr
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -159,6 +159,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(1),
   },
+  footer: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+  }
 }));
 
 export default function ListOfContacts() {
@@ -397,9 +405,9 @@ export default function ListOfContacts() {
                   </Grid>
                 )}
               </Grid>
-              <Box pt={4}>
-                <Copyright />
-              </Box>
+              <Box className={classes.footer}>
+    <Copyright />
+  </Box>
             </Container>
           </main>
         </div>
