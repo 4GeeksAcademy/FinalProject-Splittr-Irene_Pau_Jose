@@ -41,7 +41,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Splittr
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -85,22 +85,22 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
-    [theme.breakpoints.down('xs')]: {  // Extra small screens
-      '&:last-child': {  // Target the welcome message specifically
-        display: 'none',  // Hide welcome message on very small screens
+    [theme.breakpoints.down('xs')]: {  
+      '&:last-child': { 
+        display: 'none',
       },
     },
   },
   logoTitle: {
     flexGrow: 1,
     [theme.breakpoints.down('xs')]: {
-      fontSize: '1rem',  // Reduce logo size on mobile
+      fontSize: '1rem',  
     },
   },
   menuButton: {
     marginRight: 36,
     [theme.breakpoints.down('sm')]: {
-      marginRight: 12,  // Reduce spacing on mobile
+      marginRight: 12,  
     },
   },
   appBar: {
@@ -168,6 +168,14 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+  }, 
+  footer: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
   }
 }));
 
@@ -266,11 +274,13 @@ export default function Dashboard() {
                   </Paper>
                 </Grid>
               </Grid>
-              <Box pt={4}>
+
+            </Container>
+            <Box classname={classes.footer}>
                 <Copyright />
               </Box>
-            </Container>
           </main>
+
         </div>
         <FloatingActionButtonMenu />
       </div>

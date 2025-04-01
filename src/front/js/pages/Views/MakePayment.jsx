@@ -28,6 +28,8 @@ import { Context } from '../../store/appContext.js';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { getContactInfo } from '../../component/callToApi.js';
 import { createPayment } from '../../component/callToApi.js';
+import { SplittrLogo } from '../../component/SplittrLogo.jsx';
+import LogoutButton from '../../component/LogOutButton.jsx';
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -49,13 +51,24 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: { display: 'flex' },
-  toolbar: { paddingRight: 20, minHeight: 70 },
+  toolbar: {
+    paddingRight: 20,
+    minHeight: 70,
+  },
+  toolbarIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+  },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    backgroundColor: '#000000',
+    color: theme.palette.text.primary,
   },
   appBarShift: {
     marginLeft: drawerWidth,
@@ -64,22 +77,41 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    backgroundColor: '#000000',
+    color: theme.palette.text.primary,
   },
   menuButton: { marginRight: 36 },
+  menuButtonHidden: { display: 'none' },
   title: { flexGrow: 1 },
-  drawerPaper: { width: drawerWidth, transition: theme.transitions.create('width') },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
   drawerPaperClose: {
     overflowX: 'hidden',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
     width: theme.spacing(7),
     [theme.breakpoints.up('sm')]: { width: theme.spacing(9) },
   },
-  container: {
+
+  container: ({ open }) => ({
     paddingTop: theme.spacing(4),
     display: 'flex',
     justifyContent: 'center',
     width: '100%',
-    height: '100vh',
-  },
+    minHeight: 'calc(100vh - 70px)',
+    transition: 'margin 0.3s ease',
+    marginLeft: open ? drawerWidth : theme.spacing(9),
+  }),
+  
   card: {
     width: "40%", 
     maxWidth: "600px", 
@@ -103,27 +135,32 @@ const useStyles = makeStyles((theme) => ({
   },
   paymentButton: {
     marginTop: theme.spacing(2),
-    width: '100%',
+    width: '30%',
   }
 }));
 
 export default function MakePayment() {
-  const classes = useStyles();
-  const [open, setOpen] = useState(true);
+
+  const [open, setOpen] = React.useState(false);
   const { store } = useContext(Context);
   const { contactid } = useParams();
   const [contact, setContact] = useState(null);
   const [amount, setAmount] = useState('');
   const user_id = sessionStorage.getItem("user_id");
+  const classes = useStyles({ open });
+
 
 
   useEffect(() => {
     getContactInfo(setContact, contactid);
   }, [contactid]);
 
-  const handleDrawerOpen = () => setOpen(true);
-  const handleDrawerClose = () => setOpen(false);
-
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     console.log("Current contactid:", contactid); 
@@ -179,10 +216,10 @@ const [isLoading, setIsLoading] = useState(false);
     };
 
   return (
-    <ThemeProvider theme={darkTheme}>
+<ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
         <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+        <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
             {!open && (
               <IconButton
@@ -195,7 +232,6 @@ const [isLoading, setIsLoading] = useState(false);
                 <MenuIcon />
               </IconButton>
             )}
-
             {open && (
               <IconButton
                 edge="start"
@@ -207,30 +243,32 @@ const [isLoading, setIsLoading] = useState(false);
                 <ChevronLeftIcon />
               </IconButton>
             )}
-
             <Typography component="h1" variant="h6" noWrap className={classes.title}>
-              Welcome, Pepito!
+              <SplittrLogo />
             </Typography>
-
+            <Typography component="h1" variant="h6" noWrap className={classes.title}>
+                            Make Payment
+                        </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+              <LogoutButton />
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
+        <div style={{ display: 'flex', width: '100%', marginTop: 70 }}>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+            style={{ height: 'calc(100vh - 70px)', position: 'fixed' }}
+          >
           <Divider />
           <List><MainListItems user={store.userInfo} /></List>
           <Divider />
           <List><SecondaryListItems user={store.userInfo} /></List>
         </Drawer>
+      
         <div className={classes.container}>
           {contact ? (
             <Card className={classes.card} variant="outlined">
@@ -268,6 +306,7 @@ const [isLoading, setIsLoading] = useState(false);
           ) : (
             <Typography variant="h6" color="textSecondary">Loading contact...</Typography>
           )}
+        </div>
         </div>
       </div>
     </ThemeProvider>
